@@ -1,0 +1,56 @@
+name: Reusable Baseline
+
+on:
+  workflow_call:
+    inputs:
+      policy_path:
+        required: true
+        type: string
+      repo_kind:
+        required: false
+        type: string
+        default: generic
+      extra_step_script:
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  baseline:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout caller repository
+        uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Checkout eMule-tooling
+        uses: actions/checkout@v4
+        with:
+          repository: itlezy/eMule-tooling
+          ref: main
+          path: tooling
+
+      - name: Run tracked-file privacy guard
+        shell: pwsh
+        run: >
+          .\tooling\ci\guard-tracked-files.ps1
+          -RepoRoot "$PWD\repo"
+          -PolicyPath "$PWD\repo\${{ inputs.policy_path }}"
+          -SummaryPath "$PWD\repo\.ci\tracked-file-privacy-guard-summary.json"
+
+      - name: Run basic hygiene checks
+        shell: pwsh
+        run: >
+          .\tooling\ci\check-basic-hygiene.ps1
+          -RepoRoot "$PWD\repo"
+          -RepoKind "${{ inputs.repo_kind }}"
+          -SummaryPath "$PWD\repo\.ci\basic-hygiene-summary.json"
+
+      - name: Run optional extra step
+        if: ${{ inputs.extra_step_script != '' }}
+        shell: pwsh
+        run: >
+          & "$PWD\repo\${{ inputs.extra_step_script }}"
+
