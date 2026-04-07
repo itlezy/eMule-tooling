@@ -1,0 +1,13 @@
+logs/
+*.log
+tmp/
+
+.vs/
+.vscode/
+*.code-workspace
+
+__pycache__/
+*.py[cod]
+
+Thumbs.db
+Desktop.ini
