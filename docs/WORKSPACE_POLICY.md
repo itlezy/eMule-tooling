@@ -109,18 +109,31 @@ extended for it.
 - Active compiler baseline for workspace-owned C++ builds is `C++17`
   (`LanguageStandard=stdcpp17`).
 - Active MSVC toolset baseline is `v143`.
+- The active workspace build matrix has no `Win32` target.
+- Supported build architectures are:
+  - `x64`
+  - `ARM64`
 - Debug builds in the active matrix must use:
   - `RuntimeLibrary=MultiThreadedDebug`
   - `Optimization=Disabled`
+  - `IncrementalLink=true` for executable targets
+  - `DebugInformationFormat=ProgramDatabase`
 - Release builds in the active matrix must use:
   - `RuntimeLibrary=MultiThreaded`
   - explicit speed-oriented optimization
   - `FunctionLevelLinking=true`
   - `IntrinsicFunctions=true` where the project compiles code directly
+  - `IncrementalLink=false` for executable targets
+  - `LinkTimeCodeGeneration=UseLinkTimeCodeGeneration` for release app links
+- Active compile targets should also declare:
+  - `BufferSecurityCheck=true`
+  - `MultiProcessorCompilation=true`
 - This policy applies to active workspace targets:
   - `eMule-main`
   - `eMule-build-tests`
   - maintained dependency projects used by the canonical workspace build
+- Shared test builds support `x64` and `ARM64`; test execution remains `x64`
+  only.
 - Frozen app branches are not normalization targets for routine build-policy
   cleanup.
 - Project-specific exceptions are allowed when they are structural, not
