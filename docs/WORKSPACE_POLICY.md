@@ -97,6 +97,33 @@ extended for it.
 - Repo-local docs must not redefine dependency pin authority or workspace
   topology.
 
+## Active Build Policy
+
+- Active compiler baseline for workspace-owned C++ builds is `C++17`
+  (`LanguageStandard=stdcpp17`).
+- Active MSVC toolset baseline is `v143`.
+- Debug builds in the active matrix must use:
+  - `RuntimeLibrary=MultiThreadedDebug`
+  - `Optimization=Disabled`
+- Release builds in the active matrix must use:
+  - `RuntimeLibrary=MultiThreaded`
+  - explicit speed-oriented optimization
+  - `FunctionLevelLinking=true`
+  - `IntrinsicFunctions=true` where the project compiles code directly
+- This policy applies to active workspace targets:
+  - `eMule-main`
+  - `eMule-build-tests`
+  - maintained dependency projects used by the canonical workspace build
+- Frozen app branches are not normalization targets for routine build-policy
+  cleanup.
+- Project-specific exceptions are allowed when they are structural, not
+  accidental:
+  - C-only projects are not forced to declare a C++ language standard
+  - utility wrappers like `zlib` and `mbedtls` inherit their compiler policy
+    through wrapper/CMake orchestration
+  - `cryptopp` toolset enforcement remains in workspace build orchestration to
+    avoid unnecessary fork delta
+
 ## Tags
 
 - Official releases should be marked with annotated tags on the chosen
