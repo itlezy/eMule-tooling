@@ -1512,7 +1512,6 @@ In VS Code: `Ctrl+Shift+P → CMake: Select a Kit → Visual Studio Build Tools 
 ### 10.1 Files to DELETE after migration is verified working
 
 ```
-eMule/srchybrid/emule.sln
 eMule/srchybrid/emule.vcxproj
 eMule/srchybrid/emule.vcxproj.filters
 eMule/srchybrid/emule.vcxproj.user      (if present)
@@ -1813,7 +1812,6 @@ The vcxproj has `<AdditionalOptions>/D _DEBUG</AdditionalOptions>` for Debug con
 
 ### Cleanup
 
-- [ ] Delete `emule.sln`
 - [ ] Delete `emule.vcxproj` and `.vcxproj.filters`
 - [ ] Delete `cryptlib.vcxproj`
 - [ ] Delete `id3lib.vcxproj` and `id3lib.sln`
