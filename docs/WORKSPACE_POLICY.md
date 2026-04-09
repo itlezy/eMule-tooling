@@ -39,6 +39,10 @@ repo-local docs.
   stabilization lines.
 - `oracle/v0.72a-build` is the sanctioned seam-enabled oracle branch derived
   from `release/v0.72a-build`.
+- `tracing/v0.72a` is the observability-only tracing branch derived from
+  `oracle/v0.72a-build`.
+- `tracing-harness/v0.72a` is the behavior-changing experimental harness branch
+  derived from `tracing/v0.72a`.
 - Small merge work on frozen release branches is allowed only to backport
   reviewed fixes or keep those branches buildable.
 - Future release work should branch from reviewed commits already present on
@@ -86,6 +90,15 @@ The canonical workspace currently materializes these app worktrees:
 - `eMule-v0.72a-oracle` -> `oracle/v0.72a-build`
 - `eMule-v0.72a-build` -> `release/v0.72a-build`
 - `eMule-v0.72a-bugfix` -> `release/v0.72a-bugfix`
+
+The branch/worktree roles below are also reserved:
+
+- `eMule-v0.72a-tracing` -> `tracing/v0.72a`
+- `eMule-v0.72a-tracing-harness` -> `tracing-harness/v0.72a`
+
+Those tracing worktrees are intentionally inactive until setup pins and remote
+branches are ready. They are part of the sanctioned topology, but not part of
+the default active materialization set yet.
 
 `release/v0.72a-broadband` is part of the active branch strategy but is not a
 managed canonical worktree unless setup/build orchestration is explicitly
@@ -183,6 +196,27 @@ extended for it.
   `release/v0.72a-build`.
 - Oracle seams may lag `main`; backport only the minimal common seam surface
   required to compile and run the intended comparison tests.
+
+## Tracing Branch Rules
+
+- `tracing/v0.72a` derives from `oracle/v0.72a-build`.
+- `tracing/v0.72a` exists to improve observability only:
+  - machine-readable packet dumps
+  - stable trace ids / event sequencing
+  - state-oriented tracing that does not alter runtime behavior
+- `tracing/v0.72a` must not add harness-driven bootstrap actions, seeded Kad
+  publish/search overrides, or other behavior-changing parity helpers.
+- `tracing-harness/v0.72a` derives from `tracing/v0.72a`.
+- `tracing-harness/v0.72a` is the only sanctioned place for deterministic
+  parity-harness behavior such as:
+  - CLI orchestration hooks
+  - ready-file / startup automation
+  - seeded source-publish or source-search overrides
+  - swarm-control or parity-seed behavior that intentionally changes runtime
+    decisions
+- `oracle/v0.72a-build` remains the default comparison baseline for live-diff
+  and parity work unless a task explicitly requires `tracing` or
+  `tracing-harness`.
 
 ## Setup and Dependency Authority
 

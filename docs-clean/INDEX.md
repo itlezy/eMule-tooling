@@ -11,6 +11,10 @@
 regression checks. When behavior changes, compare `main` against
 `oracle/v0.72a-build` as the seam-enabled oracle baseline derived from the
 `build` release branch where that comparison is meaningful.
+**Oracle stack rule:** the old 0.72a comparison stack is layered, not flat:
+- `oracle/v0.72a-build` = baseline seam-enabled oracle
+- `tracing/v0.72a` = observability-only derivative of oracle
+- `tracing-harness/v0.72a` = behavior-changing parity-harness derivative of tracing
 
 ---
 
