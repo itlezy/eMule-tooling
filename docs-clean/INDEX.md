@@ -95,7 +95,7 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-007](FEAT-007.md) | Minor | Open | Windows Property Store integration for non-media file metadata |
 | [FEAT-008](FEAT-008.md) | Trivial | Open | Oracle protocol guard seams — integrate stale branch test scaffolding |
 | [FEAT-009](FEAT-009.md) | Trivial | Open | Mirror audit guard seam — WIP from stale branch parent |
-| [FEAT-010](FEAT-010.md) | Minor | Open | Long path support — lift MAX_PATH limit via manifest + CRT-bypass helpers |
+| [FEAT-010](FEAT-010.md) | Minor | Open | Long path support phase 2 — shell/UI icon, browse, and path-helper audit |
 | [FEAT-011](FEAT-011.md) | Minor | Open | CShield — integrate ED2K anti-leecher engine (44 bad-client categories) |
 | [FEAT-012](FEAT-012.md) | Minor | Open | PR_TCPERRORFLOODER — TCP listen-socket flood defense |
 | [FEAT-013](FEAT-013.md) | Minor | Open | REST API — CPipeApiServer (C++ named pipe IPC server) |
@@ -170,7 +170,7 @@ regression checks. When behavior changes, compare `main` against
 - **FEAT-001, 003–006** — Kad quality improvements
 - **FEAT-007** — Windows Property Store metadata
 - **FEAT-008, 009** — Oracle/mirror guard seams
-- **FEAT-010** — Long path support: full spec ready, significant call-site churn
+- **FEAT-010** — Long path support phase 2: shell/UI follow-up after core filesystem landing
 - **FEAT-011, 012** — CShield + TCP flood defense: port from eMuleAI
 - **FEAT-013, 014** — REST API sidecar: full contract specified
 - **CI-007** — Kad fuzz tests (after CI-006 ASan baseline)
@@ -239,7 +239,7 @@ These items were verified in `eMule-main` and are genuinely done:
 | `PLAN-BOOST.md` | New (2026-04-08) | REF-008 through REF-014 |
 | `PLAN-MODERNIZATION-2026.md` | Reference only — too broad for backlog | Not directly converted |
 | `CI-BASELINE.md` | Operational reference | No issues; CI infra is live |
-| `GUIDE-LONGPATHS.md` | Full implementation spec | FEAT-010 |
+| `GUIDE-LONGPATHS.md` | Core implementation spec largely landed; remaining shell/UI follow-up tracked in FEAT-010 | FEAT-010 |
 | `FEATURE-PEERS-BANS.md` | FEAT_011/012 not started; FEAT_009 merged to SafeKad; FEAT_010 rejected | FEAT-011, FEAT-012 |
 | `PLAN-API-SERVER.md` | Full canonical contract | FEAT-013, FEAT-014 |
 | `DEP-REMOVAL.md` | DEP_001 keep; DEP_002/006 done; DEP_003/005 candidates | REF-015, REF-016 |

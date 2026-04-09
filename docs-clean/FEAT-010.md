@@ -1,128 +1,81 @@
 ---
 id: FEAT-010
-title: Long path support — lift MAX_PATH limit via manifest + CRT-bypass helpers
+title: Long path support phase 2 — shell/UI icon, browse, and path-helper audit
 status: Open
 priority: Minor
 category: feature
-labels: [longpath, max-path, windows, filesystem, compat]
+labels: [longpath, max-path, windows, filesystem, shell, ui]
 milestone: ~
 created: 2026-04-08
-source: GUIDE-LONGPATHS.md
+source: GUIDE-LONGPATHS.md + feature/windows-long-paths audit
 ---
 
 ## Summary
 
-eMule silently fails or corrupts state when dealing with files whose full paths exceed 260 characters (Windows `MAX_PATH`). Neither the application manifest nor CRT-bypass wrappers are in place. The full implementation plan is already fully specified in `GUIDE-LONGPATHS.md`.
+Core long-path support has landed on `main` for filesystem operations: manifests are long-path aware, `LongPathSeams` centralizes file opens/moves/deletes/enumeration, CRT-bypass helpers are in use, and real-FS tests cover overlong Unicode paths. The remaining work is Phase 2 shell/UI hardening so icon lookup, browse dialogs, and path-helper code no longer lag behind the core file-access model.
 
-## Background
+## Already Landed On Main
 
-Two independent mechanisms must both be active to lift `MAX_PATH`:
+The following are no longer backlog items:
 
-1. **System registry key:** `HKLM\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 1` (Windows 10 1607+, set by user or Group Policy)
-2. **Application manifest:** `<ws2:longPathAware>true</ws2:longPathAware>` in the embedded `.exe` manifest
+- `x64` and `ARM64` manifests carry `<ws2:longPathAware>true</ws2:longPathAware>`
+- startup detects and logs whether `LongPathsEnabled` is enabled
+- `LongPathSeams` centralizes Win32 file APIs, CRT-bypass file descriptors, `FILE*` streams, and MFC safe-file opens
+- part files, config files, archive/import flows, ZIP/GZIP, web cert/key output, and similar high-value paths already use the shared long-path model
+- real filesystem tests now cover long Unicode paths, Cyrillic/emoji path segments, generated payloads, copy/move/delete flows, and parity-style reference coverage
 
-When both are active, Win32 APIs (`CreateFile`, `MoveFile`, `FindFirstFile`, etc.) accept paths up to ~32,767 characters.
+## Remaining Scope
 
-**Important:** The MSVC CRT (`fopen`, `_wfopen`, `_open`, `_trename`, `_tremove`) does **not** benefit from the manifest — it has its own internal MAX_PATH check. CRT-based file operations require explicit `\\?\` prefix paths or a handle-based bypass via `_open_osfhandle` + `_fdopen`.
+The remaining long-path backlog is now shell/UI oriented:
 
-## Three-Layer Implementation
+1. **Shell icon lookup**
+   Centralize direct `SHGetFileInfo` usage and define fallback behavior for overlong paths.
 
-### Layer 1 — Registry detection (startup)
+   Primary files:
+   - `DirectoryTreeCtrl.cpp`
+   - `SharedDirsTreeCtrl.cpp`
+   - `SharedFileList.cpp`
+   - `SharedFilesCtrl.cpp`
+   - `PPgDirectories.cpp`
+   - `Emule.cpp`
 
-Add to `OtherFunctions.cpp` (append after line 3962):
+2. **Browse dialog flows**
+   Audit `SHBrowseForFolder`, `SHGetPathFromIDList`, and `CFileDialog` call sites to document or improve long-path behavior where feasible.
 
-```cpp
-static bool g_bWin32LongPathsEnabled = false;
+   Primary files:
+   - `OtherFunctions.cpp`
+   - `PartFileConvert.cpp`
+   - `TreeOptionsCtrl.cpp`
+   - `KnownFile.cpp`
+   - `PPgFiles.cpp`
+   - `MuleToolBarCtrl.cpp`
+   - `StatisticsTree.cpp`
 
-bool IsWin32LongPathsEnabled() { return g_bWin32LongPathsEnabled; }
+3. **Path helper / path-display cleanup**
+   Reduce legacy fixed-buffer `Path*` / `GetModuleFileName` patterns where they are still used in actual path construction or shell-facing code.
 
-void DetectWin32LongPathsSupportAtStartup()
-{
-    HKEY hKey = NULL;
-    DWORD dw = 0, type = 0, cb = sizeof(dw);
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-            _T("SYSTEM\\CurrentControlSet\\Control\\FileSystem"),
-            0, KEY_READ, &hKey) == ERROR_SUCCESS) {
-        if (RegQueryValueEx(hKey, _T("LongPathsEnabled"), NULL, &type,
-                reinterpret_cast<LPBYTE>(&dw), &cb) == ERROR_SUCCESS && type == REG_DWORD)
-            g_bWin32LongPathsEnabled = (dw != 0);
-        RegCloseKey(hKey);
-    }
-}
-```
+   Primary files:
+   - `FileInfoDialog.cpp`
+   - `Ini2.cpp`
+   - `OtherFunctions.cpp`
+   - `SecRunAsUser.cpp`
+   - `MiniMule.cpp`
 
-Add declarations to `OtherFunctions.h`. Call `DetectWin32LongPathsSupportAtStartup()` from `CemuleApp::InitInstance()`.
+## Intended Phase 2 Approach
 
-### Layer 2 — Path preparation
-
-```cpp
-CString PreparePathForWin32LongPath(const CString& path)
-{
-    if (path.IsEmpty()) return path;
-    if (path.Left(4).CompareNoCase(_T("\\\\?\\")) == 0) return path;
-    const bool needPrefix = g_bWin32LongPathsEnabled || path.GetLength() >= MAX_PATH;
-    if (!needPrefix) return path;
-    if (path.Left(2) == _T("\\\\"))
-        return _T("\\\\?\\UNC\\") + path.Mid(2);
-    return _T("\\\\?\\") + path;
-}
-```
-
-### Layer 3 — CRT-bypass open helpers
-
-```cpp
-// Returns FILE* opened via CreateFile + _open_osfhandle + _fdopen
-// Needed because CRT fopen/_wfopen ignores the manifest and has its own MAX_PATH check
-FILE* OpenFileStreamSharedReadLongPath(const CString& path, const wchar_t* mode);
-int   OpenCrtReadOnlyLongPath(const CString& path);
-```
-
-Both functions use `CreateFile` (respects manifest) and attach the OS handle to a CRT fd.
-
-## Manifest Change
-
-File: `res/eMule.exe.manifest` (or the embedded manifest in the `.rc` / linker manifest)
-
-```xml
-<ws2:requestedExecutionLevel level="asInvoker" uiAccess="false"/>
-<ws2:longPathAware>true</ws2:longPathAware>
-```
-
-## Call-Site Changes (by file)
-
-| File | Change |
-|------|--------|
-| `SharedFileList.cpp` | Wrap `FindFirstFile`/`FindNextFile` paths with `PreparePathForWin32LongPath` |
-| `PartFile.cpp` | Wrap `.part`, `.met`, `_backup` open paths with Layer 3 helpers |
-| `KnownFile.cpp` | Wrap `GetMetaDataFromMP3File`, `GetMetaDataFromWMAFile` open calls |
-| `SafeFile.cpp` | Wrap `Open()` with Layer 3 helpers |
-| `OtherFunctions.cpp` | Wrap `_tremove`, `_trename` calls with `PreparePathForWin32LongPath` |
-| `Preferences.cpp` | Wrap all temp-file and ini-write paths |
-
-## Graceful Degradation
-
-Before any operation that will fail for long paths, guard with:
-
-```cpp
-if (!IsWin32LongPathsEnabled() && path.GetLength() >= MAX_PATH) {
-    AddLogLine(false, _T("Path exceeds MAX_PATH and long paths are not enabled: %s"), path);
-    return false; // or appropriate error
-}
-```
-
-## Protocol / .met Impact
-
-`.met` files store paths as Pascal-prefixed UTF-16 strings. No format change is needed — the stored path can be long; only the Win32 open call needs the `\\?\` prefix.
+- Add a small shell-facing helper layer for icon/display queries rather than sprinkling more `SHGetFileInfo` patterns.
+- Keep `LongPathSeams` as the core filesystem boundary; do not fork a second file-access model.
+- Where shell APIs are inherently limited, prefer explicit fallback behavior and documentation over ad hoc failure.
+- Keep pure string helpers like `PathFindExtension` only where they are not path-length sensitive.
 
 ## Acceptance Criteria
 
-- [ ] `DetectWin32LongPathsSupportAtStartup()` called at startup; result logged
-- [ ] `PreparePathForWin32LongPath()` applied at all `FindFirstFile`/`MoveFile`/`DeleteFile` call sites
-- [ ] `OpenFileStreamSharedReadLongPath()` used in `PartFile` and `SafeFile` open paths
-- [ ] `longPathAware` flag added to application manifest
-- [ ] Manual test: share a file at a >260-char path — it hashes and transfers correctly
-- [ ] Manual test: without registry key set — long-path attempt logs warning, no crash
+- [ ] Shell icon/display lookup is centralized and no longer scattered across tree/list controls
+- [ ] Overlong paths still get sensible icons or graceful fallback behavior in directory/file UI
+- [ ] Browse-dialog flows are audited and any unavoidable shell limitations are documented
+- [ ] Fixed-buffer path composition used in real path construction is reduced or eliminated in the audited files
+- [ ] Manual smoke checks cover icon lookup and browse flows for deep Unicode paths where the shell APIs permit it
 
 ## Reference
 
-Full implementation spec: `docs/GUIDE-LONGPATHS.md`
+Core implementation spec: `docs/GUIDE-LONGPATHS.md`
