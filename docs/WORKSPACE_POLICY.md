@@ -179,6 +179,17 @@ extended for it.
 - `eMulebb-setup` owns materialization, managed app worktrees, and repo pinning.
 - `repos.psd1` in `eMulebb-setup` is the source of truth for active dependency
   branches used by the canonical workspace.
+- `repos\eMule-build` owns supported app-build orchestration and is required
+  for canonical `emule.exe` builds.
+- App worktrees do not by themselves define a complete supported app-build
+  environment; dependency materialization and third-party build inputs are part
+  of the `eMulebb-setup` plus `eMule-build` contract.
+- Direct `msbuild` of `srchybrid\emule.vcxproj` from an app worktree is not the
+  default supported validation path unless the `eMule-build` materialized build
+  environment is already known to be active.
+- If a direct app-project build fails because third-party headers or libraries
+  are unresolved, report that the supported `eMule-build` path was bypassed
+  rather than describing the workspace as generically missing materialization.
 - Repo-local docs must not redefine dependency pin authority or workspace
   topology.
 
@@ -207,6 +218,21 @@ extended for it.
 - Backlog and planning docs are not authoritative by themselves.
 - Before implementing a backlog item, revalidate it against current `main`,
   current dependency pins, and the current workspace policy.
+
+## File Normalization Policy
+
+- Tracked text-file edits must honor the repo-local `.editorconfig` and
+  `.gitattributes` rules of the repo being edited.
+- Line endings, charset or BOM, trailing whitespace, and final-newline policy
+  are part of the workspace contract, not optional editor preferences.
+- Do not leave edited tracked files in mixed-EOL state.
+- `repos\eMule-tooling\helpers\source-normalizer.py` is the canonical
+  normalization helper for workspace-owned repos and app worktrees.
+- `repos\eMule-tooling\helpers\install-editorconfig-hook.ps1` is the supported
+  local hook installer for catching normalization drift before commit.
+- Routine `validate` must fail when modified tracked files in workspace-owned
+  repos or canonical app worktrees drift from their declared normalization
+  policy.
 
 ## Active Build Policy
 
