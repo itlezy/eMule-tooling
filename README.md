@@ -24,6 +24,13 @@ execution contracts. It is the authoritative documentation home for
 workspace-wide policy and the place for deeper engineering notes and helper
 scripts that operate inside the canonical workspace.
 
+Normalization helpers live here too:
+
+- `helpers\source-normalizer.py` checks or rewrites tracked text files to match
+  repo `.editorconfig` and `.gitattributes`
+- `helpers\install-editorconfig-hook.ps1` installs the supported local
+  pre-commit hook for the current repo
+
 ## Workspace Convention
 
 Canonical paths are expressed through `EMULE_WORKSPACE_ROOT`:

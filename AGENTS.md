@@ -5,7 +5,7 @@
 - the canonical remote repo is `EMULE_WORKSPACE_ROOT\repos\eMule-remote`
 - the canonical app worktrees live under `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\...`
 - do not restate the full workspace contract here; that belongs in the central workspace policy document
-- keep a consistent code style with the existing code base
+- when editing tracked text files, honor the repo-local `.editorconfig` and `.gitattributes`; normalize edited files before finishing
 - comment added code only when the purpose is not obvious
 - use Doxygen-style comments for new or clarified code comments
 - do not recreate legacy fixed-path `eMulebb` workspace assumptions in scripts or docs

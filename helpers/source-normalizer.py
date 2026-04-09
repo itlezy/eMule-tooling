@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -86,6 +87,11 @@ def parse_args() -> argparse.Namespace:
         help="Root directory to scan. Defaults to the current directory.",
     )
     parser.add_argument(
+        "--tracked-only",
+        action="store_true",
+        help="Limit scanning to Git-tracked files under the selected root.",
+    )
+    parser.add_argument(
         "--write",
         action="store_true",
         help="Rewrite files to match .editorconfig instead of reporting only.",
@@ -99,6 +105,11 @@ def parse_args() -> argparse.Namespace:
         "--report-encodings",
         action="store_true",
         help="Print a detailed encoding breakdown without rewriting files.",
+    )
+    parser.add_argument(
+        "paths",
+        nargs="*",
+        help="Optional repo-relative paths to check instead of scanning the whole root.",
     )
     return parser.parse_args()
 
@@ -120,6 +131,67 @@ def iter_target_files(root_path: Path) -> list[Path]:
         for path in root_path.rglob("*")
         if path.is_file() and matches_target_file(path)
     )
+
+
+def get_tracked_files(root_path: Path) -> list[Path]:
+    """Return tracked target files under the scan root in a stable order."""
+
+    result = subprocess.run(
+        ["git", "-C", str(root_path), "ls-files", "-z"],
+        capture_output=True,
+        text=False,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"git ls-files failed for '{root_path}'.")
+
+    tracked_paths: list[Path] = []
+    for relative_path in result.stdout.decode("utf-8", errors="surrogateescape").split("\0"):
+        if not relative_path:
+            continue
+        candidate = (root_path / relative_path).resolve()
+        if candidate.is_file() and matches_target_file(candidate):
+            tracked_paths.append(candidate)
+
+    return sorted(dict.fromkeys(tracked_paths))
+
+
+def resolve_explicit_paths(root_path: Path, explicit_paths: list[str]) -> list[Path]:
+    """Resolve explicit repo-relative paths to stable absolute file paths."""
+
+    resolved_paths: list[Path] = []
+    for raw_path in explicit_paths:
+        candidate = Path(raw_path)
+        if not candidate.is_absolute():
+            candidate = root_path / candidate
+
+        candidate = candidate.resolve()
+        try:
+            candidate.relative_to(root_path)
+        except ValueError:
+            raise ValueError(f"Explicit path '{raw_path}' is outside the scan root '{root_path}'.") from None
+
+        if candidate.is_file() and matches_target_file(candidate):
+            resolved_paths.append(candidate)
+
+    return sorted(dict.fromkeys(resolved_paths))
+
+
+def select_target_files(root_path: Path, explicit_paths: list[str], tracked_only: bool) -> list[Path]:
+    """Select the file set to inspect based on path and tracking filters."""
+
+    if explicit_paths:
+        selected_paths = resolve_explicit_paths(root_path, explicit_paths)
+    elif tracked_only:
+        selected_paths = get_tracked_files(root_path)
+    else:
+        selected_paths = iter_target_files(root_path)
+
+    if tracked_only and explicit_paths:
+        tracked_set = set(get_tracked_files(root_path))
+        selected_paths = [path for path in selected_paths if path in tracked_set]
+
+    return selected_paths
 
 
 def get_editorconfig_properties(path: Path) -> dict[str, str]:
@@ -272,7 +344,11 @@ def scan_and_normalize(args: argparse.Namespace) -> int:
     """Scan files, optionally normalize them, and print summaries."""
 
     root_path = Path(args.root).resolve()
-    files = iter_target_files(root_path)
+    files = select_target_files(
+        root_path=root_path,
+        explicit_paths=args.paths,
+        tracked_only=args.tracked_only,
+    )
 
     encoding_counts: Counter[str] = Counter()
     detailed_paths: defaultdict[str, list[str]] = defaultdict(list)
