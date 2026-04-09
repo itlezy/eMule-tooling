@@ -112,7 +112,7 @@ regression checks. When behavior changes, compare `main` against
 |----|----------|--------|-------|
 | [CI-001](CI-001.md) | Major | Open | CMake migration — replace emule.vcxproj with CMakeLists.txt + Ninja |
 | [CI-002](CI-002.md) | Minor | Open | clang-format — enforce consistent code formatting |
-| [CI-003](CI-003.md) | Minor | Open | MSVC compiler hardening — SDL, guard:cf, /WX |
+| [CI-003](CI-003.md) | Minor | In Progress | MSVC compiler hardening — SDL, guard:cf, /WX |
 | [CI-004](CI-004.md) | Minor | Open | clang-tidy — integrate static analysis |
 | [CI-005](CI-005.md) | Minor | Open | cppcheck — integrate complementary bug-class analysis |
 | [CI-006](CI-006.md) | Minor | Open | MSVC AddressSanitizer — enable for debug builds |
