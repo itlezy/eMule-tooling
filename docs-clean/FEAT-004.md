@@ -69,3 +69,16 @@ All changes are local resource governance — no wire format or protocol changes
 - `srchybrid/kademlia/utils/KadPublishGuard.h` / `KadPublishGuard.cpp` — extend
 - `srchybrid/kademlia/net/KademliaUDPListener.h` / `.cpp` — opcode dispatch hooks
 - `srchybrid/kademlia/kademlia/Indexed.h` / `.cpp` — memory ceiling hooks
+
+## Experimental Reference Implementation
+
+**Status in `stale-v0.72a-experimental-clean`:** The generalization is partially done. `KadPublishGuard.cpp/h` is a new file (does not exist in main at all) implementing a standalone publish throttle class with:
+- `PublishSourceMetadata` struct capturing source-type, source-port, buddy-IP, buddy-port, buddy-hash fields
+- `EKadPublishThrottleDecision` enum (ALLOW, DROP, BAN)
+- Per-IP token-bucket style publish rate enforcement
+- Malformed-metadata rejection (missing required fields for PUBLISH_SOURCE)
+- Integration hook in `KademliaUDPListener.h` (`m_publishGuard` member)
+
+**What's NOT done:** Per-prefix budgets, byte-based quotas, explicit memory ceilings for other opcodes, and the counters/observability layer are not implemented. The file covers the PUBLISH_SOURCE use case cleanly but is not yet generalized to all expensive opcodes.
+
+**Porting note:** `KadPublishGuard.cpp/h` are new files; add to `.vcxproj`. The guard is called from `KademliaUDPListener.cpp` in the `OP_KADEMLIA_PUBLISH_SOURCE_RES` / `OP_KADEMLIA_PUBLISH_NOTES_REQ` dispatch paths. Integration commit is `4798953`.

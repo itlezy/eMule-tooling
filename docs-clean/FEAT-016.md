@@ -135,3 +135,34 @@ Expose in `Preferences > Tweaks` (advanced tree) without adding a new subtree:
 ## Reference
 
 Full rationale and per-setting analysis: `docs/FEATURE-MODERN-LIMITS.md`
+
+## Experimental Reference Implementation
+
+**Status in `stale-v0.72a-experimental-clean`:** Done in commit `a0bebbc` (FEAT: finish modern limits defaults follow-through) and related cleanup commits. Key deliverables:
+
+**`ModernLimits.h` (new file):** Centralizes all modern defaults as `constexpr` values in the `ModernLimits` namespace:
+- `kDefaultMaxConnectionsPerFiveSeconds = 50`
+- `kDefaultConnectionTimeoutSeconds = 30`, `kDefaultDownloadTimeoutSeconds = 75`
+- `kDefaultUdpMaxQueueTimeSeconds = 20`, `kDefaultConnectionLatencyMs = 15000`
+- `kDefaultUdpReceiveBufferSize = 512 KiB`, `kDefaultTcpSendBufferSize = 512 KiB`
+- `kDefaultFileBufferSize = 64 MiB`, `kMaxFileBufferSize = 512 MiB`, `kDefaultFileBufferTimeLimitSeconds = 120`
+- `kDefaultQueueSize = 10000`, `kDefaultMaxSourcesPerFile = 600`, `kDefaultMaxSourcesPerFileSoft = 1000`, `kDefaultMaxSourcesPerFileUdp = 100`
+- `kDefaultUploadClientDataRate = 8 MiB/s`
+- `SecondsToMs`, `NormalizeTimeoutSeconds`, `TimeoutMsToSeconds`, `ApplyUploadClientDataRateCap` helpers
+
+**`Opcodes.h` changes:**
+- `SESSIONMAXTRANS` raised from `(PARTSIZE+20*1024)` to `(1024ui64*1024*1024*64)` (64 GiB target — upload full file to fast user)
+- `SESSIONMAXTIME` raised from `HR2MS(1)` to `HR2MS(3)` (3 hours)
+- `MAXCONPER5SEC` raised from 20 to 50
+- `MAX_UP_CLIENTS_ALLOWED` changed to 50 (softened, dynamic expansion via broadband controller)
+- `PROXYTYPE_*` constants removed
+- `CONNECTION_TIMEOUT`, `UDPMAXQUEUETIME`, `MAX_SOURCES_FILE_SOFT`, `MAX_SOURCES_FILE_UDP`, `CONNECTION_LATENCY` moved/removed (now in `ModernLimits.h`)
+
+**`Preferences.cpp` changes:**
+- `m_dwConnectionTimeout` and `m_dwDownloadTimeout` now use `ModernLimits::NormalizeTimeoutSeconds` on load/save
+- `m_uMaxUpClientsAllowed` new field with `kDefaultMaxConnectionsPerFiveSeconds` default
+- `BBBoostLowRatioFiles`, `BBBoostLowRatioFilesBy`, `BBDeboostLowIDs` added for broadband slot controller
+
+**`PPgTweaks.cpp`:** UI sliders for `FileBufferSize` (max raised to 512 MiB), `FileBufferTimeLimit`, `ConnectionTimeout`, `DownloadTimeout` exposed.
+
+**Porting note:** Port `ModernLimits.h` first (new header, no dependencies), then update `Opcodes.h` constants, then `Preferences.cpp` load/save paths. Keep changes gated on existing `.ini` values overriding defaults — no forced migration.

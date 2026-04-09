@@ -141,3 +141,21 @@ Use `nlohmann/json` (header-only, MIT license) — add as a single `json.hpp` he
 
 Full API contract (commands, events, data types, error conventions): `docs/PLAN-API-SERVER.md`
 Sidecar (Node.js) side: FEAT-014
+
+## Experimental Reference Implementation
+
+**Status in `stale-v0.72a-experimental-clean`:** Substantially implemented. `PipeApiServer.cpp/h` and `PipeApiServerPolicy.h` are present in `srchybrid/`. Key aspects:
+
+**Lifecycle state machine:** `EPipeApiLifecycleState` enum (`Stopped`, `Listening`, `Connected`, `ShuttingDown`). Worker thread performs `CreateNamedPipe` → `ConnectNamedPipe` (overlapped) → read loop → `DisconnectNamedPipe` cycle.
+
+**Backpressure:** `SPipeApiWriteEntry` tracks bytes in the write queue; `PipeApiPolicy::EWriteKind` distinguishes command responses (must-deliver) from event pushes (droppable under pressure). Write queue has a hard byte ceiling.
+
+**Command dispatch:** Worker thread reads a line, creates `SPipeApiCommandRequest` with a Win32 `HANDLE hCompletedEvent`, posts to UI thread via `PostMessage`, waits on event. UI thread processes the model access, fills `strResponseLine`, sets the event. No blocking of the UI thread (uses `SendMessage` style but with timeout + cancellable flag).
+
+**JSON:** `nlohmann/json` (`srchybrid/nlohmann/` directory) included as vendored header-only library.
+
+**Startup toggle:** `m_bPipeServerEnabled` preference toggle + resource ID for menu/toolbar toggle.
+
+**Commands implemented:** `get_stats`, `get_transfers`, `get_shared`, `get_servers`, `get_kad`, `get_log`, `search_start`, `download_add`, `download_cancel`, `download_pause`, `download_resume`, plus versioned v2 routes.
+
+**Porting note:** `PipeApiServer.cpp/h`, `PipeApiServerPolicy.h`, and `srchybrid/nlohmann/` are all new. Add to `.vcxproj` and wire `CPipeApiServer` into `CemuleApp` and `EmuleDlg` (start/stop lifecycle + event hook points). The preference toggle and runtime enable/disable are important for safe rollout.

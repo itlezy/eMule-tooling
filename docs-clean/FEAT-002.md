@@ -56,3 +56,19 @@ All changes are local policy — no Kad packet changes, no wire format changes.
 - `srchybrid/kademlia/utils/SafeKad.h` / `SafeKad.cpp`
 - `srchybrid/kademlia/routing/RoutingZone.h` / `.cpp` — admission integration
 - `srchybrid/kademlia/kademlia/Kademlia.h` / `.cpp` — verification integration
+
+## Experimental Reference Implementation
+
+**Status in `stale-v0.72a-experimental-clean`:** Core layered trust model implemented. `SafeKad.cpp/h` is present in `srchybrid/kademlia/utils/` with:
+- `CSafeKad` class tracking `TrackedNode` (last ID, last change time, ID-verified flag), `ProblematicNode`, and `BannedIP` state
+- `TrackNode(ip, port, id, bIDVerified, bBanOnVerifiedIdFlip)` — detects ID flipping; hard-bans if a verified ID flip is observed
+- `TrackProblematicNode(ip, port)` — soft-penalises nodes with repeated failures
+- `BanIP(ip)` — explicit hard ban (used for crypto abuse, flood)
+- `IsBadNode(ip, port, id, kadVersion, ...)` — routing admission check combining ban, problematic, and ID-flip state
+- `IsBanned(ip)` / `IsProblematic(ip, port)` — fast lookup paths
+- Maps capped: 10,000 tracked nodes, 10,000 problematic nodes, 1,000 banned IPs
+- `ShutdownCleanup()` clears maps with a stale-age sweep before exit
+
+The CGNAT fix (multiple legitimately-different contacts per IP allowed) is implemented via the `bOnlyOneNodePerIP` parameter to `IsBadNode` — callers in routing pass `false` during contact admission, allowing multiple verified contacts from the same IP in CGNAT scenarios.
+
+**Porting note:** `SafeKad.cpp/h` are new files. Integration point is `RoutingZone.cpp` contact addition — replace the current same-IP gate with `CSafeKad::IsBadNode(...)`. The integration is in commit `4798953` alongside FastKad.
