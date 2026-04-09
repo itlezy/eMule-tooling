@@ -17,7 +17,9 @@ end_of_line = lf
 indent_style = space
 indent_size = 4
 
+[hooks/*]
+end_of_line = lf
+
 [*.{ps1,psd1,cmd}]
 indent_style = space
 indent_size = 4
-

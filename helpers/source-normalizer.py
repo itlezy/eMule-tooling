@@ -52,6 +52,11 @@ SIMPLE_SUFFIXES = {
     ".json",
 }
 COMPOUND_SUFFIXES = (".vcxproj.filters",)
+SPECIAL_FILENAMES = {
+    ".editorconfig",
+    ".gitattributes",
+    ".gitignore",
+}
 
 
 @dataclass
@@ -118,6 +123,10 @@ def matches_target_file(path: Path) -> bool:
     """Return True when the path is one of the tracked text file families."""
 
     lower_name = path.name.lower()
+    if lower_name in SPECIAL_FILENAMES:
+        return True
+    if len(path.parts) >= 2 and path.parts[-2].lower() == "hooks":
+        return True
     if lower_name.endswith(COMPOUND_SUFFIXES):
         return True
     return path.suffix.lower() in SIMPLE_SUFFIXES

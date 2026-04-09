@@ -28,8 +28,9 @@ Normalization helpers live here too:
 
 - `helpers\source-normalizer.py` checks or rewrites tracked text files to match
   repo `.editorconfig` and `.gitattributes`
-- `helpers\install-editorconfig-hook.ps1` installs the supported local
-  pre-commit hook for the current repo
+- `hooks\pre-commit` is the shared workspace pre-commit hook entrypoint
+- `helpers\install-editorconfig-hook.ps1` configures a target repo's local
+  `core.hooksPath` to use that shared hook
 
 ## Workspace Convention
 

@@ -26,57 +26,102 @@ function Resolve-RepoRoot {
     return [System.IO.Path]::GetFullPath($repoRoot.Trim())
 }
 
-function Get-HooksDirectory {
+function Resolve-PathLikeGit {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$PathValue
+    )
+
+    if ([System.IO.Path]::IsPathRooted($PathValue)) {
+        return [System.IO.Path]::GetFullPath($PathValue)
+    }
+
+    return [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $PathValue))
+}
+
+function Get-GitPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$GitPath
+    )
+
+    $gitPathOutput = @(& git -C $RepoRoot rev-parse --git-path $GitPath 2>$null)
+    $exitCode = $LASTEXITCODE
+    $resolvedPath = ($gitPathOutput | Select-Object -First 1)
+    if ($exitCode -ne 0 -or [string]::IsNullOrWhiteSpace($resolvedPath)) {
+        throw "Unable to resolve Git path '$GitPath' for '$RepoRoot'."
+    }
+
+    return Resolve-PathLikeGit -RepoRoot $RepoRoot -PathValue $resolvedPath.Trim()
+}
+
+function Get-LocalHooksPathSetting {
     param(
         [Parameter(Mandatory = $true)]
         [string]$RepoRoot
     )
 
-    $hooksPathOutput = @(& git -C $RepoRoot rev-parse --git-path hooks 2>$null)
+    $hooksPathOutput = @(& git -C $RepoRoot config --local --get core.hooksPath 2>$null)
     $exitCode = $LASTEXITCODE
-    $hooksPath = ($hooksPathOutput | Select-Object -First 1)
-    if ($exitCode -ne 0 -or [string]::IsNullOrWhiteSpace($hooksPath)) {
-        throw "Unable to resolve the Git hooks directory for '$RepoRoot'."
+    if ($exitCode -ne 0) {
+        return ''
     }
 
-    [System.IO.Path]::GetFullPath((Join-Path $RepoRoot $hooksPath.Trim()))
+    return (($hooksPathOutput | Select-Object -First 1) ?? '').Trim()
 }
 
 $repoRootPath = Resolve-RepoRoot -Candidate $RepoRoot
 $toolingRoot = Split-Path -Parent $PSScriptRoot
-$hookRunnerPath = Join-Path $toolingRoot 'helpers\git-pre-commit-editorconfig.ps1'
-$hooksDir = Get-HooksDirectory -RepoRoot $repoRootPath
-$preCommitPath = Join-Path $hooksDir 'pre-commit'
-
-if (-not (Test-Path -LiteralPath $hookRunnerPath -PathType Leaf)) {
-    throw "Missing hook runner: $hookRunnerPath"
-}
-
-if (-not (Test-Path -LiteralPath $hooksDir -PathType Container)) {
-    $null = New-Item -ItemType Directory -Path $hooksDir -Force
-}
-
-$relativeHookRunnerPath = [System.IO.Path]::GetRelativePath($repoRootPath, $hookRunnerPath).Replace('\', '/')
+$sharedHooksDir = [System.IO.Path]::GetFullPath((Join-Path $toolingRoot 'hooks'))
+$sharedPreCommitPath = Join-Path $sharedHooksDir 'pre-commit'
 $marker = '# eMule-tooling editorconfig hook'
 
-if ((Test-Path -LiteralPath $preCommitPath -PathType Leaf) -and -not $Force) {
-    $existingContent = Get-Content -Raw -LiteralPath $preCommitPath
+if (-not (Test-Path -LiteralPath $sharedPreCommitPath -PathType Leaf)) {
+    throw "Missing shared pre-commit hook: $sharedPreCommitPath"
+}
+
+$configuredHooksPath = Get-LocalHooksPathSetting -RepoRoot $repoRootPath
+$configuredHooksPathResolved = ''
+if (-not [string]::IsNullOrWhiteSpace($configuredHooksPath)) {
+    $configuredHooksPathResolved = Resolve-PathLikeGit -RepoRoot $repoRootPath -PathValue $configuredHooksPath
+}
+
+if (-not [string]::IsNullOrWhiteSpace($configuredHooksPathResolved) -and
+    $configuredHooksPathResolved -ne $sharedHooksDir -and
+    -not $Force) {
+    throw "Refusing to replace an existing unmanaged core.hooksPath for '$repoRootPath'. Use -Force to replace it."
+}
+
+$effectiveHooksDir = Get-GitPath -RepoRoot $repoRootPath -GitPath 'hooks'
+$existingPreCommitPath = Join-Path $effectiveHooksDir 'pre-commit'
+if ((Test-Path -LiteralPath $existingPreCommitPath -PathType Leaf) -and
+    $existingPreCommitPath -ne $sharedPreCommitPath -and
+    [string]::IsNullOrWhiteSpace($configuredHooksPathResolved) -and
+    -not $Force) {
+    $existingContent = Get-Content -Raw -LiteralPath $existingPreCommitPath
     if ($existingContent -notmatch [regex]::Escape($marker)) {
-        throw "Refusing to overwrite an existing unmanaged pre-commit hook at '$preCommitPath'. Use -Force to replace it."
+        throw "Refusing to replace an existing unmanaged pre-commit hook at '$existingPreCommitPath'. Use -Force to replace it."
     }
 }
 
-$hookContent = @(
-    '#!/bin/sh'
-    $marker
-    'repo_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 1'
-    "hook_runner=`"`$repo_root/$relativeHookRunnerPath`""
-    'if command -v pwsh >/dev/null 2>&1; then'
-    '  exec pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$hook_runner" -RepoRoot "$repo_root"'
-    'fi'
-    'exec powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$hook_runner" -RepoRoot "$repo_root"'
-) -join "`n"
+& git -C $repoRootPath config --local core.hooksPath $sharedHooksDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to configure core.hooksPath for '$repoRootPath'."
+}
 
-[System.IO.File]::WriteAllText($preCommitPath, "$hookContent`n", [System.Text.UTF8Encoding]::new($false))
-Write-Host ("Installed editorconfig pre-commit hook for {0}" -f $repoRootPath) -ForegroundColor Green
-Write-Host ("Hook path: {0}" -f $preCommitPath)
+if ((Test-Path -LiteralPath $existingPreCommitPath -PathType Leaf) -and
+    $existingPreCommitPath -ne $sharedPreCommitPath -and
+    [string]::IsNullOrWhiteSpace($configuredHooksPathResolved)) {
+    $existingContent = Get-Content -Raw -LiteralPath $existingPreCommitPath
+    if ($existingContent -match [regex]::Escape($marker)) {
+        Remove-Item -LiteralPath $existingPreCommitPath -Force
+    }
+}
+
+$installedHooksDir = Get-GitPath -RepoRoot $repoRootPath -GitPath 'hooks'
+Write-Host ("Configured editorconfig hook for {0}" -f $repoRootPath) -ForegroundColor Green
+Write-Host ("core.hooksPath: {0}" -f $installedHooksDir)

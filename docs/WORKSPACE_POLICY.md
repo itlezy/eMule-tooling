@@ -210,9 +210,13 @@ extended for it.
 ## Documentation Discipline
 
 - Workspace-wide development rules belong only in this document.
+- Workspace-wide hooks and workspace-wide policy must be centralized in
+  `repos\eMule-tooling`.
 - Repo-local `AGENTS.md` files should stay thin and repo-specific.
 - Repo-local docs must point to this policy rather than restating workspace
   branch, worktree, setup, or dependency authority.
+- Repo-local hook or policy helpers must point back to the centralized
+  `repos\eMule-tooling` implementation instead of redefining workspace rules.
 - Use `EMULE_WORKSPACE_ROOT` style references instead of machine-specific
   absolute paths in active docs.
 - Backlog and planning docs are not authoritative by themselves.
@@ -228,8 +232,10 @@ extended for it.
 - Do not leave edited tracked files in mixed-EOL state.
 - `repos\eMule-tooling\helpers\source-normalizer.py` is the canonical
   normalization helper for workspace-owned repos and app worktrees.
-- `repos\eMule-tooling\helpers\install-editorconfig-hook.ps1` is the supported
-  local hook installer for catching normalization drift before commit.
+- `repos\eMule-tooling\hooks\pre-commit` is the shared workspace hook entrypoint
+  for catching normalization drift before commit.
+- `repos\eMule-tooling\helpers\install-editorconfig-hook.ps1` configures a
+  repo-local `core.hooksPath` to that shared hook directory.
 - Routine `validate` must fail when modified tracked files in workspace-owned
   repos or canonical app worktrees drift from their declared normalization
   policy.
