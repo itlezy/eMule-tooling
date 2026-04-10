@@ -41,7 +41,7 @@ startup override` (196 insertions / 19 deletions)
 
 **Usage:**
 ```
-eMule.exe -c "D:\eMule-profiles\instance1"
+eMule.exe -c "%EMULE_WORKSPACE_ROOT%\profiles\instance1"
 eMule.exe -c "%APPDATA%\eMule-test"
 ```
 
