@@ -161,7 +161,7 @@ branching policy.
 | FEAT_023 | FFmpeg alternative (long-term) | **[REJECTED]** thumbnail preview retired | [FEATURE-THUMBS](FEATURE-THUMBS.md) |
 | FEAT_024 | MediaInfo static embedding | **[REJECTED]** | [FEATURE-THUMBS](FEATURE-THUMBS.md) |
 | FEAT_029 | Track B — Worker thread hygiene | Not started | [ARCH-THREADING](ARCH-THREADING.md) |
-| FEAT_030 | Track A — Network IOCP migration | Not started | [ARCH-THREADING](ARCH-THREADING.md) |
+| FEAT_030 | Track A — Network IOCP migration | Not started; UDP WSAPoll stepping stone tracked as REF-029 in `docs-clean` | [ARCH-THREADING](ARCH-THREADING.md) |
 
 ### Bug Fixes & Security (BUG_, GAP_)
 
@@ -251,8 +251,8 @@ branching policy.
 |---|---|---|---|
 | CPP_001–010 | Language modernization — casts, arrays, RAII, constexpr, range-for, enum class, nullptr, auto | Open | [CPP-AUDIT](CPP-AUDIT.md) |
 | CPP_011–020 | Standard library — MFC→std containers, string safety, algorithms, chrono, filesystem, random | **[PARTIAL]** (`CPP_012` **[PARTIAL]**) | [CPP-AUDIT](CPP-AUDIT.md) |
-| CPP_021–030 | Threading — shared state, lock ordering, TOCTOU, atomics, CSingleLock, thread inventory, mutex | **[PARTIAL]** (`CPP_021`–`026`, `CPP_028`–`030` partially addressed, including bounded AICH maintenance wait cleanup; `CPP_027` **[DONE]**) | [CPP-AUDIT](CPP-AUDIT.md) |
-| CPP_031–040 | Safety — unchecked returns, exception safety, buffer overflows, integer overflow, RAII, noexcept | **[PARTIAL]** (`CPP_031`–`038` partially addressed, including bounded `CPP_034` numeric hardening, AICH maintenance RAII cleanup, client part-status ownership hardening, credits/collection ownership hardening, and Win32 file-handle RAII hardening) | [CPP-AUDIT](CPP-AUDIT.md) |
+| CPP_021–030 | Threading — shared state, lock ordering, TOCTOU, atomics, CSingleLock, thread inventory, mutex | **[PARTIAL]** (`CPP_021`–`026`, `CPP_028`–`030` partially addressed, including bounded AICH maintenance wait cleanup; `CPP_027` **[DONE]**; CPP_022/026 = BUG-017, CPP_024 = BUG-018 in `docs-clean`) | [CPP-AUDIT](CPP-AUDIT.md) |
+| CPP_031–040 | Safety — unchecked returns, exception safety, buffer overflows, integer overflow, RAII, noexcept | **[PARTIAL]** (`CPP_031`–`038` partially addressed, including bounded `CPP_034` numeric hardening, AICH maintenance RAII cleanup, client part-status ownership hardening, credits/collection ownership hardening, and Win32 file-handle RAII hardening; CPP_032/035 = BUG-019, CPP_037 = BUG-020 in `docs-clean`) | [CPP-AUDIT](CPP-AUDIT.md) |
 
 ### Dependencies (DEP_)
 
@@ -277,7 +277,7 @@ branching policy.
 | WWMOD_010 | No DPI awareness (P0) | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
 | WWMOD_011 | Legacy MFC list controls (no virtual mode) | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
 | WWMOD_012 | Legacy CPropertySheet preferences | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
-| WWMOD_013 | Historical WSAAsyncSelect networking model | **[PARTIAL]** helper-window migration done; IOCP/soak follow-up remains | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
+| WWMOD_013 | Historical WSAAsyncSelect networking model | **[PARTIAL]** helper-window migration done; IOCP/soak follow-up remains; UDP WSAPoll migration tracked as REF-029 in `docs-clean` | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
 | WWMOD_014–015 | MFC sync primitives, AfxBeginThread | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
 | WWMOD_016–017 | Custom type aliases, MFC containers | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
 | WWMOD_018 | GDI-only drawing (no Direct2D) | Open | [AUDIT-WWMOD](AUDIT-WWMOD.md) |
@@ -316,6 +316,8 @@ branching policy.
 ---
 
 ## Progress Summary
+
+*Last updated: 2026-04-10 — cross-variant analysis pass (eMule-main new commits, community-0.72, eMuleAI, stale-v0.72a-experimental-clean). New active-backlog items tracked in `docs-clean/` (BUG-016 through BUG-021, REF-027 through REF-030, FEAT-018 through FEAT-022). This table reflects the legacy docs/ item namespace only.*
 
 | Category | Total | Done | Partial | Stale | Open |
 |---|---|---|---|---|---|
