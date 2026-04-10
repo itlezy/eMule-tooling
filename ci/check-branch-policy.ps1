@@ -62,13 +62,56 @@ function Assert-BranchAllowed([string]$RepoLabel, [string]$ExpectedBranch, [stri
     throw "$RepoLabel is on branch '$CurrentBranch', expected '$ExpectedBranch'."
 }
 
-$depsPath = Resolve-WorkspacePath 'repos\eMule-build\deps.psd1'
-if (-not (Test-Path -LiteralPath $depsPath)) {
-    throw "Missing workspace dependency manifest: $depsPath"
+$buildDepsPath = Resolve-WorkspacePath 'repos\eMule-build\deps.psd1'
+if (-not (Test-Path -LiteralPath $buildDepsPath)) {
+    throw "Missing build dependency manifest: $buildDepsPath"
 }
 
-$deps = Import-PowerShellDataFile -LiteralPath $depsPath
-$appRepo = $deps.Workspace.AppRepo
+$buildDeps = Import-PowerShellDataFile -LiteralPath $buildDepsPath
+$workspaceName = if ($buildDeps.ContainsKey('Workspace') -and $buildDeps.Workspace.ContainsKey('Name')) {
+    [string]$buildDeps.Workspace.Name
+} else {
+    'v0.72a'
+}
+
+$workspaceRootPath = Resolve-WorkspacePath ("workspaces\{0}" -f $workspaceName)
+$workspaceManifestPath = Join-Path $workspaceRootPath 'deps.psd1'
+if (-not (Test-Path -LiteralPath $workspaceManifestPath)) {
+    throw "Missing generated workspace manifest: $workspaceManifestPath"
+}
+
+$workspaceManifest = Import-PowerShellDataFile -LiteralPath $workspaceManifestPath
+if (-not ($workspaceManifest.ContainsKey('Workspace') -and $workspaceManifest.Workspace.ContainsKey('AppRepo'))) {
+    throw "Generated workspace manifest '$workspaceManifestPath' is missing Workspace.AppRepo."
+}
+
+$convertWorkspaceRelativePathToRootRelative = {
+    param([string]$RelativePath)
+
+    if ([string]::IsNullOrWhiteSpace($RelativePath)) {
+        return $RelativePath
+    }
+
+    $absolutePath = [System.IO.Path]::GetFullPath((Join-Path $workspaceRootPath $RelativePath))
+    [System.IO.Path]::GetRelativePath($EmuleWorkspaceRoot, $absolutePath)
+}
+
+$appRepo = @{} + $workspaceManifest.Workspace.AppRepo
+$seedRepo = @{} + $appRepo.SeedRepo
+if ($seedRepo.ContainsKey('Path')) {
+    $seedRepo.Path = & $convertWorkspaceRelativePathToRootRelative $seedRepo.Path
+}
+$appRepo.SeedRepo = $seedRepo
+
+$normalizedVariants = [System.Collections.Generic.List[hashtable]]::new()
+foreach ($variant in @($appRepo.Variants)) {
+    $normalizedVariant = @{} + $variant
+    if ($normalizedVariant.ContainsKey('Path')) {
+        $normalizedVariant.Path = & $convertWorkspaceRelativePathToRootRelative $normalizedVariant.Path
+    }
+    $normalizedVariants.Add($normalizedVariant) | Out-Null
+}
+$appRepo.Variants = @($normalizedVariants)
 
 $canonicalRepoPath = Resolve-WorkspacePath $appRepo.SeedRepo.Path
 if (-not (Test-Path -LiteralPath $canonicalRepoPath)) {
