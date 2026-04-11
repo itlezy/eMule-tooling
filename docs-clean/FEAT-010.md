@@ -31,11 +31,15 @@ The remaining long-path backlog is now shell/UI oriented:
 Branch status on `fix/partfile-longpath-hardening`:
 
 - `Ini2.cpp` path-helper cleanup is done; module/current-directory INI path construction no longer depends on fixed `_MAX_*` buffers or `MAX_PATH`-sized `GetModuleFileName` / `GetCurrentDirectory` calls.
+- Shell icon / shell-attribute query call sites in `DirectoryTreeCtrl.cpp`, `SharedDirsTreeCtrl.cpp`, `Emule.cpp`, `PPgDirectories.cpp`, `SharedFileList.cpp`, and `SharedFilesCtrl.cpp` are intentionally deferred and marked in code as `TODO:MINOR(FEAT-010)`.
 - `Emule.cpp` skin resource path assembly is intentionally deferred as `TODO:MINOR`.
 - `MuleListCtrl.cpp` background skin image path assembly is intentionally deferred as `TODO:MINOR`.
 
 1. **Shell icon lookup**
    Centralize direct `SHGetFileInfo` usage and define fallback behavior for overlong paths.
+
+   Deferred status on `fix/partfile-longpath-hardening`:
+   active call sites are tagged in code as `TODO:MINOR(FEAT-010)` and are not part of the current branch scope.
 
    Primary files:
    - `DirectoryTreeCtrl.cpp`
