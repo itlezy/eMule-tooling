@@ -1,6 +1,6 @@
 ---
 id: FEAT-015
-title: Broadband upload slot controller — budget-based slot cap + slow-slot reclamation
+title: Broadband upload slot allocation — fixed cap + weak-slot reclamation
 status: Open
 priority: Major
 category: feature
@@ -14,7 +14,9 @@ source: FEATURE-BROADBAND.md (FEAT_001 — stale branch, not yet on main)
 
 The stock upload controller scales slot count linearly with bandwidth using a hard-coded 25 KiB/s per-slot target (`UPLOAD_CLIENT_MAXDATARATE`). On a modern broadband link (50+ Mbit/s) this drives slot count toward 100, filling the pipe by accumulation rather than by keeping a small set of strong slots. This feature replaces that model with a budget-based controller: a configurable steady-state slot target, per-slot rate derived from one finite configured upload budget, and proactive slow-slot reclamation.
 
-**Status:** Full design exists in `docs/FEATURE-BROADBAND.md`. The active stabilization line on `feature/broadband-stabilization` now intentionally narrows this into a strict fixed-slot controller: default cap `8`, no temporary overflow above the configured cap, underfill used only to justify weak-slot recycling, friend slots kept as the one intentional scheduling exception, and LowID reconnects returned to the normal waiting/admission path.
+**Branch status:** Implemented on `feature/broadband-stabilization`. The active branch intentionally narrows the old broadband design into a strict fixed-slot controller: default cap `8`, no temporary overflow above the configured cap, underfill used only to justify weak-slot recycling, friend slots kept as the one intentional scheduling exception, and LowID reconnects returned to the normal waiting/admission path.
+
+**Scope split:** Non-slot broadband extras still present on the branch, such as low-ratio queue scoring and ratio/cooldown UI columns, are no longer part of this story. Track them separately under `FEAT-023`.
 
 ## The Problem (stock v0.72a behavior)
 
@@ -49,10 +51,6 @@ A modern link works better with 12 strong slots at ~500 KiB/s each.
 | `BBSlowWarmupSeconds` | int | 60 | Startup protection before slow/zero recycle can apply |
 | `BBZeroRateGraceSeconds` | int | 10 | Zero-rate recycle grace after warm-up |
 | `BBSlowCooldownSeconds` | int | 120 | Score suppression after weak-slot recycle |
-| `BBLowRatioBoostEnabled` | bool | true | Enables low-ratio queue-score bonus |
-| `BBLowRatioThreshold` | float | 0.5 | All-time ratio threshold for queue-score bonus |
-| `BBLowRatioBonus` | int | 50 | Additive queue-score bonus when low-ratio threshold matches |
-| `BBLowIDDivisor` | int | 2 | Divide LowID queue score by this value |
 | `BBSessionTransferMode` | enum | Percent of file size | Transfer-rotation mode |
 | `BBSessionTransferValue` | int | 55 | Value for the selected transfer-rotation mode |
 | `BBSessionTimeLimitSeconds` | int | 3600 | Time-based session rotation backstop |
@@ -117,62 +115,28 @@ Replace fixed `75 KiB/s` / `100 KiB/s` thresholds in `UploadDiskIOThread.cpp`:
 - Large socket send buffer: enable when slot rate ≥ `targetPerSlot / 2`
 - Disk prefetch: 1 → 3 → 5 blocks based on rate relative to `targetPerSlot`
 
-## Ratio Methods (prerequisite — borrow from eMuleAI)
-
-Add to `KnownFile.h` (eMuleAI already has these):
-
-```cpp
-double GetRatio() const {
-    const uint64 fileSize = static_cast<uint64>(GetFileSize());
-    return fileSize > 0 ? static_cast<double>(statistic.GetTransferred()) / static_cast<double>(fileSize) : 0.0;
-}
-double GetAllTimeRatio() const {
-    const uint64 fileSize = static_cast<uint64>(GetFileSize());
-    return fileSize > 0 ? static_cast<double>(statistic.GetAllTimeTransferred()) / static_cast<double>(fileSize) : 0.0;
-}
-```
-
-These feed both the UI columns and the low-ratio queue scoring.
-
-## UI Columns
-
-Add to shared files, upload list, and queue list:
-
-| Column | Source | Location |
-|--------|--------|---------|
-| `All-Time Ratio` | `GetAllTimeRatio()` — all-time transferred / file size | Shared, Upload, Queue |
-| `Session Ratio` | `GetRatio()` — session transferred / file size | Shared, Upload, Queue |
-| `Cooldown` | remaining slow-eviction suppression seconds | Upload, Queue |
-
 ## Files to Modify
 
 | File | Change |
 |------|--------|
-| `Preferences.h/cpp` | 6 new BB* preference keys with load/save/defaults |
-| `Opcodes.h` | No change to existing constants (BB* are separate) |
-| `UploadQueue.h/cpp` | Replace slot-count formula; add budget/target computation; add low-ratio queue scoring |
+| `Preferences.h/cpp` | Slot-controller BB* preference keys with load/save/defaults |
+| `Opcodes.h` | No change to existing constants |
+| `UploadQueue.h/cpp` | Replace slot-count formula; add budget/target computation; add weak-slot recycle gates |
 | `UploadBandwidthThrottler.h/cpp` | Replace `UPLOAD_CLIENT_MAXDATARATE` guard with `targetPerSlot` |
 | `UpdownClient.h` | Add slow-tracking and cooldown members for weak-slot recycle |
 | `UploadClient.cpp` | Slow/stuck detection + eviction logic; cooldown queue-score zero |
 | `UploadDiskIOThread.cpp` | Replace fixed buffer/prefetch thresholds with `targetPerSlot`-based scaling |
-| `KnownFile.h` | Add `GetRatio()` / `GetAllTimeRatio()` |
-| `UploadListCtrl.cpp` | All-Time Ratio, Session Ratio, Cooldown columns |
-| `QueueListCtrl.cpp` | All-Time Ratio, Session Ratio, Cooldown columns |
-| `SharedFilesCtrl.cpp` | All-Time Ratio, Session Ratio columns |
-| New: `PPgBroadband.h/cpp` | `Preferences > Tweaks > Broadband` page |
-| `PreferencesDlg.cpp` | Register `PPgBroadband` page |
+| `PPgTweaks.cpp` | Broadband settings surfaced under `Preferences > Tweaks > Broadband` |
 
 ## Implementation Order
 
-1. `KnownFile.h` — add `GetRatio()` / `GetAllTimeRatio()`
-2. `Preferences.h/cpp` — add all 6 BB* keys
-3. `UploadQueue.cpp` — replace slot-count formula with budget-based controller
-4. `UploadBandwidthThrottler.cpp` — replace UPLOAD_CLIENT_MAXDATARATE guard
-5. `UpdownClient.h` / `UploadClient.cpp` — slow-slot tracking and eviction
-6. `UploadDiskIOThread.cpp` — buffer/prefetch scaling
-7. Session rotation overrides
-8. UI columns (Ratio, Cooldown)
-9. `PPgBroadband` preferences page
+1. `Preferences.h/cpp` — slot-controller BB* keys
+2. `UploadQueue.cpp` — fixed-cap admission and weak-slot recycle
+3. `UploadBandwidthThrottler.cpp` — cap-aware slot pressure
+4. `UpdownClient.h` / `UploadClient.cpp` — slow-slot tracking and cooldown
+5. `UploadDiskIOThread.cpp` — per-slot-rate buffer/prefetch scaling
+6. Session rotation overrides
+7. `PPgTweaks` broadband settings
 
 ## Acceptance Criteria
 
@@ -182,10 +146,7 @@ Add to shared files, upload list, and queue list:
 - [ ] Slow uploaders (< `targetPerSlot / 3`) are evicted after 30 s and enter 120 s cooldown
 - [ ] Zero-rate slots are evicted after 10 s once warm-up has completed
 - [ ] Cooldown prevents immediate slot re-entry; column shows remaining time
-- [ ] `BBLowRatioBoostEnabled` / `BBLowRatioThreshold` / `BBLowRatioBonus` raise queue score for files with low all-time ratio
-- [ ] `BBLowIDDivisor` divides queue score for LowID clients by the configured divisor
 - [ ] `BBSessionTransferMode` / `BBSessionTransferValue` / `BBSessionTimeLimitSeconds` override stock session rotation
-- [ ] All-Time Ratio / Session Ratio columns sortable in Upload, Queue, Shared lists
 - [ ] `Preferences > Tweaks > Broadband` page loads, saves, applies without restart
 - [ ] Missing or legacy-unlimited upload config normalizes to `6100 KiB/s`
 - [ ] Friend slots remain the only deliberate scheduling exception

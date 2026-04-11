@@ -29,6 +29,15 @@ The implementation is intentionally narrow:
 
 It does not attempt to replay the whole historic broadband branch.
 
+Current branch scope split:
+
+- the slot-allocation story on `feature/broadband-stabilization` is the fixed-cap
+  controller: admission, underfill-driven weak-slot recycle, finite upload
+  budget, and session rotation
+- the branch still carries separate broadband extras such as low-ratio scoring
+  and ratio/cooldown UI columns, but those are no longer considered part of the
+  slot-allocation story and should be tracked independently
+
 ## Problem in Stock `v0.72a`
 
 The stock `v0.72a` upload controller grows the number of upload slots almost
@@ -91,19 +100,22 @@ That behavior maps well to the goal on `v0.72a`.
 
 ## What This Branch Keeps
 
-This branch keeps the following parts of the old broadband approach:
+The slot-allocation story keeps these parts of the old broadband approach:
 
 - hidden `BBMaxUpClientsAllowed` configuration key as the steady-state slot target
-- hidden `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, `BBLowRatioBonus`, and `BBLowIDDivisor` queue-score controls for strict seeders
 - hidden `BBSessionTransferMode`, `BBSessionTransferValue`, and `BBSessionTimeLimitSeconds` overrides for broadband session rotation
-- restored `IP2Country` backend support for client country lookups
-- `All-Time Ratio` / `Session Ratio` columns in shared, upload, and queue lists
-- `Cooldown` column in upload and queue lists
 - a steady-state soft cap for upload slots
 - slow/stuck slot tracking on each uploading client
 - replacement of bad slots instead of relying on runaway slot growth
+
+Separate branch extras still present but outside this story:
+
+- hidden `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, `BBLowRatioBonus`, and `BBLowIDDivisor` queue-score controls
+- `All-Time Ratio` / `Session Ratio` columns in shared, upload, and queue lists
+- `Cooldown` column in upload and queue lists
 - low-ratio preference when ordering the shared-file list published to servers,
   while still respecting upload priority first
+- restored `IP2Country` backend support for client country lookups
 
 ## What This Branch Does Not Port
 
@@ -320,6 +332,10 @@ Intentional exceptions:
 - friend slots remain the only deliberate scheduling exception
 - collection handling is reduced to correctness checks only, such as rejecting a
   file switch while a collection request is active
+
+The collection marker is still present in code, but only as a correctness guard
+for collection block validation. It is not a slot-admission or recycle-policy
+exception.
 - LowID reconnects no longer reserve a future slot; they return through the same
   waiting/admission path as every other client
 

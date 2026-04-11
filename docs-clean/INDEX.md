@@ -122,6 +122,7 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-020](FEAT-020.md) | Trivial | Open | GeoLite2 IP geolocation — country flag + city per peer (eMuleAI ref) |
 | [FEAT-021](FEAT-021.md) | Minor | Open | SourceSaver — persist download source lists between sessions (eMuleAI ref) |
 | [FEAT-022](FEAT-022.md) | Minor | Open | Startup config directory override — -c flag for alternate preferences path (experimental ref) |
+| [FEAT-023](FEAT-023.md) | Minor | Open | Broadband queue scoring and ratio/cooldown UI extras |
 
 ---
 
@@ -147,7 +148,7 @@ regression checks. When behavior changes, compare `main` against
 2. **REF-026** — Manifest cleanup: drop legacy OS entries, add Common Controls dep (quick win, pairs with FEAT-017)
 3. **BUG-007** — Ring.h UB: index-based rewrite done in experimental, ready to port *(BUG-001 Done)*
 4. **FEAT-016** — Modern limits: raise stale defaults, zero protocol risk; `ModernLimits.h` done in experimental
-5. **FEAT-015** — Broadband upload controller: full spec available, partial impl in experimental
+5. **FEAT-015** — Broadband upload slot allocation: implemented on `feature/broadband-stabilization`; merge/doc split still pending
 6. **REF-001** — Replace CZIPFile with minizip: isolated, 3 call sites
 7. **REF-002** — Remove Source Exchange v1: targeted cleanup, ~250 lines
 8. **REF-029** — WSAPoll UDP backend: experimental impl done, significant network quality improvement; port BUG-017 alongside
@@ -247,7 +248,8 @@ REF-008              supersedes REF-029 (WSAPoll UDP) and REF-030 (hostname reso
 FEAT-008 (oracle seams) ──► FEAT-009 (mirror audit)
 FEAT-013 (CPipeApiServer) ──► FEAT-014 (Node.js sidecar)
 FEAT-011 (CShield) ──► FEAT-012 (PR_TCPERRORFLOODER, can standalone)
-FEAT-015 (upload controller) ──► FEAT-016 (modern limits — coordinate Opcodes.h values)
+FEAT-015 (slot allocation) ──► FEAT-016 (modern limits — coordinate Opcodes.h values)
+FEAT-015 (slot allocation) ──► FEAT-023 (optional scoring/UI extras kept separate)
 FEAT-017 (DPI) ──► REF-026 (manifest) — apply together
 FEAT-017 (DPI) ──► FEAT-019 (dark mode — pair for modern UI milestone)
 FEAT-018 (µTP) ──► coordinate with REF-029 (WSAPoll UDP demux)
@@ -334,7 +336,7 @@ These items have complete or near-complete implementations in the experimental b
 | `DEP-REMOVAL.md` | DEP_001 keep; DEP_002/006 done; DEP_003/005 candidates | REF-015, REF-016 |
 | `DEP-REMOVAL-DLL.md` | DLL analysis; miniupnpc + zlib good candidates | REF-015 (no DLL path chosen) |
 | `FEATURE-KAD.md` | Cross-ref for FEAT_002-006; partially overlaps AUDIT-KAD | FEAT-001 through FEAT-006 |
-| `FEATURE-BROADBAND.md` | FEAT_001 done on stale branch only — NOT in main | FEAT-015 |
+| `FEATURE-BROADBAND.md` | Broadband branch design; stabilization scope now split between slot allocation and extras | FEAT-015, FEAT-023 |
 | `FEATURE-MODERN-LIMITS.md` | FEAT_013-019 done on stale branch only — NOT in main | FEAT-016 |
 | `FEATURE-THUMBS.md` | Thumbnail feature RETIRED in experimental; IMediaDet in FileInfoDialog.cpp pending | Not converted (needs audit) |
 | `EXTRAS_VPNKILLSWITCHDESIGN.md` | External helper tool — not in-process; deferred | Not converted |
