@@ -14,7 +14,7 @@ source: FEATURE-BROADBAND.md (FEAT_001 — stale branch, not yet on main)
 
 The stock upload controller scales slot count linearly with bandwidth using a hard-coded 25 KiB/s per-slot target (`UPLOAD_CLIENT_MAXDATARATE`). On a modern broadband link (50+ Mbit/s) this drives slot count toward 100, filling the pipe by accumulation rather than by keeping a small set of strong slots. This feature replaces that model with a budget-based controller: a configurable steady-state slot target, per-slot rate derived from actual upload budget, and proactive slow-slot reclamation.
 
-**Status:** Full design exists in `docs/FEATURE-BROADBAND.md`. The active stabilization line on `feature/broadband-stabilization` now intentionally narrows this into a strict fixed-slot controller: default cap `8`, no temporary overflow above the configured cap, and underfill used only to justify weak-slot recycling.
+**Status:** Full design exists in `docs/FEATURE-BROADBAND.md`. The active stabilization line on `feature/broadband-stabilization` now intentionally narrows this into a strict fixed-slot controller: default cap `8`, no temporary overflow above the configured cap, underfill used only to justify weak-slot recycling, friend slots kept as the one intentional scheduling exception, and LowID reconnects returned to the normal waiting/admission path.
 
 ## The Problem (stock v0.72a behavior)
 
@@ -39,18 +39,23 @@ A modern link works better with 12 strong slots at ~500 KiB/s each.
 
 ## New Controller Design
 
-### Preferences (7 new hidden keys)
+### Preferences (active stabilization branch)
 
 | Key | Type | Default | Meaning |
 |-----|------|---------|---------|
 | `BBMaxUpClientsAllowed` | int | 8 | Steady-state slot target |
-| `BBSessionMaxTrans` | uint64 | `SESSIONMAXTRANS` | Session transfer limit (0=off, 1–100=% of file size, >100=absolute bytes) |
-| `BBSessionMaxTime` | uint64 | `SESSIONMAXTIME` | Session time limit in seconds (0=off) |
-| `BBBoostLowRatioFiles` | float | 0 | All-time ratio threshold for queue score bonus (0=off) |
-| `BBBoostLowRatioFilesBy` | float | 0 | Additive queue score bonus when ratio threshold matches |
-| `BBDeboostLowIDs` | int | 0 | Divide LowID queue score by this value (0/1=off) |
-
-Exposed in **`Preferences > Tweaks > Broadband`** page with friendly editor labels.
+| `BBSlowThresholdFactor` | float | 0.33 | Slow-slot threshold as a fraction of per-slot target |
+| `BBSlowGraceSeconds` | int | 30 | Slow-rate recycle grace after warm-up |
+| `BBSlowWarmupSeconds` | int | 60 | Startup protection before slow/zero recycle can apply |
+| `BBZeroRateGraceSeconds` | int | 10 | Zero-rate recycle grace after warm-up |
+| `BBSlowCooldownSeconds` | int | 120 | Score suppression after weak-slot recycle |
+| `BBLowRatioBoostEnabled` | bool | true | Enables low-ratio queue-score bonus |
+| `BBLowRatioThreshold` | float | 0.5 | All-time ratio threshold for queue-score bonus |
+| `BBLowRatioBonus` | int | 50 | Additive queue-score bonus when low-ratio threshold matches |
+| `BBLowIDDivisor` | int | 2 | Divide LowID queue score by this value |
+| `BBSessionTransferMode` | enum | Percent of file size | Transfer-rotation mode |
+| `BBSessionTransferValue` | int | 55 | Value for the selected transfer-rotation mode |
+| `BBSessionTimeLimitSeconds` | int | 3600 | Time-based session rotation backstop |
 
 ### Effective upload budget
 
@@ -78,31 +83,30 @@ Existing 75% admission threshold applies to `targetPerSlot`.
 
 ### Slow/stuck slot reclamation (`UpdownClient.h` + `UploadClient.cpp`)
 
-New state per `CUpDownClient`:
-
-```cpp
-DWORD  m_dwSlowUploadStart;    // when slow-rate accumulation started
-float  m_fSlowAccumSec;        // accumulated seconds below threshold
-bool   m_bInCooldown;          // true during post-eviction zero-score window
-DWORD  m_dwCooldownEnd;        // when cooldown ends
-```
+New state per `CUpDownClient` tracks accumulated slow/zero-rate time and
+post-recycle cooldown.
 
 Slow threshold: smoothed upload rate < `targetPerSlot / 3`
 
 Eviction triggers (only while queue non-empty AND at/above soft cap AND underfilled):
-- `m_fSlowAccumSec >= 15` seconds below slow threshold
-- `m_fSlowAccumSec >= 3` seconds at exactly 0 upload rate
+- fresh slots are protected for `60` seconds before recycle can apply
+- recycle after `30` seconds below slow threshold
+- recycle after `10` seconds at exactly `0` upload rate
 
-Evicted clients are requeued immediately (protocol compat) but queue score held at 0 for one slow-eviction window (`Cooldown` column).
+Evicted clients are requeued immediately (protocol compat) but queue score held
+at `0` for `120` seconds (`Cooldown` column).
 
-Good samples reduce `m_fSlowAccumSec`. Neutral periods freeze timers.
+Good samples reduce accumulated slow time. Neutral periods freeze timers.
 
 ### Session rotation overrides
 
-Replace `SESSIONMAXTRANS`/`SESSIONMAXTIME` checks in upload slot logic with `BBSessionMaxTrans`/`BBSessionMaxTime`:
-- `BBSessionMaxTrans == 0`: no transfer-based rotation
-- `BBSessionMaxTrans 1–100`: `% of current file size`
-- `BBSessionMaxTrans > 100`: absolute byte limit
+Replace `SESSIONMAXTRANS`/`SESSIONMAXTIME` checks in upload slot logic with:
+- `BBSessionTransferMode` + `BBSessionTransferValue`
+- `BBSessionTimeLimitSeconds`
+
+Current default:
+- percent-of-file transfer mode with value `55`
+- `3600` second time limit
 
 ### Socket buffer / disk prefetch scaling
 
@@ -125,7 +129,7 @@ double GetAllTimeRatio() const {
 }
 ```
 
-These feed both the UI columns and the `BBBoostLowRatioFiles` queue scoring.
+These feed both the UI columns and the low-ratio queue scoring.
 
 ## UI Columns
 
@@ -143,9 +147,9 @@ Add to shared files, upload list, and queue list:
 |------|--------|
 | `Preferences.h/cpp` | 6 new BB* preference keys with load/save/defaults |
 | `Opcodes.h` | No change to existing constants (BB* are separate) |
-| `UploadQueue.h/cpp` | Replace slot-count formula; add budget/target computation; add `BBBoostLowRatioFiles` queue scoring |
+| `UploadQueue.h/cpp` | Replace slot-count formula; add budget/target computation; add low-ratio queue scoring |
 | `UploadBandwidthThrottler.h/cpp` | Replace `UPLOAD_CLIENT_MAXDATARATE` guard with `targetPerSlot` |
-| `UpdownClient.h` | Add slow-tracking members: `m_dwSlowUploadStart`, `m_fSlowAccumSec`, `m_bInCooldown`, `m_dwCooldownEnd` |
+| `UpdownClient.h` | Add slow-tracking and cooldown members for weak-slot recycle |
 | `UploadClient.cpp` | Slow/stuck detection + eviction logic; cooldown queue-score zero |
 | `UploadDiskIOThread.cpp` | Replace fixed buffer/prefetch thresholds with `targetPerSlot`-based scaling |
 | `KnownFile.h` | Add `GetRatio()` / `GetAllTimeRatio()` |
@@ -171,15 +175,19 @@ Add to shared files, upload list, and queue list:
 
 - [ ] Default `BBMaxUpClientsAllowed=8` holds slot count near 8 on a 50 Mbit/s link (does not grow to 100)
 - [ ] Manually setting `BBMaxUpClientsAllowed=12` holds slot count at or below 12 on a 50 Mbit/s link
-- [ ] Slow uploaders (< `targetPerSlot / 3` for 15 s) are evicted and enter cooldown
-- [ ] Zero-rate slots evicted after 3 s
+- [ ] Fresh upload slots are protected from recycle for the first 60 s
+- [ ] Slow uploaders (< `targetPerSlot / 3`) are evicted after 30 s and enter 120 s cooldown
+- [ ] Zero-rate slots are evicted after 10 s once warm-up has completed
 - [ ] Cooldown prevents immediate slot re-entry; column shows remaining time
-- [ ] `BBBoostLowRatioFiles` raises queue score for files with low all-time ratio
-- [ ] `BBDeboostLowIDs` divides queue score for LowID clients by configured divisor
-- [ ] `BBSessionMaxTrans` / `BBSessionMaxTime` override stock session rotation
+- [ ] `BBLowRatioBoostEnabled` / `BBLowRatioThreshold` / `BBLowRatioBonus` raise queue score for files with low all-time ratio
+- [ ] `BBLowIDDivisor` divides queue score for LowID clients by the configured divisor
+- [ ] `BBSessionTransferMode` / `BBSessionTransferValue` / `BBSessionTimeLimitSeconds` override stock session rotation
 - [ ] All-Time Ratio / Session Ratio columns sortable in Upload, Queue, Shared lists
 - [ ] `Preferences > Tweaks > Broadband` page loads, saves, applies without restart
 - [ ] Upload works correctly when `GetMaxGraphUploadRate(true)` returns 0 (no real budget configured)
+- [ ] Friend slots remain the only deliberate scheduling exception
+- [ ] LowID reconnects do not bypass the normal waiting/admission path
+- [ ] Collection handling is correctness-only and does not use a separate scheduler path
 
 ## Reference
 

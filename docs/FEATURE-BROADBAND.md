@@ -22,7 +22,7 @@ fits the `v0.72a` codebase and current broadband links.
 The implementation is intentionally narrow:
 
 - keep `BBMaxUpClientsAllowed` as the steady-state slot target
-- override the legacy session rotation defaults with `BBSessionMaxTrans` and `BBSessionMaxTime`
+- override the legacy session rotation defaults with `BBSessionTransferMode` / `BBSessionTransferValue` and `BBSessionTimeLimitSeconds`
 - base slot decisions on the actual upload budget
 - treat the configured broadband slot target as the normal ceiling for upload slots
 - reclaim obviously weak upload slots instead of compensating by opening many more
@@ -94,8 +94,8 @@ That behavior maps well to the goal on `v0.72a`.
 This branch keeps the following parts of the old broadband approach:
 
 - hidden `BBMaxUpClientsAllowed` configuration key as the steady-state slot target
-- hidden `BBBoostLowRatioFiles`, `BBBoostLowRatioFilesBy`, and `BBDeboostLowIDs` queue-score controls for strict seeders
-- hidden `BBSessionMaxTrans` and `BBSessionMaxTime` overrides for broadband session rotation
+- hidden `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, `BBLowRatioBonus`, and `BBLowIDDivisor` queue-score controls for strict seeders
+- hidden `BBSessionTransferMode`, `BBSessionTransferValue`, and `BBSessionTimeLimitSeconds` overrides for broadband session rotation
 - restored `IP2Country` backend support for client country lookups
 - `All-Time Ratio` / `Session Ratio` columns in shared, upload, and queue lists
 - `Cooldown` column in upload and queue lists
@@ -125,60 +125,107 @@ the patch maintainable on top of `v0.72a`.
 
 - stored in `preferences.ini`
 - defaults to `8`
-- clamped to `[MIN_UP_CLIENTS_ALLOWED, MAX_UP_CLIENTS_ALLOWED]`
+- clamped to `1..32`
 
 This value is the normal broadband slot target and, on the stabilization branch,
 the effective ceiling for normal upload slots.
 
-`BBSessionMaxTrans=<uint64>`
+`BBSlowThresholdFactor=<float>`
 
 - stored in `preferences.ini`
-- defaults to `SESSIONMAXTRANS`
-- overrides the stock one-chunk session cap on this branch
-- semantics:
-  - `0` disables transfer-based session rotation
-  - `1..100` means percent of the currently uploaded file size
-  - `>100` means an absolute byte limit
+- defaults to `0.33`
+- clamped to `0.10..1.00`
+- slots below `targetPerSlot * factor` are candidates for slow-slot recycle once
+  the other recycle gates also hold
 
-`BBSessionMaxTime=<uint64>`
+`BBSlowGraceSeconds=<int>`
 
 - stored in `preferences.ini`
-- defaults to `SESSIONMAXTIME`
-- overrides the stock one-hour session cap on this branch
-- `0` disables time-based session rotation
+- defaults to `30`
+- clamped to `5..300`
+- a warmed-up slot must remain below the slow threshold for this long before it
+  is recycled
 
-`BBBoostLowRatioFiles=<float>`
-
-- stored in `preferences.ini`
-- defaults to `0`
-- `0` disables the low-ratio bias
-- when enabled, files whose all-time uploaded-bytes-to-file-size ratio is below
-  the configured threshold get a queue-score bonus
-
-`BBBoostLowRatioFilesBy=<float>`
+`BBSlowWarmupSeconds=<int>`
 
 - stored in `preferences.ini`
-- defaults to `0`
-- additive score bonus applied when the low-ratio threshold matches
+- defaults to `60`
+- clamped to `0..3600`
+- fresh upload slots do not accumulate broadband recycle debt during this window
 
-`BBDeboostLowIDs=<int>`
+`BBZeroRateGraceSeconds=<int>`
 
 - stored in `preferences.ini`
-- defaults to `0`
-- `0` and `1` disable the behavior
+- defaults to `10`
+- clamped to `3..120`
+- a warmed-up slot stuck at exactly `0` upload rate for this long is recycled
+
+`BBSlowCooldownSeconds=<int>`
+
+- stored in `preferences.ini`
+- defaults to `120`
+- clamped to `10..3600`
+- recycled clients are requeued immediately, but their queue score stays at zero
+  until this cooldown expires
+
+`BBLowRatioBoostEnabled=<bool>`
+
+- stored in `preferences.ini`
+- defaults to `true`
+
+`BBLowRatioThreshold=<float>`
+
+- stored in `preferences.ini`
+- defaults to `0.5`
+- clamped to `0.0..2.0`
+
+`BBLowRatioBonus=<int>`
+
+- stored in `preferences.ini`
+- defaults to `50`
+- clamped to `0..500`
+
+`BBLowIDDivisor=<int>`
+
+- stored in `preferences.ini`
+- defaults to `2`
+- clamped to `1..8`
 - values above `1` divide the queue score of actual LowID clients by the
   configured value
+
+`BBSessionTransferMode=<int>` + `BBSessionTransferValue=<int>`
+
+- stored in `preferences.ini`
+- defaults to `Percent of file size` with value `55`
+- transfer mode is one of:
+  - `Disabled`
+  - `Percent of file size`
+  - `Absolute limit (MiB)`
+- the current value is clamped by mode:
+  - percent mode: `1..100`
+  - MiB mode: `1..4096`
+
+`BBSessionTimeLimitSeconds=<int>`
+
+- stored in `preferences.ini`
+- defaults to `3600`
+- clamped to `0..86400`
+- `0` disables time-based session rotation
 
 These settings are also exposed in `Preferences > Tweaks > Broadband` with a
 friendlier editor:
 
 - `Max Upload Clients`
+- `Slow threshold factor`
+- `Slow grace [sec.]`
+- `Slow recycle warm-up [sec.]`
+- `Zero-rate grace [sec.]`
+- `Cooldown [sec.]`
 - `Session Transfer Limit`
   - `Disabled`
   - `Percent of file size`
   - `Absolute limit (MiB)`
-- `Enable session time limit`
-  - `Minutes`
+- `Session time limit [sec.]`
 - `Enable low-ratio file boost`
   - `Ratio threshold`
   - `Score bonus`
@@ -264,8 +311,9 @@ Slow threshold:
 
 Time windows:
 
-- evict after `15 seconds` spent below the slow-rate threshold
-- evict after `3 seconds` spent at exactly `0` upload rate
+- ignore startup behavior for the first `60 seconds` of a fresh upload slot
+- evict after `30 seconds` spent below the slow-rate threshold
+- evict after `10 seconds` spent at exactly `0` upload rate
 - good samples reduce accumulated slow time
 - neutral periods freeze the timers instead of silently forgiving the client
 
@@ -273,8 +321,16 @@ When a client gets a fresh upload slot, its slow timers are reset.
 
 When a client is evicted for being slow or stuck, it is still requeued
 immediately for protocol compatibility, but its queue score is held at zero for
-one slow-eviction window. That short cooldown prevents the same weak uploader
-from bouncing straight back into the next slot.
+`120 seconds`. That cooldown prevents the same weak uploader from bouncing
+straight back into the next slot.
+
+Intentional exceptions:
+
+- friend slots remain the only deliberate scheduling exception
+- collection handling is reduced to correctness checks only, such as rejecting a
+  file switch while a collection request is active
+- LowID reconnects no longer reserve a future slot; they return through the same
+  waiting/admission path as every other client
 
 ### UI readouts
 
@@ -297,11 +353,11 @@ still decides who gets them.
 
 This branch keeps that policy explicit instead of burying it in slot math:
 
-- `BBBoostLowRatioFiles` and `BBBoostLowRatioFilesBy` let the queue favor files
+- `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, and `BBLowRatioBonus` let the queue favor files
   that have historically seen fewer uploaded copies
 - the ratio metric is simple and local to the current file:
   `allTimeTransferred / fileSize`
-- `BBDeboostLowIDs` optionally penalizes actual LowID clients with a score
+- `BBLowIDDivisor` optionally penalizes actual LowID clients with a score
   divisor
 
 This is intentionally harsh. The goal of this branch is not neutral fairness; it
@@ -319,9 +375,9 @@ This keeps the feature intentionally simple:
 The branch now replaces the stock `SESSIONMAXTRANS` and `SESSIONMAXTIME`
 rotation checks with the hidden broadband overrides:
 
-- `BBSessionMaxTrans` replaces the stock one-chunk transfer cap
-- `BBSessionMaxTime` replaces the stock one-hour time cap
-- both are stored as `uint64`
+- `BBSessionTransferMode` + `BBSessionTransferValue` replace the stock
+  one-chunk transfer cap
+- `BBSessionTimeLimitSeconds` replaces the stock one-hour time cap
 
 This keeps healthy upload sessions bounded without relying on the old score-based
 rotation logic, which caused extra churn on broadband-oriented low-slot setups.
