@@ -12,7 +12,7 @@ source: FEATURE-BROADBAND.md (FEAT_001 — stale branch, not yet on main)
 
 ## Summary
 
-The stock upload controller scales slot count linearly with bandwidth using a hard-coded 25 KiB/s per-slot target (`UPLOAD_CLIENT_MAXDATARATE`). On a modern broadband link (50+ Mbit/s) this drives slot count toward 100, filling the pipe by accumulation rather than by keeping a small set of strong slots. This feature replaces that model with a budget-based controller: a configurable steady-state slot target, per-slot rate derived from actual upload budget, and proactive slow-slot reclamation.
+The stock upload controller scales slot count linearly with bandwidth using a hard-coded 25 KiB/s per-slot target (`UPLOAD_CLIENT_MAXDATARATE`). On a modern broadband link (50+ Mbit/s) this drives slot count toward 100, filling the pipe by accumulation rather than by keeping a small set of strong slots. This feature replaces that model with a budget-based controller: a configurable steady-state slot target, per-slot rate derived from one finite configured upload budget, and proactive slow-slot reclamation.
 
 **Status:** Full design exists in `docs/FEATURE-BROADBAND.md`. The active stabilization line on `feature/broadband-stabilization` now intentionally narrows this into a strict fixed-slot controller: default cap `8`, no temporary overflow above the configured cap, underfill used only to justify weak-slot recycling, friend slots kept as the one intentional scheduling exception, and LowID reconnects returned to the normal waiting/admission path.
 
@@ -57,18 +57,21 @@ A modern link works better with 12 strong slots at ~500 KiB/s each.
 | `BBSessionTransferValue` | int | 55 | Value for the selected transfer-rotation mode |
 | `BBSessionTimeLimitSeconds` | int | 3600 | Time-based session rotation backstop |
 
-### Effective upload budget
+### Configured upload budget
 
 ```cpp
-uint32 effectiveBudget = min(GetMaxGraphUploadRate(true), GetMaxUpload());  // KiB/s
+uint32 configuredBudget = GetMaxUpload();  // KiB/s
 ```
 
-Falls back to legacy 25 KiB/s target if no real capacity configured.
+On `feature/broadband-stabilization`, upload is always finite:
+- the configured upload limit is the only slot-control budget source
+- unlimited upload is not supported
+- missing, zero, or legacy-unlimited upload values normalize to `6100 KiB/s`
 
 ### Per-slot target
 
 ```cpp
-uint32 targetPerSlot = max(3u, effectiveBudget / BBMaxUpClientsAllowed);  // KiB/s floor 3
+uint32 targetPerSlot = max(3u, configuredBudget / BBMaxUpClientsAllowed);  // KiB/s floor 3
 ```
 
 Existing 75% admission threshold applies to `targetPerSlot`.
@@ -184,7 +187,7 @@ Add to shared files, upload list, and queue list:
 - [ ] `BBSessionTransferMode` / `BBSessionTransferValue` / `BBSessionTimeLimitSeconds` override stock session rotation
 - [ ] All-Time Ratio / Session Ratio columns sortable in Upload, Queue, Shared lists
 - [ ] `Preferences > Tweaks > Broadband` page loads, saves, applies without restart
-- [ ] Upload works correctly when `GetMaxGraphUploadRate(true)` returns 0 (no real budget configured)
+- [ ] Missing or legacy-unlimited upload config normalizes to `6100 KiB/s`
 - [ ] Friend slots remain the only deliberate scheduling exception
 - [ ] LowID reconnects do not bypass the normal waiting/admission path
 - [ ] Collection handling is correctness-only and does not use a separate scheduler path

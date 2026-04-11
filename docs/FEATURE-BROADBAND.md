@@ -23,7 +23,7 @@ The implementation is intentionally narrow:
 
 - keep `BBMaxUpClientsAllowed` as the steady-state slot target
 - override the legacy session rotation defaults with `BBSessionTransferMode` / `BBSessionTransferValue` and `BBSessionTimeLimitSeconds`
-- base slot decisions on the actual upload budget
+- base slot decisions on one finite configured upload budget
 - treat the configured broadband slot target as the normal ceiling for upload slots
 - reclaim obviously weak upload slots instead of compensating by opening many more
 
@@ -232,34 +232,26 @@ friendlier editor:
 - `Deboost LowID clients`
   - `Divisor`
 
-### Effective upload budget
+### Configured upload budget
 
 The new controller stops deriving slot count from the old `25 KiB/s` slot model.
-Instead it computes an effective upload budget and derives per-slot targets from
-that budget.
+Instead it derives per-slot targets directly from one configured upload budget.
 
-The effective budget is:
+On the stabilization branch, upload is always finite:
 
-- configured upload capacity from `GetMaxGraphUploadRate(true)`
-- limited by `GetMaxUpload()` when the user configured a finite upload limit
-
-In other words:
-
-`effectiveBudget = min(capacity, activeLimit)`
+- the configured upload limit is the only slot-control budget source
+- unlimited upload is not supported on this branch
+- missing, zero, or legacy-unlimited upload values normalize to `6100 KiB/s`
+  (about `50 Mbit/s`) on load
 
 Units follow the existing queue code and are kept in `KiB/s` until converted for
 comparisons against byte-rate counters.
-
-Broadband-specific overflow and slow-slot logic only activate when this budget is
-based on a real configured capacity. If the code only has the old
-`UNLIMITED -> 16 KiB/s` fallback, it falls back to the legacy per-slot target
-logic instead of pretending that `16 KiB/s` is a real line budget.
 
 ### Target per slot
 
 The per-slot target now becomes:
 
-`targetPerSlot = effectiveBudget / BBMaxUpClientsAllowed`
+`targetPerSlot = configuredUploadBudget / BBMaxUpClientsAllowed`
 
 with a floor of `3 KiB/s`.
 
@@ -267,7 +259,7 @@ The existing minimum-admission threshold is kept at `75%` of the target value.
 
 On a `50 Mbit/s` uplink with `BBMaxUpClientsAllowed=12`:
 
-- effective budget is about `6100 KiB/s`
+- configured upload budget is about `6100 KiB/s`
 - target per slot is about `508 KiB/s`
 - the controller can keep a small number of strong slots instead of chasing
   dozens of weak ones
@@ -287,7 +279,7 @@ Underfill handling:
 - slow-slot recycling only activates while the waiting queue is non-empty
 - only while upload is underfilled by at least the larger of:
   - half of one target slot, or
-  - `5%` of the effective budget
+  - `5%` of the configured upload budget
 - only after that underfill persists for at least `2 seconds`
 
 That keeps slot count fixed while still allowing the queue to replace clearly bad
@@ -303,7 +295,6 @@ Slow-slot tracking is only meaningful while:
 - the waiting queue is non-empty
 - the upload list is already at or above the soft cap
 - total upload is underfilled according to the derived headroom rule above
-- a real effective budget exists
 
 Slow threshold:
 
