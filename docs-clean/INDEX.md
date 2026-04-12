@@ -42,7 +42,7 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-017](BUG-017.md) | Minor | Open | UDP throttler deadlock — sendLocker held when signaling QueueForSendingControlPacket |
 | [BUG-018](BUG-018.md) | Minor | Open | Part-file hash layout drift — hash tree can mutate during concurrent hashing |
 | [BUG-019](BUG-019.md) | Minor | Open | AICH sync thread concurrency — UI deadlocks, starvation, incomplete/duplicate nodes |
-| [BUG-020](BUG-020.md) | Minor | Open | Client socket teardown ordering — cross-link not cleared before Safe_Delete |
+| [BUG-020](BUG-020.md) | Minor | In Progress | Client socket teardown ordering — cross-link not cleared before Safe_Delete |
 | [BUG-021](BUG-021.md) | Minor | Open | Upload queue lock inversion + socket I/O result mishandling + inflate buffer aliasing |
 
 ---
