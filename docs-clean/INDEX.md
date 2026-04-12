@@ -36,7 +36,7 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-011](BUG-011.md) | Minor | **Done** | Race — shareddir_list iterated without lock in SendSharedDirectories |
 | [BUG-012](BUG-012.md) | Minor | **Done** | CPartFile destructor calls FlushBuffer after write thread has already exited |
 | [BUG-013](BUG-013.md) | Minor | Open | ArchiveRecovery.cpp — three unchecked malloc() calls crash on OOM *(retire feature or fix)* |
-| [BUG-014](BUG-014.md) | Minor | Open | ZIPFile.cpp — WriteFile return value silently discarded on two paths |
+| [BUG-014](BUG-014.md) | Minor | **Done** | ZIPFile.cpp — WriteFile return value silently discarded on two paths |
 | [BUG-015](BUG-015.md) | Minor | **Done** | GetTickCount() 49-day overflow in ban expiry and download timeout checks |
 | [BUG-016](BUG-016.md) | Minor | **Done** | UDP obfuscation applied when crypt layer is disabled — IsCryptLayerEnabled() guard missing |
 | [BUG-017](BUG-017.md) | Minor | **Done** | UDP throttler deadlock — sendLocker held when signaling QueueForSendingControlPacket |
@@ -52,11 +52,11 @@ regression checks. When behavior changes, compare `main` against
 | ID | Priority | Status | Title |
 |----|----------|--------|-------|
 | [REF-001](REF-001.md) | Major | Open | Replace custom CZIPFile with minizip |
-| [REF-002](REF-002.md) | Major | Open | Remove Source Exchange v1 branches |
+| [REF-002](REF-002.md) | Major | **Done** | Remove Source Exchange v1 branches |
 | [REF-003](REF-003.md) | Trivial | Open | Rename stale IRC string resources *(or full IRC removal — see REF-025)* |
 | [REF-004](REF-004.md) | Minor | Open | Audit and disposition 17 load-only preference keys |
 | [REF-005](REF-005.md) | Trivial | Open | Remove dead DebugSourceExchange commented-out calls |
-| [REF-006](REF-006.md) | Trivial | Open | GetCategory should be const in DownloadListCtrl |
+| [REF-006](REF-006.md) | Trivial | **Done** | GetCategory should be const in DownloadListCtrl |
 | [REF-007](REF-007.md) | Trivial | Open | WebM vs MKV disambiguation in MIME detection |
 | [REF-015](REF-015.md) | Minor | Open | Switch UPnP from miniupnpc to UPnPImplWinServ — remove miniupnpc submodule |
 | [REF-016](REF-016.md) | Trivial | Open | Inline ResizableLib into source tree — remove submodule |
@@ -149,9 +149,8 @@ regression checks. When behavior changes, compare `main` against
 2. **REF-026** — Manifest cleanup: drop legacy OS entries, add Common Controls dep (quick win, pairs with FEAT-017)
 3. **BUG-018** — Part-file hash layout drift: active stabilization branch is replacing stale hash write-back and progress-owner posting
 4. **REF-001** — Replace CZIPFile with minizip: isolated, 3 call sites
-5. **REF-002** — Remove Source Exchange v1: targeted cleanup, ~250 lines
-6. **REF-029** — WSAPoll UDP backend: experimental impl done, significant network quality improvement
-7. **CI-001** — CMake migration: unlocks all static analysis tools
+5. **REF-029** — WSAPoll UDP backend: experimental impl done, significant network quality improvement
+6. **CI-001** — CMake migration: unlocks all static analysis tools
 
 ### Do Second — Major, higher effort
 
@@ -180,7 +179,6 @@ regression checks. When behavior changes, compare `main` against
 - **BUG-002, BUG-013** — ArchiveRecovery bugs: consider full feature removal (REF-025 path) as easier than patching; community (irwir) added const-correctness fixes in `24d1de7` as partial improvement reference
 - **BUG-003 through BUG-006** — targeted bug fixes
 - **BUG-008** — CaptchaGenerator rand() & 8 (one-liner; or resolved by REF-027 full rewrite)
-- **BUG-014** — ZIPFile WriteFile return check (2-line fix)
 - **BUG-018** — currently in progress on `fix/bug018-partfile-hash-drift`; merge before starting another hashing-concurrency branch
 - **REF-003** — subsumed by REF-025 (IRC removal); only relevant if IRC is kept
 - **REF-004** — Prefs audit (coordinate with BUG-001 Done; mostly resolved)
@@ -357,6 +355,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 9 open bugs + 1 in-progress bug + 30 refactors/boost items + 20 features + 7 CI = **67 non-done issues**.*
+*Total non-done: 8 open bugs + 1 in-progress bug + 28 refactors/boost items + 20 features + 7 CI = **64 non-done issues**.*
 
-*Status refresh through 2026-04-12: BUG-007/017/019/020/021 and FEAT-015/016/023 are now done in `main`; BUG-018 is active on `fix/bug018-partfile-hash-drift`.*
+*Status refresh through 2026-04-12: BUG-007/014/017/019/020/021 and REF-002/006 are now done in `main`; FEAT-015/016/023 are done; BUG-018 is active on `fix/bug018-partfile-hash-drift`.*
