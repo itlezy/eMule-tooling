@@ -5,7 +5,7 @@
 **Revalidated:** 2026-04-09 — deep diff against `stale-v0.72a-experimental-clean` (378 commits); BUG-009/010/011/012/015 confirmed Done in main; experimental reference implementations documented for all items done there  
 **Revalidated:** 2026-04-10 — full cross-variant analysis pass: eMule-main new commits (06eaefe/4a02669/0300a9d), community-0.72 (irwir, 10 commits through 2026-01-05), eMuleAI (2026 release), stale-v0.72a-experimental-clean (378 commits, deep FIX/BUG CPP pass). BUG-001/BUG-016 confirmed Done in main; BUG-017 through BUG-021 new from experimental; REF-027 through REF-030 new from community+experimental; FEAT-018 through FEAT-022 new from eMuleAI+experimental.  
 **Revalidated:** 2026-04-12 — focused `community-0.72` vs `eMule-main` `srchybrid` diff review for stabilization/hardening only. Confirmed long-path shell delete gap (`BUG-022`), refreshed FEAT-010 scope, pivoted REST planning to extend `WebServer.cpp`, and added regression-expansion item `CI-008`. Async socket remains explicitly deferred for a future phase.  
-**Updated:** 2026-04-13 — active stabilization branches now implement the long-path recycle-bin fix, the FEAT-010 shell/UI closure, exact-name namespace support, unified shared-directory recursion (`SharedDirectoryOps`), 8.3 canonicalization/migration, and CI-008 regression coverage for long-path share state and junction recursion. These items are no longer open, but they are not marked Done until merged to `main`.
+**Updated:** 2026-04-13 — `main` now includes the FEAT-010 long-path/share-state stabilization line and the FEAT-024 centralized share-ignore policy with additive `shareignore.dat`. CI-008 long-path regressions and CI-009 share-ignore regressions are landed as well.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -46,7 +46,7 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-019](BUG-019.md) | Minor | **Done** | AICH sync thread concurrency — UI deadlocks, starvation, incomplete/duplicate nodes |
 | [BUG-020](BUG-020.md) | Minor | **Done** | Client socket teardown ordering — cross-link not cleared before Safe_Delete |
 | [BUG-021](BUG-021.md) | Minor | **Done** | Upload queue lock inversion + socket I/O result mishandling + inflate buffer aliasing |
-| [BUG-022](BUG-022.md) | Major | In Progress | Long-path delete-to-recycle-bin still breaks in ShellDeleteFile |
+| [BUG-022](BUG-022.md) | Major | **Done** | Long-path delete-to-recycle-bin still breaks in ShellDeleteFile |
 
 ---
 
@@ -113,7 +113,7 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-007](FEAT-007.md) | Minor | Open | Windows Property Store integration for non-media file metadata |
 | [FEAT-008](FEAT-008.md) | Trivial | Open | Oracle protocol guard seams — integrate stale branch test scaffolding |
 | [FEAT-009](FEAT-009.md) | Trivial | Open | Mirror audit guard seam — WIP from stale branch parent |
-| [FEAT-010](FEAT-010.md) | Minor | In Progress | Long path support phase 2 — shell/UI, shared-directory recursion, exact-name paths, and path-helper audit |
+| [FEAT-010](FEAT-010.md) | Minor | **Done** | Long path support phase 2 — shell/UI, shared-directory recursion, exact-name paths, and path-helper audit |
 | [FEAT-011](FEAT-011.md) | Minor | Open | CShield — integrate ED2K anti-leecher engine (44 bad-client categories) |
 | [FEAT-012](FEAT-012.md) | Minor | Open | PR_TCPERRORFLOODER — TCP listen-socket flood defense |
 | [FEAT-013](FEAT-013.md) | Major | Open | REST API — extend WebServer.cpp with authenticated JSON endpoints |
@@ -127,6 +127,7 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-021](FEAT-021.md) | Minor | Open | SourceSaver — persist download source lists between sessions (eMuleAI ref) |
 | [FEAT-022](FEAT-022.md) | Minor | Open | Startup config directory override — -c flag for alternate preferences path (experimental ref) |
 | [FEAT-023](FEAT-023.md) | Minor | **Done** | Broadband queue scoring and ratio/cooldown UI extras |
+| [FEAT-024](FEAT-024.md) | Minor | **Done** | Share-ignore policy with additive `shareignore.dat` |
 
 ---
 
@@ -142,6 +143,7 @@ regression checks. When behavior changes, compare `main` against
 | [CI-006](CI-006.md) | Minor | Open | MSVC AddressSanitizer — enable for debug builds |
 | [CI-007](CI-007.md) | Minor | Open | Kad — Expand integration and fuzz test coverage |
 | [CI-008](CI-008.md) | Minor | In Progress | Expand regression coverage for part files, long paths, and WebServer/REST |
+| [CI-009](CI-009.md) | Minor | **Done** | Share-ignore regression coverage and Release test-build stabilization |
 
 ---
 
@@ -153,7 +155,7 @@ regression checks. When behavior changes, compare `main` against
 2. **CI-008** — continue targeted regression expansion after the long-path slices, mainly WebServer/REST and any higher-level part-file delete coverage still worth adding
 3. **REF-001** — replace `CZIPFile` with minizip: isolated file-handling hardening with low architectural drift
 4. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
-5. **BUG-022 / FEAT-010** — implementation and cleanup are in progress on stabilization branches; merge and smoke-test rather than reopening scope
+5. **BUG-022** — keep only optional caller-level/manual smoke coverage if later delete-flow changes touch the same path
 
 ### Do Second — narrow stability items still close to current behavior
 
@@ -306,7 +308,7 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 | `PLAN-BOOST.md` | New (2026-04-08) | REF-008 through REF-014 |
 | `PLAN-MODERNIZATION-2026.md` | Reference only — too broad for backlog | Not directly converted |
 | `CI-BASELINE.md` | Operational reference | No issues; CI infra is live |
-| `GUIDE-LONGPATHS.md` | Core implementation spec landed; shell/UI follow-up is implemented on stabilization branches and tracked in FEAT-010 until merge | FEAT-010 |
+| `GUIDE-LONGPATHS.md` | Core implementation spec landed; shell/UI follow-up and shared-directory recursion hardening are now merged in FEAT-010 | FEAT-010 |
 | `FEATURE-PEERS-BANS.md` | FEAT_011/012 not started; FEAT_009 merged to SafeKad; FEAT_010 rejected | FEAT-011, FEAT-012 |
 | `PLAN-API-SERVER.md` | Full canonical contract | FEAT-013, FEAT-014 |
 | `DEP-REMOVAL.md` | DEP_001 keep; DEP_002/006 done; DEP_003/005 candidates | REF-015, REF-016 |
@@ -326,6 +328,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 8 open bugs + 0 in-progress bugs + 28 refactors/boost items + 20 features + 8 CI = **64 non-done issues**.*
+*Total non-done: 7 open bugs + 0 in-progress bugs + 28 refactors/boost items + 19 features + 8 CI = **62 non-done issues**.*
 
-*Status refresh through 2026-04-13: BUG-007/014/017/018/019/020/021 and REF-002/006 are now done in `main`; FEAT-015/016/023 are done; BUG-022, FEAT-010 phase 2, and CI-008 long-path regression expansion are implemented on stabilization branches, including unified shared-directory recursion and junction-loop hardening, and remain In Progress until merge.*
+*Status refresh through 2026-04-13: BUG-007/014/017/018/019/020/021/022 and REF-002/006 are now done in `main`; FEAT-010/015/016/023/024 are done; CI-009 is done; CI-008 remains in progress for future part-file and WebServer/REST expansion.*

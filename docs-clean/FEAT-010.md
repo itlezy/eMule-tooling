@@ -1,7 +1,7 @@
 ---
 id: FEAT-010
 title: Long path support phase 2 — shell/UI, shared-directory recursion, exact-name paths, and path-helper audit
-status: In Progress
+status: Done
 priority: Minor
 category: feature
 labels: [longpath, max-path, windows, filesystem, shell, ui]
@@ -14,8 +14,7 @@ source: GUIDE-LONGPATHS.md + feature/windows-long-paths audit
 
 Core long-path support is already landed on `main` for filesystem operations. Phase 2
 shell/UI hardening, exact-name path support, share-recursion unification, and helper
-cleanup are now implemented on the active stabilization branches and are pending merge
-back to `main`.
+cleanup are now merged to `main`.
 
 The implementation now covers:
 
@@ -90,7 +89,7 @@ The stabilization branches now include:
 - share-list/path-matching coverage for prefixed vs unprefixed, 8.3 vs long-name, and exact-name spellings
 - shared-directory recursion coverage for junction alias dedupe and junction-loop suppression by filesystem identity
 
-Remaining verification before merge is manual smoke coverage for representative browse/icon flows on a live UI.
+Remaining optional verification is manual smoke coverage for representative browse/icon flows on a live UI.
 
 ## Final Helper Architecture
 
