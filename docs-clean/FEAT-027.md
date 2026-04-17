@@ -41,8 +41,13 @@ Visible implementation points:
 
 - `UserMsgs.h` adds `UM_STARTUP_NEXT_STAGE`
 - `CemuleDlg::OnStartupNextStage(...)` posts startup progression back through the UI message loop
-- `Emule.cpp` writes `startup-profile.txt` when startup profiling is enabled
+- `Emule.cpp` writes `startup-profile.trace.json` in Chrome Trace Event format when startup profiling is enabled
 - startup profiling is gated by the `EMULE_STARTUP_PROFILE` environment variable
+- the trace now carries stable phase families for:
+  - `ui.shared_files_ready` readiness milestones
+  - `CStatisticsDlg::OnInitDialog ...` internal page-construction spans
+  - `shared.hash.file.queue_wait` and `shared.hash.file.run` per-file hashing spans
+  - `broadband.*` constructor and thread-readiness lifecycle events
 - `SharedFilesWnd` now has `EnsureSharedTreeInitialized()`
 - `SharedFilesWnd` also gains `OnVolumesChanged()` and `OnSingleFileShareStatusChanged()`
 
@@ -66,7 +71,7 @@ already present in the active worktree.
 ## Validation Focus Before Merge
 
 - startup stage progression should not stall or double-run
-- `startup-profile.txt` generation should remain optional and low-risk
+- `startup-profile.trace.json` generation should remain optional and low-risk
 - shared-files tree initialization should stay stable on fresh and warm starts
 - shared-volume/share-status notifications should not regress existing UI refresh paths
 
