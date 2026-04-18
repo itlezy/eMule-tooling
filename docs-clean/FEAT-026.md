@@ -81,6 +81,24 @@ Before this can close as **Done**, the merge review should focus on:
 - no false reuse when directory contents changed
 - no interaction regressions with share-ignore and long-path behavior
 
+## Latest Measured Status (2026-04-18)
+
+Fresh `eMule-main` startup profiling still indicates that the dominant remaining heavy
+shared-tree delay is in the hash pipeline rather than shared-files window creation.
+
+From
+`EMULE_WORKSPACE_ROOT\repos\eMule-build-tests\reports\startup-profile-scenarios\20260418-121956-eMule-main-debug\startup-profiles-wrapper-summary.json`:
+
+- `shared_files_ready_absolute_ms = 29360.160`
+- `shared.scan.complete = 963.106 ms`
+- `CSharedFilesWnd::OnInitDialog total = 139.524 ms`
+- top `shared.hash.file.queue_wait(...)` spans were about `28164.869 ms`,
+  `27845.748 ms`, and `27634.356 ms`
+
+Current read: when FEAT-026 is revalidated for merge, the most important remaining
+heavy-startup question is hash queue wait in the shared-file pipeline, not shared-files
+page construction. See **FEAT-027** for the broader startup/shutdown profiling summary.
+
 ## Relationship To Other Items
 
 - pairs naturally with **FEAT-027**, which cleans up startup sequencing around the same path

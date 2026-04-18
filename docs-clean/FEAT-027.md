@@ -75,6 +75,56 @@ already present in the active worktree.
 - shared-files tree initialization should stay stable on fresh and warm starts
 - shared-volume/share-status notifications should not regress existing UI refresh paths
 
+## Latest Profiling Conclusions (2026-04-18)
+
+Current evidence for future merge and follow-up work:
+
+- startup matrix artifact:
+  `EMULE_WORKSPACE_ROOT\repos\eMule-build-tests\reports\startup-profile-scenarios\20260418-121956-eMule-main-debug\startup-profiles-wrapper-summary.json`
+- focused shutdown probe:
+  `EMULE_WORKSPACE_ROOT\scratch\shutdown-probe-20260418-122546-profiling\summary.json`
+- repeated shutdown variance probe:
+  `EMULE_WORKSPACE_ROOT\scratch\shutdown-repeat-20260418-122927\summary.json`
+
+Baseline `eMule-main` Debug startup with no shared files is still mostly UI/page
+construction cost:
+
+- `startup_complete_absolute_ms = 793.610`
+- `shared_files_ready_absolute_ms = 793.678`
+- `CemuleDlg::OnInitDialog complete = 623.326 ms`
+- `child page creation total = 538.218 ms`
+- `create statistics window = 138.444 ms`
+- `CStatisticsDlg::OnInitDialog total = 133.474 ms`
+- `create transfer window = 75.383 ms`
+
+Current read: on the light profile, the main remaining startup cost is still eager
+child-page construction, with `Statistics` the largest single page.
+
+The heavy recursive long-path startup case is not page-creation bound:
+
+- `shared_files_ready_absolute_ms = 29360.160`
+- `shared_files_ready_after_startup_complete_ms = 27654.642`
+- `shared.scan.complete = 963.106 ms`
+- `CSharedFilesWnd::OnInitDialog total = 139.524 ms`
+- top `shared.hash.file.queue_wait(...)` spans were about `28164.869 ms`,
+  `27845.748 ms`, and `27634.356 ms`
+
+Current read: the dominant remaining startup cost on heavy shared trees is
+`shared.hash.file.queue_wait`, not shared-files page creation.
+
+Shutdown measurements are split between visible UI handoff and final process exit:
+
+- repeated baseline process-exit observation averaged `8566.246 ms`
+- repeated heavy process-exit observation averaged `9042.636 ms`
+- main-window disappearance averaged `254.555 ms` baseline and `252.291 ms` heavy
+- focused heavy shutdown probe reached "no windows left" at `3530.240 ms`
+  after close
+
+Current read: visible shutdown UI clears in about `3.0-3.5 s`, but full teardown
+still lands closer to `8.4-9.4 s`. Heavy shared trees add only modest extra shutdown
+time versus baseline, so the dominant remaining shutdown cost appears to be common
+post-UI teardown rather than shared-tree-specific window work.
+
 ## Relationship To Other Items
 
 - depends on the same startup/share surface as **FEAT-026**
