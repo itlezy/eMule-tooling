@@ -62,6 +62,11 @@ defense is now landed on current `main` in `../docs-clean`; the historical
 `FEATURE-PEERS-BANS.md` analysis still describes the broader eMuleAI `CShield`
 context, but the implemented mainline shape is the narrow standalone tracker.
 
+Backlog note (2026-04-18): bind-policy completion is tracked as `FEAT-030` in
+`../docs-clean`: keep the global `BindAddr` on all non-web socket paths, add a
+separate `WebBindAddr` for the embedded webserver, and audit remaining socket
+openers such as `Pinger`.
+
 ---
 
 ## Architecture
