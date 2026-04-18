@@ -19,6 +19,7 @@
 **Revalidated:** 2026-04-18 — focused `eMuleAI` vs current `eMule-main` hardening pass. Corrected stale landed statuses for `REF-007`, `FEAT-020`, `FEAT-022`, `FEAT-026`, and `FEAT-027`; added landed `BUG-029` and `FEAT-028`; promoted new stock-friendly hardening bugs `BUG-030` / `BUG-031` / `BUG-032`; refreshed `CI-008` with long-config `-c` live UI stability coverage; recorded the pass in [REVIEW-2026-04-18-emuleai-vs-main-hardening-pass](REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md).
 **Updated:** 2026-04-18 — `main` now includes `BUG-030` server-login crypt-flag hardening in commit `f9bb14b`; `BUG-030` is marked Done.
 **Updated:** 2026-04-18 — `main` now includes `BUG-032` AICH hashset save timeout removal in commit `8a5a33c`; `BUG-032` is marked Done.
+**Updated:** 2026-04-18 — `main` now includes `REF-019` `EncryptedStreamSocket` protocol-error hardening in commit `93b3450`; `REF-019` is marked Done.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -88,7 +89,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-016](REF-016.md) | Trivial | Open | Inline ResizableLib into source tree — remove submodule |
 | [REF-017](REF-017.md) | Minor | Open | Dead code sweep — Win9x/NT4 guards, PROXY comments, #if 0 blocks |
 | [REF-018](REF-018.md) | Minor | Open | Remove defunct PeerCache opcodes, Win95 detection, and legacy INI keys |
-| [REF-019](REF-019.md) | Minor | Open | Replace ASSERT(0) + "must be a bug" with OnError() in EncryptedStreamSocket |
+| [REF-019](REF-019.md) | Minor | **Done** | Replace ASSERT(0) + "must be a bug" with OnError() in EncryptedStreamSocket |
 | [REF-020](REF-020.md) | Minor | Open | Replace dynamic loading of always-present Win10 APIs with static linking |
 | [REF-021](REF-021.md) | Minor | Open | Remove blanket warning suppressions and replace deprecated Winsock APIs |
 | [REF-022](REF-022.md) | Trivial | Open | Replace custom type aliases in types.h with \<cstdint\> standard types |
@@ -199,7 +200,7 @@ regression checks. When behavior changes, compare `main` against
 - **FEAT-013** — WebServer REST JSON endpoints; useful but broader than the current hardening-first pass
 - **FEAT-017, REF-026, REF-032** — DPI/manifest/MFC-host modernization
 - **CI-001 through CI-006** — broader build/tooling modernization
-- **REF-017, REF-018, REF-019, REF-020, REF-021, REF-023, REF-025** — cleanup and legacy removal passes
+- **REF-017, REF-018, REF-020, REF-021, REF-023, REF-025** — cleanup and legacy removal passes
 - **REF-027** — CaptchaGenerator rewrite
 - **REF-029, REF-030** — async socket / resolver work; explicitly future phase, not part of the current stabilization plan
 - **FEAT-014** — optional OpenAPI/external gateway follow-up after FEAT-013
@@ -300,6 +301,7 @@ These items were verified in `eMule-main` and are genuinely done:
 | BUG-029 — Long-path tail hardening | current `main` commit series `bb7ef92` through `1e71a16` |
 | BUG-030 — Server login crypt flags | commit `f9bb14b` — suppress callback crypt request/require flags on already-obfuscated server sockets |
 | BUG-032 — AICH hashset save timeout | commit `8a5a33c` — wait normally for the `known2.met` mutex instead of failing after 5 seconds |
+| REF-019 — EncryptedStreamSocket protocol errors | commit `93b3450` — `FailEncryptedStream` helper plus explicit disconnect paths in `EncryptedStreamSocket.cpp` |
 
 ---
 
