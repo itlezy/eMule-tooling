@@ -23,6 +23,7 @@
 **Updated:** 2026-04-18 — narrow `REF-017` dead-code cleanup landed in current `main`: all remaining `CCM_SETUNICODEFORMAT` no-op calls, `MAXCON5WIN9X`, and one stale WinNT note were removed.
 **Updated:** 2026-04-18 — `REF-017` is now marked Done after revalidation confirmed that the only original targeted leftovers are intentionally retained `deadlake PROXYSUPPORT` comments and no further live dead-code workload remains.
 **Updated:** 2026-04-18 — `main` now includes `REF-018` defunct PeerCache surface removal plus legacy `FileBufferSizePref` / `QueueSizePref` load-read cleanup in commit `6751a50`; `REF-018` is marked Done.
+**Updated:** 2026-04-18 — `main` now includes `REF-026` manifest cleanup in commit `444f6ec`: Windows 10 / 11+ compatibility is declared via the Windows 10 GUID only, Common Controls 6.0 moved from linker pragmas into the embedded manifests, and DPI enablement remains deferred to `FEAT-017`.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -99,7 +100,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-023](REF-023.md) | Minor | Open | Replace unsafe sprintf/_stprintf/wsprintf with safe equivalents |
 | [REF-024](REF-024.md) | Trivial | Open | Convert #define constants in Opcodes.h to constexpr in namespace |
 | [REF-025](REF-025.md) | Minor | Open | Remove legacy feature set — IRC, SMTP, Scheduler, MiniMule, wizard, splash, update checker |
-| [REF-026](REF-026.md) | Minor | Open | Manifest — drop legacy OS entries, add Common Controls 6.0 dependency |
+| [REF-026](REF-026.md) | Minor | **Done** | Manifest — keep Win10/11+ compatibility GUID only and move Common Controls into manifests |
 | [REF-027](REF-027.md) | Minor | Open | CaptchaGenerator — replace CxImage with ATL CImage / native GDI (community ref) |
 | [REF-028](REF-028.md) | Minor | Open | Upgrade MbedTLS to 4.0 — API rename + TLS 1.3 readiness (community ref) |
 | [REF-029](REF-029.md) | Major | Open | Move UDP sockets to WSAPoll backend — AsyncDatagramSocket (experimental ref) |
