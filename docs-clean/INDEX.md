@@ -12,6 +12,7 @@
 **Revalidated:** 2026-04-14 — deeper bug-only follow-up on current `main`. Added `BUG-026` for search-tab teardown lifetime violations and `BUG-027` for destructive IP-filter promotion failure. Recorded the follow-up in [REVIEW-2026-04-14-main-bug-pass-deeper](REVIEW-2026-04-14-main-bug-pass-deeper.md).
 **Revalidated:** 2026-04-14 — deeper Windows/API and dependency pass. Added `BUG-028` for ANSI-only `id3lib` path handling in current MP3 metadata extraction, refreshed `REF-021` / `REF-030` with the remaining live Winsock and message-DNS surface, and recorded the deeper findings in [REVIEW-2026-04-14-api-deep-pass-id3lib-unicode](REVIEW-2026-04-14-api-deep-pass-id3lib-unicode.md).
 **Updated:** 2026-04-18 — persisted fresh startup/shutdown profiling conclusions under `FEAT-026`, `FEAT-027`, and `CI-008`, using the current `eMule-main` startup matrix `20260418-121956-eMule-main-debug` plus shutdown probes `shutdown-probe-20260418-122546-profiling` and `shutdown-repeat-20260418-122927`.
+**Updated:** 2026-04-18 — `main` now includes `BUG-026` search-tab teardown lifetime hardening in commit `8ba6248`; `BUG-026` is marked Done.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -56,7 +57,7 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-023](BUG-023.md) | Minor | Open | Shared-file ED2K published column shows a false `No` after publish-state reset |
 | [BUG-024](BUG-024.md) | Minor | Open | `statUTC(HANDLE)` returns corrupted `st_size` by using `nFileIndexLow` |
 | [BUG-025](BUG-025.md) | Minor | Open | KnownFile hashing open failures log stale or wrong error text on Win32 open failure |
-| [BUG-026](BUG-026.md) | Major | Open | Search tab teardown frees live result/tab payload objects before the UI detaches them |
+| [BUG-026](BUG-026.md) | Major | **Done** | Search tab teardown frees live result/tab payload objects before the UI detaches them |
 | [BUG-027](BUG-027.md) | Major | Open | IP filter update can delete the live `ipfilter.dat` before replacement promotion succeeds |
 | [BUG-028](BUG-028.md) | Minor | Open | MP3 ID3 metadata extraction is ANSI-only; non-ACP filenames can silently lose tags |
 
@@ -172,7 +173,7 @@ regression checks. When behavior changes, compare `main` against
 3. **REF-001** — replace `CZIPFile` with minizip: isolated file-handling hardening with low architectural drift
 4. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
 5. **BUG-022** — keep only optional caller-level/manual smoke coverage if later delete-flow changes touch the same path
-6. **BUG-026, BUG-027** — fix the live search teardown crash window and the IP-filter promotion failure path; both are narrow, high-signal stabilization fixes
+6. **BUG-027** — fix the IP-filter promotion failure path; narrow, high-signal stabilization hardening
 
 ### Do Second — narrow stability items still close to current behavior
 
