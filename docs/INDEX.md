@@ -42,6 +42,17 @@ Revalidation note (2026-04-13): the active backlog is tracked in
 `eMule-main` tree should defer to `docs-clean` and to the dated revalidation notes in
 this folder.
 
+Revalidation note (2026-04-18): a focused `eMuleAI` vs current `eMule-main`
+hardening pass further corrected active backlog state in `docs-clean`, including:
+
+- landed mainline status for `REF-007`, `FEAT-020`, `FEAT-022`, `FEAT-026`, and `FEAT-027`
+- new landed backlog docs for `BUG-029` and `FEAT-028`
+- new narrow stock-friendly hardening items `BUG-030`, `BUG-031`, and `BUG-032`
+
+See `../docs-clean/INDEX.md` and
+`../docs-clean/REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md` for the active
+backlog state. Theme and translation deltas were intentionally excluded from that pass.
+
 ---
 
 ## Architecture

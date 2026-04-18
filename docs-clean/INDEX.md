@@ -16,6 +16,7 @@
 **Updated:** 2026-04-18 — `main` now includes `BUG-027` IP-filter promotion hardening in commit `cc3553b`; `BUG-027` is marked Done.
 **Updated:** 2026-04-18 — `main` now includes `BUG-025` KnownFile hash-open diagnostics hardening in commit `897c207`; `BUG-025` is marked Done.
 **Updated:** 2026-04-18 — `main` now includes `BUG-024` handle-based `statUTC` size-field correction in commit `f33f38b`; `BUG-024` is marked Done.
+**Revalidated:** 2026-04-18 — focused `eMuleAI` vs current `eMule-main` hardening pass. Corrected stale landed statuses for `REF-007`, `FEAT-020`, `FEAT-022`, `FEAT-026`, and `FEAT-027`; added landed `BUG-029` and `FEAT-028`; promoted new stock-friendly hardening bugs `BUG-030` / `BUG-031` / `BUG-032`; refreshed `CI-008` with long-config `-c` live UI stability coverage; recorded the pass in [REVIEW-2026-04-18-emuleai-vs-main-hardening-pass](REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md).
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -63,6 +64,10 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-026](BUG-026.md) | Major | **Done** | Search tab teardown frees live result/tab payload objects before the UI detaches them |
 | [BUG-027](BUG-027.md) | Major | **Done** | IP filter update can delete the live `ipfilter.dat` before replacement promotion succeeds |
 | [BUG-028](BUG-028.md) | Minor | Open | MP3 ID3 metadata extraction is ANSI-only; non-ACP filenames can silently lose tags |
+| [BUG-029](BUG-029.md) | Major | **Done** | Long-path tail hardening across config, media, shell, and GeoLocation surfaces |
+| [BUG-030](BUG-030.md) | Minor | Open | Obfuscated server logins can advertise redundant callback crypto flags and require extra attempts |
+| [BUG-031](BUG-031.md) | Minor | Open | Shared-file hashing fails too eagerly on transient sharing and lock violations |
+| [BUG-032](BUG-032.md) | Minor | Open | AICH hashset save can fail spuriously after hashing because `known2.met` lock wait times out |
 
 ---
 
@@ -76,7 +81,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-004](REF-004.md) | Minor | Open | Audit and disposition 17 load-only preference keys |
 | [REF-005](REF-005.md) | Trivial | Open | Remove dead DebugSourceExchange commented-out calls |
 | [REF-006](REF-006.md) | Trivial | **Done** | GetCategory should be const in DownloadListCtrl |
-| [REF-007](REF-007.md) | Trivial | Open | WebM vs MKV disambiguation in MIME detection |
+| [REF-007](REF-007.md) | Trivial | **Done** | WebM vs MKV disambiguation in MIME detection |
 | [REF-015](REF-015.md) | Minor | Open | Switch UPnP from miniupnpc to UPnPImplWinServ — remove miniupnpc submodule |
 | [REF-016](REF-016.md) | Trivial | Open | Inline ResizableLib into source tree — remove submodule |
 | [REF-017](REF-017.md) | Minor | Open | Dead code sweep — Win9x/NT4 guards, PROXY comments, #if 0 blocks |
@@ -140,14 +145,15 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-017](FEAT-017.md) | Major | Open | DPI awareness — Per-Monitor V2 manifest + hardcoded pixel audit |
 | [FEAT-018](FEAT-018.md) | Minor | Open | µTP transport layer — CUtpSocket / libutp (eMuleAI ref) |
 | [FEAT-019](FEAT-019.md) | Minor | Open | Dark mode UI — system-aware Windows 10 dark theme (eMuleAI ref) |
-| [FEAT-020](FEAT-020.md) | Trivial | Open | GeoLite2 IP geolocation — country flag + city per peer (eMuleAI ref) |
+| [FEAT-020](FEAT-020.md) | Trivial | **Done** | DB-IP city geolocation — location label and flag per peer |
 | [FEAT-021](FEAT-021.md) | Minor | Open | SourceSaver — persist download source lists between sessions (eMuleAI ref) |
-| [FEAT-022](FEAT-022.md) | Minor | Open | Startup config directory override — -c flag for alternate preferences path (experimental ref) |
+| [FEAT-022](FEAT-022.md) | Minor | **Done** | Startup config directory override — `-c` flag for alternate preferences path |
 | [FEAT-023](FEAT-023.md) | Minor | **Done** | Broadband queue scoring and ratio/cooldown UI extras |
 | [FEAT-024](FEAT-024.md) | Minor | **Done** | Share-ignore policy with additive `shareignore.dat` |
 | [FEAT-025](FEAT-025.md) | Minor | **Done** | Normalize download filenames on intake and completion |
-| [FEAT-026](FEAT-026.md) | Minor | In Progress | Shared startup cache with known.met lookup index and `sharedcache.dat` |
-| [FEAT-027](FEAT-027.md) | Minor | In Progress | Startup sequencing fix, startup profiling, and shared-view startup churn cleanup |
+| [FEAT-026](FEAT-026.md) | Minor | **Done** | Shared startup cache with known.met lookup index and `sharedcache.dat` |
+| [FEAT-027](FEAT-027.md) | Minor | **Done** | Startup sequencing fix, startup profiling, and shared-view startup churn cleanup |
+| [FEAT-028](FEAT-028.md) | Minor | **Done** | Virtualize and harden shared files list |
 
 ---
 
@@ -171,24 +177,26 @@ regression checks. When behavior changes, compare `main` against
 
 ### Do First — stabilization / hardening with minimal drift
 
-1. **FEAT-013** — WebServer REST JSON endpoints: needed feature, but keep it inside `WebServer.cpp`/`WebSocket.cpp` to avoid transport drift
-2. **CI-008** — continue targeted regression expansion after the long-path slices, mainly WebServer/REST and any higher-level part-file delete coverage still worth adding
-3. **REF-001** — replace `CZIPFile` with minizip: isolated file-handling hardening with low architectural drift
-4. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
-5. **BUG-022** — keep only optional caller-level/manual smoke coverage if later delete-flow changes touch the same path
-6. **BUG-028** — remaining MP3 metadata fallback Unicode risk if `id3lib` stays
+1. **BUG-030** — narrow server-obfuscation login correctness fix with low protocol drift
+2. **BUG-031** — bounded retry for transient shared-file hashing open failures
+3. **BUG-032** — remove the false-failure `known2.met` lock timeout after expensive hashing
+4. **BUG-028** — remaining MP3 metadata fallback Unicode risk if `id3lib` stays
+5. **REF-001** — replace `CZIPFile` with minizip: isolated file-handling hardening with low architectural drift
+6. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
 
 ### Do Second — narrow stability items still close to current behavior
 
-7. **BUG-003 through BUG-006, BUG-028** — targeted correctness fixes
+7. **BUG-003 through BUG-006, BUG-023, BUG-028, BUG-030 through BUG-032** — targeted correctness fixes
 8. **BUG-008** — CaptchaGenerator rand() & 8 or fold into REF-027
-9. **REF-028** — MbedTLS 4.0 upgrade once the current WebServer/TLS surface is stable
-10. **FEAT-002** — SafeKad CGNAT fix
-11. **FEAT-001** — FastKad bootstrap ranking
+9. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
+10. **REF-028** — MbedTLS 4.0 upgrade once the current WebServer/TLS surface is stable
+11. **FEAT-002** — SafeKad CGNAT fix
+12. **FEAT-001** — FastKad bootstrap ranking
 
 ### Do Later — useful, but not part of the current stabilization milestone
 
 - **BUG-023** — shared-file ED2K published-state UI false `No` after publish reset; small correctness fix, low protocol risk
+- **FEAT-013** — WebServer REST JSON endpoints; useful but broader than the current hardening-first pass
 - **FEAT-017, REF-026, REF-032** — DPI/manifest/MFC-host modernization
 - **CI-001 through CI-006** — broader build/tooling modernization
 - **REF-017, REF-018, REF-019, REF-020, REF-021, REF-023, REF-025** — cleanup and legacy removal passes
@@ -244,6 +252,7 @@ FEAT-015 (slot allocation) ──► FEAT-023 (optional scoring/UI extras kept s
 FEAT-024 (share-ignore policy) ──► CI-009 (share-ignore regressions)
 FEAT-025 (filename normalization) — standalone intake/completion hardening
 FEAT-026 (shared startup cache) ──► FEAT-027 (startup sequencing, profiling, and startup-path churn cleanup)
+FEAT-027 (startup sequencing/profiling) ──► FEAT-028 (shared-files control virtualization and churn reduction)
 FEAT-017 (DPI) ──► REF-026 (manifest) — apply together
 FEAT-017 (DPI) ──► REF-032 (modern MFC layout hosts) — apply on the same UI surfaces
 FEAT-017 (DPI) ──► FEAT-019 (dark mode — pair for modern UI milestone)
@@ -282,6 +291,13 @@ These items were verified in `eMule-main` and are genuinely done:
 | FEAT-023 — Broadband queue scoring extras | commit `5470d69` — added queue scoring and score breakdown UI |
 | FEAT-024 — Share-ignore policy | commit `462c73b` — centralized share-ignore rules plus additive `shareignore.dat` |
 | FEAT-025 — Filename normalization | commit `021cb5b` — normalized download filenames on intake and completion |
+| REF-007 — WebM / Matroska MIME split | commit `32d6ac1` — modernized MIME sniffing and WebM classification |
+| FEAT-020 — DB-IP geolocation | commit `aaf253f` — added DB-IP city geolocation UI and updater |
+| FEAT-022 — Startup config override | commit `fc70cf9` — `-c` startup config-root override through `StartupConfigOverride.h` |
+| FEAT-026 — Shared startup cache | current `main` shared-startup line — `KnownFileLookupIndex`, `SharedStartupCachePolicy`, and `sharedcache.dat` are present |
+| FEAT-027 — Startup profiling | commit `1d461c8` — trace-backed startup and readiness profiling |
+| FEAT-028 — Shared Files virtualization | commit `fc70cf9` — owner-data Shared Files list with hardened reload/state handling |
+| BUG-029 — Long-path tail hardening | current `main` commit series `bb7ef92` through `1e71a16` |
 
 ---
 
@@ -295,7 +311,7 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 |------|--------------------|-----------| 
 | BUG-001 — load-only prefs | All 18 write-backs added | `Preferences.cpp` |
 | BUG-007 — Ring.h UB | Landed in `main` via smaller pointer-state fix; experimental index rewrite kept as reference only | `Ring.h` |
-| REF-007 — WebM vs MKV MIME | Done in MediaInfo.cpp | `MediaInfo.cpp` |
+| REF-007 — WebM vs MKV MIME | Done in `main` via the narrow MIME port | `MediaInfo.cpp`, `OtherFunctions.cpp` |
 | REF-017 — Win9x dead code | Fully removed (0 remaining) | Spread across codebase |
 | REF-018 — PeerCache/proxy cleanup | Done; proxy fully removed | `Opcodes.h`, `BaseClient.cpp`, removed files |
 | REF-019 — EncryptedStreamSocket ASSERT | Done: `FailEncryptedStream` helper | `EncryptedStreamSocket.cpp` |
@@ -316,7 +332,7 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 | BUG-021 — Upload queue lock inversion + socket I/O + inflate buffer | Done in `main` | `UploadQueue.cpp`, `EMSocket.cpp`, `ClientUDPSocket.cpp`, `DownloadClient.cpp` |
 | REF-029 — WSAPoll UDP backend | Done: AsyncDatagramSocket + WSAPoll thread | `AsyncDatagramSocket.cpp/h`, `ClientUDPSocket.cpp`, `UDPSocket.cpp` |
 | REF-030 — Async hostname resolver | Done: worker-thread getaddrinfo replaces WSAAsyncGetHostByName | `DownloadQueue.cpp/h` |
-| FEAT-022 — Startup config directory override | Done: -c flag + StartupConfigOverride.h | `Emule.cpp`, `StartupConfigOverride.h`, `Preferences.cpp` |
+| FEAT-022 — Startup config directory override | Done in `main`: `-c` flag + `StartupConfigOverride.h` | `Emule.cpp`, `StartupConfigOverride.h`, `Preferences.cpp` |
 
 ---
 
@@ -347,7 +363,8 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 | `EXTRAS_VPNKILLSWITCHDESIGN.md` | External helper tool — not in-process; deferred | Not converted |
 | `AUDIT-WWMOD.md` | Win10+ modernization catalog; many "fixed in broadband-dev" statuses are branch-local, not current `main` | REF-017 through REF-024, FEAT-017, REF-032 |
 | `AUDIT-CODEREVIEW.md` | CODEREV_001 fixed in main; 002/003/004/011 not in main; 006/007 still need revalidation because WebSocket is still live | BUG-007, BUG-008, REF-028 |
-| eMuleAI v1.3 analysis | ReplaceFileAtomically, CanWritePartMetFiles, shareddir lock, destructor guard | BUG-009 through BUG-012 (Done) |
+| eMuleAI v1.3 analysis | Initial source for `ReplaceFileAtomically`, `CanWritePartMetFiles`, shareddir lock, destructor guard, and feature references | BUG-009 through BUG-012 (Done), FEAT-018 through FEAT-022 |
+| `eMuleAI` hardening revalidation (2026-04-18) | Current `main` already contains REF-007, FEAT-020/022/026/027/028, and BUG-029; remaining stock-friendly candidates promoted as narrow new bugs | BUG-030, BUG-031, BUG-032 |
 | `stale-v0.72a-experimental-clean` diff (2026-04-09) | 378 commits; 16 backlog items with reference impls | See Experimental Branch Reference table above |
 
 ---
@@ -355,6 +372,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 8 open bugs + 0 in-progress bugs + 29 refactors/boost items + 21 features + 8 CI = **66 non-done issues**.*
+*Total non-done: 12 open bugs + 0 in-progress bugs + 28 refactors/boost items + 17 features + 8 CI = **65 non-done issues**.*
 
-*Status refresh through 2026-04-13: BUG-007/014/017/018/019/020/021/022 and REF-002/006 are now done in `main`; FEAT-010/015/016/023/024/025 are done; FEAT-026/027 exist on the current workspace HEAD but are not merged to `main`; `BUG-023` was added from the shared-file publish-state revalidation; `REF-032` was added from the Windows/MFC deep dive; stale dependency/security/source-doc claims about WebServer/MbedTLS/id3lib were corrected; CI-009 is done; CI-008 remains in progress for future part-file and WebServer/REST expansion.*
+*Status refresh through 2026-04-18: REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028 and BUG-029 were added as landed `main` work; BUG-030 through BUG-032 were added from the focused `eMuleAI` comparison; CI-008 now also records the long-config `-c` live UI stability regression coverage.*

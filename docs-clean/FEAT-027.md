@@ -1,32 +1,28 @@
 ---
 id: FEAT-027
 title: Startup sequencing fix, startup profiling, and shared-view startup churn cleanup
-status: In Progress
+status: Done
 priority: Minor
 category: feature
 labels: [startup, ui, profiling, sharing, performance]
 milestone: ~
 created: 2026-04-13
-source: current workspace HEAD commit `e1ecdee`
+source: `main` commit `1d461c8` (`FEAT-027 add trace-backed startup and readiness profiling`)
 ---
 
 ## Summary
 
-This feature exists on the current app workspace HEAD but is not merged to `main`.
+This feature is merged to `main`.
 
-It tightens the startup-stage handoff, adds optional startup profiling output, and
-reduces path/UI churn around shared-files initialization so the FEAT-026 startup-cache
-work can run on a cleaner startup surface.
+It tightened the startup-stage handoff, added optional startup profiling output, and
+reduced path/UI churn around shared-files initialization so the landed FEAT-026 startup
+cache could run on a cleaner startup surface.
 
-## Current Branch Status
+## Landed Mainline Shape
 
-Validated on current workspace HEAD:
+Mainline commit:
 
-- `e1ecdee` — `FEAT-027 cut startup path churn and fix startup sequencing`
-
-Backlog status remains **In Progress** until merged to `main`.
-
-## Implemented Workspace-Head Changes
+- `1d461c8` — `FEAT-027 add trace-backed startup and readiness profiling`
 
 Primary files:
 
@@ -35,49 +31,32 @@ Primary files:
 - `srchybrid/SharedFilesWnd.cpp/.h`
 - `srchybrid/SharedFilesCtrl.cpp/.h`
 - `srchybrid/UserMsgs.h`
-- `srchybrid/LongPathSeams.h`
+- `srchybrid/SharedFileList.cpp/.h`
 
 Visible implementation points:
 
 - `UserMsgs.h` adds `UM_STARTUP_NEXT_STAGE`
-- `CemuleDlg::OnStartupNextStage(...)` posts startup progression back through the UI message loop
-- `Emule.cpp` writes `startup-profile.trace.json` in Chrome Trace Event format when startup profiling is enabled
+- `CemuleDlg::OnStartupNextStage(...)` posts startup progression back through the UI
+  message loop
+- `Emule.cpp` writes `startup-profile.trace.json` in Chrome Trace Event format when
+  startup profiling is enabled
 - startup profiling is gated by the `EMULE_STARTUP_PROFILE` environment variable
-- the trace now carries stable phase families for:
+- the trace carries stable phase families for:
   - `ui.shared_files_ready` readiness milestones
   - `CStatisticsDlg::OnInitDialog ...` internal page-construction spans
   - `shared.hash.file.queue_wait` and `shared.hash.file.run` per-file hashing spans
   - `broadband.*` constructor and thread-readiness lifecycle events
-- `SharedFilesWnd` now has `EnsureSharedTreeInitialized()`
-- `SharedFilesWnd` also gains `OnVolumesChanged()` and `OnSingleFileShareStatusChanged()`
+- `SharedFilesWnd` gains explicit tree/share-status coordination points
 
-## Why This Exists
+## Why The Item Is Closed
 
-The old startup path chained more work through timer-driven sequencing and repeated
-shared-view/path setup than necessary. The workspace-head slice makes that progression
-more explicit and adds a lightweight profiling surface for measuring startup stages in
-the active config directory.
-
-## Mainline Status Boundary
-
-At revalidation time:
-
-- `main` does not contain this slice
-- current workspace HEAD does contain it
-
-That is why this stays **In Progress** in the clean backlog even though the code is
-already present in the active worktree.
-
-## Validation Focus Before Merge
-
-- startup stage progression should not stall or double-run
-- `startup-profile.trace.json` generation should remain optional and low-risk
-- shared-files tree initialization should stay stable on fresh and warm starts
-- shared-volume/share-status notifications should not regress existing UI refresh paths
+This slice used to be tracked as workspace-head-only startup work. It is now in `main`,
+and the remaining work is no longer "land FEAT-027" but rather "use FEAT-027's evidence to
+pick the next startup/shutdown hardening slices."
 
 ## Latest Profiling Conclusions (2026-04-18)
 
-Current evidence for future merge and follow-up work:
+Current evidence for future follow-up work:
 
 - startup matrix artifact:
   `EMULE_WORKSPACE_ROOT\repos\eMule-build-tests\reports\startup-profile-scenarios\20260418-121956-eMule-main-debug\startup-profiles-wrapper-summary.json`
@@ -117,15 +96,16 @@ Shutdown measurements are split between visible UI handoff and final process exi
 - repeated baseline process-exit observation averaged `8566.246 ms`
 - repeated heavy process-exit observation averaged `9042.636 ms`
 - main-window disappearance averaged `254.555 ms` baseline and `252.291 ms` heavy
-- focused heavy shutdown probe reached "no windows left" at `3530.240 ms`
-  after close
+- focused heavy shutdown probe reached "no windows left" at `3530.240 ms` after close
 
-Current read: visible shutdown UI clears in about `3.0-3.5 s`, but full teardown
-still lands closer to `8.4-9.4 s`. Heavy shared trees add only modest extra shutdown
-time versus baseline, so the dominant remaining shutdown cost appears to be common
-post-UI teardown rather than shared-tree-specific window work.
+Current read: visible shutdown UI clears in about `3.0-3.5 s`, but full teardown still
+lands closer to `8.4-9.4 s`. Heavy shared trees add only modest extra shutdown time
+versus baseline, so the dominant remaining shutdown cost appears to be common post-UI
+teardown rather than shared-tree-specific window work.
 
 ## Relationship To Other Items
 
 - depends on the same startup/share surface as **FEAT-026**
-- likely makes a future fix for **BUG-023** easier by giving the shared-files UI a more explicit status-refresh path
+- complements **FEAT-028**, which made the visible Shared Files list itself more stable
+- likely makes a future fix for **BUG-023** easier by giving the shared-files UI a more
+  explicit status-refresh path

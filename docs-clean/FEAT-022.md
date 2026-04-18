@@ -1,83 +1,66 @@
 ---
 id: FEAT-022
-title: Startup config directory override — -c flag for alternate preferences path
-status: Open
+title: Startup config directory override — `-c` flag for alternate preferences path
+status: Done
 priority: Minor
 category: feature
 labels: [startup, config, testing, portability, sysadmin]
 milestone: ~
 created: 2026-04-10
-source: stale-v0.72a-experimental-clean, commit f8ef5c1
+source: `main` commit `fc70cf9` (`FEAT-028 virtualize and harden shared files list`)
 ---
 
 ## Summary
 
-eMule currently hardcodes its configuration directory to a fixed location relative to the
-binary or the user's `%APPDATA%`. There is no way to specify an alternate config directory
-at launch, making it difficult to:
+This feature is merged to `main`.
 
-- Run multiple isolated eMule instances with separate configs
-- Run automated tests with a controlled configuration state
-- Support portable installation modes
-- Use separate configs for different network environments
+`eMule-main` now accepts `-c <base-dir>` early in startup and redirects the effective
+config, log, and related profile paths below that selected base directory before normal
+preference initialization runs.
 
-The experimental branch adds a `-c <path>` command-line switch that overrides the config
-directory at startup, before any preference loading occurs.
+Although the original backlog reference came from the experimental branch, the mainline
+implementation landed as part of the broader shared-files performance and startup-hardening
+line in commit `fc70cf9`.
 
-## Experimental Reference Implementation
+## Landed Mainline Shape
 
-**Source:** `stale-v0.72a-experimental-clean`, commit `f8ef5c1 FEAT: add config directory
-startup override` (196 insertions / 19 deletions)
+Primary files:
 
-**New file:**
-- `srchybrid/StartupConfigOverride.h` — `CStartupConfigOverride` class and helpers (+103 lines)
+- `srchybrid/StartupConfigOverride.h`
+- `srchybrid/Emule.cpp`
+- supporting startup/config consumers touched on the same line
 
-**Modified files:**
-- `srchybrid/Emule.cpp` — argument parsing, `-c` flag extraction, `SetConfigDir()` call
-  before `InitApp()` (+68 lines)
-- `srchybrid/Emule.h` — new `GetConfigDir()` accessor (+3 lines)
-- `srchybrid/EmuleDlg.cpp` — uses `GetConfigDir()` instead of hardcoded path (+5 lines)
-- `srchybrid/Preferences.cpp` — `CPreferences::Init()` respects the override (+12 lines)
+Key behavior:
 
-**Usage:**
-```
-eMule.exe -c "%EMULE_WORKSPACE_ROOT%\profiles\instance1"
-eMule.exe -c "%APPDATA%\eMule-test"
-```
+- `-c <path>` is parsed before config initialization
+- the effective config directory becomes `<base-dir>\config\`
+- the effective log directory becomes `<base-dir>\logs\`
+- `preferences.ini`, `known.met`, `sharedcache.dat`, and sibling runtime files follow the
+  override
+- long-path-safe path handling is preserved on the override path
 
-The override is applied before startup config initialization, so all files
-(`preferences.ini`, `known.met`, `part.met` root, etc.) are redirected to the specified
-directory.
+## Why This Matters
 
-## Use Cases
+This was a real testing and stability enabler, not just a convenience switch:
 
-1. **Automated testing** (primary motivation): the experimental test harness uses `-c` to
-   point each test run at a deterministic temp directory, ensuring test isolation without
-   touching the developer's live config.
+- deterministic isolated live profiles for build-tests
+- multi-instance or staging configs without touching the user's normal profile
+- portable-style runs from explicit base directories
+- deep long-path config-root stress coverage without polluting the default profile
 
-2. **Multiple instances**: run a "test" and a "live" instance with different configs
-   simultaneously.
+## Validation Already In Place
 
-3. **Portable mode**: set `-c` to a relative path (`.`) for a fully portable installation
-   on a USB drive.
+The live test harness now exercises this path directly under long config roots:
 
-4. **Staging configs**: operators managing eMule in multi-user environments can assign
-   per-user config directories.
+- `repos\eMule-build-tests\scripts\run-config-stability-ui-e2e.ps1`
+- `repos\eMule-build-tests\scripts\config-stability-ui-e2e.py`
 
-## Implementation Notes
+That suite launches real `emule.exe` instances with explicit `-c`, edits/saves settings,
+verifies `preferences.ini` persistence across relaunch, and stresses repeated close/save
+cycles under overlong config paths.
 
-- The override path must be resolved before any `thePrefs.GetMuleDirectory()` call
-- Relative paths resolved relative to the binary location (not CWD)
-- Environment variable expansion in the path (`%APPDATA%`, `%TEMP%`) handled by the
-  `CStartupConfigOverride` helper
-- Long-path aware: use `\\?\` prefix if path exceeds MAX_PATH (coordinate with FEAT-010)
+## Relationship To Other Items
 
-## Acceptance Criteria
-
-- [ ] `-c <path>` command-line argument parsed before preference initialization
-- [ ] All config file paths (`preferences.ini`, known files, temp dirs) redirected to the
-  override directory
-- [ ] Missing override directory created automatically
-- [ ] Relative path expansion documented
-- [ ] No change in behavior when `-c` is not specified (backward compatible)
-- [ ] Works with the existing portable-mode detection if any
+- complements **FEAT-010** / **BUG-029** long-path work because test and portable profiles
+  can now live under deep paths
+- complements **CI-008**, which now carries the long-config live UI stability regression
