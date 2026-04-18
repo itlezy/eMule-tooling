@@ -21,6 +21,7 @@
 **Updated:** 2026-04-18 — `main` now includes `BUG-032` AICH hashset save timeout removal in commit `8a5a33c`; `BUG-032` is marked Done.
 **Updated:** 2026-04-18 — `main` now includes `REF-019` `EncryptedStreamSocket` protocol-error hardening in commit `93b3450`; `REF-019` is marked Done.
 **Updated:** 2026-04-18 — narrow `REF-017` dead-code cleanup landed in current `main`: all remaining `CCM_SETUNICODEFORMAT` no-op calls, `MAXCON5WIN9X`, and one stale WinNT note were removed; the broader `REF-017` item remains Open.
+**Updated:** 2026-04-18 — `main` now includes `REF-018` defunct PeerCache surface removal plus legacy `FileBufferSizePref` / `QueueSizePref` load-read cleanup in commit `6751a50`; `REF-018` is marked Done.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -89,7 +90,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-015](REF-015.md) | Minor | Open | Switch UPnP from miniupnpc to UPnPImplWinServ — remove miniupnpc submodule |
 | [REF-016](REF-016.md) | Trivial | Open | Inline ResizableLib into source tree — remove submodule |
 | [REF-017](REF-017.md) | Minor | Open | Dead code sweep — Win9x/NT4 guards, PROXY comments, #if 0 blocks |
-| [REF-018](REF-018.md) | Minor | Open | Remove defunct PeerCache opcodes, Win95 detection, and legacy INI keys |
+| [REF-018](REF-018.md) | Minor | **Done** | Remove defunct PeerCache surface and legacy INI fallback reads |
 | [REF-019](REF-019.md) | Minor | **Done** | Replace ASSERT(0) + "must be a bug" with OnError() in EncryptedStreamSocket |
 | [REF-020](REF-020.md) | Minor | Open | Replace dynamic loading of always-present Win10 APIs with static linking |
 | [REF-021](REF-021.md) | Minor | Open | Remove blanket warning suppressions and replace deprecated Winsock APIs |
