@@ -48,6 +48,7 @@ reference reading.
 **Updated:** 2026-04-19 — added `BUG-035` to track the broader non-exception control-flow debt where live runtime paths still rely on bare `ASSERT(0)` placeholders without proper recovery or logging. Representative current anchors include `TreePropSheet.cpp`, `TransferWnd.cpp`, and `SHAHashSet.cpp`.
 **Updated:** 2026-04-19 — added `CI-010` to track the remaining app-local warning debt after the external-header noise reduction pass. This keeps real source-fix buckets (`C5262`, `C4244`, targeted `C5219`) separate from the deferred `REF-021` Winsock cleanup and from framework-heavy `C4191` triage.
 **Updated:** 2026-04-19 — `BUG-031`, `CI-010`, and the remaining `FEAT-001` FastKad follow-through are now explicitly deferred by product decision; because the backlog schema has no `Deferred` state, they are tracked as `Blocked`.
+**Updated:** 2026-04-19 — `main` now includes the `BUG-003` cleanup in commit `a0a7d18`: the real remaining issue was narrowed to Kad metadata 64-bit formatting, that formatter is fixed, and the other historical `FIXME LARGE FILES` markers were removed as stale overstatements. `BUG-003` is marked Done.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -72,7 +73,7 @@ regression checks. When behavior changes, compare `main` against
 |----|----------|--------|-------|
 | [BUG-001](BUG-001.md) | Major | **Done** | 17+ load-only hidden prefs not written back to preferences.ini |
 | [BUG-002](BUG-002.md) | Minor | Open | ASSERT(0) FIXME in ArchiveRecovery.cpp — silent fail in release *(retire feature or fix)* |
-| [BUG-003](BUG-003.md) | Minor | Open | Large-file AICH / metadata paths incomplete — FIXME markers in place |
+| [BUG-003](BUG-003.md) | Minor | **Done** | Historical large-file FIXME markers overstated the remaining live issue |
 | [BUG-004](BUG-004.md) | Minor | Open | IPFilter overlapping IP ranges not handled — acknowledged correctness gap |
 | [BUG-005](BUG-005.md) | Minor | Wont-Fix | Kad buddy connections broken when RequireCrypt is enabled |
 | [BUG-006](BUG-006.md) | Minor | Open | Weak RNG for crypto challenge — rand() seeded with time(NULL) (accepted risk) |
@@ -223,7 +224,7 @@ regression checks. When behavior changes, compare `main` against
 
 ### Do Second — narrow stability items still close to current behavior
 
-5. **BUG-003 through BUG-006, BUG-023, BUG-028, BUG-034, BUG-035** — targeted correctness fixes
+5. **BUG-004 through BUG-006, BUG-023, BUG-028, BUG-034, BUG-035** — targeted correctness fixes
 6. **BUG-008** — CaptchaGenerator rand() & 8 or fold into REF-027
 7. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
 8. **CI-010** — continue lowering the remaining app-local warning floor now that SDK and third-party warning mass is contained *(explicitly deferred / Blocked)*
@@ -414,6 +415,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 11 open bugs + 1 in-progress bug + 27 refactors/boost items + 15 features + 9 CI = **63 non-done issues**.*
+*Total non-done: 10 open bugs + 1 in-progress bug + 27 refactors/boost items + 15 features + 9 CI = **62 non-done issues**.*
 
 *Status refresh through 2026-04-19: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031, CI-010, and the remaining FEAT-001 follow-through are now explicitly deferred and tracked as `Blocked`; CI-008 now also records the long-config `-c` live UI stability regression coverage.*
