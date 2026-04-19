@@ -1,5 +1,11 @@
 # Review 2026-04-14 — Main Bug-Only Pass
 
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 ## Scope
 
 Focused pass on fresh concrete bugs in current `eMule-main` only.

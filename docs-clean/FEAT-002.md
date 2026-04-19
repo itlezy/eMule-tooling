@@ -10,6 +10,12 @@ created: 2026-04-08
 source: AUDIT-KAD.md (AUD_KAD_006, AUD_KAD_007)
 ---
 
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 ## Summary
 
 `SafeKad` is the local Kad anti-abuse layer. It currently enforces near-"one

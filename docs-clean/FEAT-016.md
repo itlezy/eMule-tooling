@@ -10,6 +10,12 @@ created: 2026-04-08
 source: `main` commit `860d7a5` (`Modernize fixed runtime limits for broadband defaults`); historical rationale in `docs/FEATURE-MODERN-LIMITS.md`
 ---
 
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 ## Summary
 
 This feature is merged to `main`.

@@ -1,5 +1,11 @@
 # Review — 2026-04-13 Main / Workspace / Analysis Revalidation
 
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 ## Scope
 
 Revalidated the live backlog and historical docs against:

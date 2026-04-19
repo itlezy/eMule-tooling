@@ -10,6 +10,12 @@ created: 2026-04-08
 source: `main` commit `d731bbe` (`Stabilize broadband upload slot allocation`); historical design in `docs/FEATURE-BROADBAND.md`
 ---
 
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 ## Summary
 
 The broadband upload slot controller is merged to `main`.
