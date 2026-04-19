@@ -39,6 +39,7 @@ reference reading.
 **Updated:** 2026-04-18 — `main` now includes standalone `FEAT-012` TCP listen-socket error-flood defense: accepted incoming pre-handshake TCP error/close bursts are tracked per IP and banned through the stock banned-IP path, with Tweaks hidden-security settings for enable/interval/threshold.
 **Updated:** 2026-04-18 — bind-policy completion is now tracked as `FEAT-030`: keep global `BindAddr` on all non-web socket paths, add separate `WebBindAddr`, and audit remaining socket openers such as `Pinger`.
 **Updated:** 2026-04-19 — local `main` now includes the core `FEAT-001` FastKad / `nodes.fastkad.dat` port in commit `125720f`; `FEAT-001` is now `In Progress` rather than `Open` because its bootstrap diversity and stale-decay follow-through remains unfinished.
+**Updated:** 2026-04-19 — current `main` now completes `REF-004`: the original hidden-preference write-back fix from `4a02669` is now paired with Extended-options exposure/validation cleanup (`6c792d9`, `e6f0625`, `910828c`, `d3ccfd1`), and the retired `AICHTrustEveryHash` key is explicitly deleted from persisted config.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -103,7 +104,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-001](REF-001.md) | Major | Wont-Fix | Keep the existing CZIPFile implementation |
 | [REF-002](REF-002.md) | Major | **Done** | Remove Source Exchange v1 branches |
 | [REF-003](REF-003.md) | Trivial | Open | Rename stale IRC string resources *(or full IRC removal — see REF-025)* |
-| [REF-004](REF-004.md) | Minor | Open | Audit and disposition 17 load-only preference keys |
+| [REF-004](REF-004.md) | Minor | **Done** | Audit and disposition 17 load-only preference keys |
 | [REF-005](REF-005.md) | Trivial | Open | Remove dead DebugSourceExchange commented-out calls |
 | [REF-006](REF-006.md) | Trivial | **Done** | GetCategory should be const in DownloadListCtrl |
 | [REF-007](REF-007.md) | Trivial | **Done** | WebM vs MKV disambiguation in MIME detection |
@@ -400,6 +401,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 10 open bugs + 0 in-progress bugs + 28 refactors/boost items + 15 features + 8 CI = **61 non-done issues**.*
+*Total non-done: 10 open bugs + 0 in-progress bugs + 27 refactors/boost items + 15 features + 8 CI = **60 non-done issues**.*
 
 *Status refresh through 2026-04-19: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031 remains from the focused `eMuleAI` comparison; CI-008 now also records the long-config `-c` live UI stability regression coverage.*
