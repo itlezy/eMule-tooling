@@ -43,6 +43,7 @@ reference reading.
 **Updated:** 2026-04-19 — current `main` now includes the first `REF-025` cleanup slice in commit `3105ee3` (`chore: remove Connection options wizard entry`); the full legacy-feature removal remains unfinished, so `REF-025` is now `In Progress`.
 **Updated:** 2026-04-19 — current `main` now includes the `BUG-028` mitigation commit `5cc8e59` (`prefer MediaInfo.dll for AV metadata routing`); the Unicode-unsafe `id3lib` fallback remains, so the item is now `In Progress` rather than `Open`.
 **Updated:** 2026-04-19 — `BUG-005` is now marked `Wont-Fix` by explicit product decision: Kad buddy callback encryption / `RequireCrypt` incompatibility is understood but intentionally not pursued on the current branch direction. `REF-021` remains valid but is explicitly deferred for now; because the backlog schema has no `Deferred` status, it is tracked as `Blocked`.
+**Updated:** 2026-04-19 — added `BUG-033` to persist the explicit `Wont-Fix` decision for the shutdown-only `TerminateThread` fallbacks in `WebSocket.cpp` and `UPnPImplMiniLib.cpp`.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -97,6 +98,7 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-030](BUG-030.md) | Minor | **Done** | Obfuscated server logins can advertise redundant callback crypto flags and require extra attempts |
 | [BUG-031](BUG-031.md) | Minor | Open | Shared-file hashing fails too eagerly on transient sharing and lock violations |
 | [BUG-032](BUG-032.md) | Minor | **Done** | AICH hashset save can fail spuriously after hashing because `known2.met` lock wait times out |
+| [BUG-033](BUG-033.md) | Minor | Wont-Fix | WebSocket and MiniUPnP shutdown still use forced thread termination |
 
 ---
 
