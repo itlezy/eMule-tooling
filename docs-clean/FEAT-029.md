@@ -1,7 +1,7 @@
 ---
 id: FEAT-029
 title: Search result ceilings — configurable ed2k expansion plus moderate Kad totals/lifetimes
-status: In Progress
+status: Done
 priority: Minor
 category: feature
 labels: [search, ed2k, kad, preferences, ui, networking]
@@ -78,3 +78,12 @@ Out of scope:
 - `eMuleAI` is only a useful reference for the ed2k `0 = unlimited` cap shape.
 - eMuleAI does not provide a strong low-drift reference for broader Kad search
   expansion, so the Kad side stays intentionally moderate here.
+
+## Mainline Outcome
+
+Landed on `main` in commit `1dd710c`:
+
+- persisted ed2k and Kad search ceiling settings in `Preferences`
+- Tweaks-tree Search controls for the new limits
+- ed2k result and `Search More` limits routed through preferences
+- Kad file/keyword totals and lifetimes routed through preferences
