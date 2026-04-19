@@ -40,6 +40,7 @@ reference reading.
 **Updated:** 2026-04-18 — bind-policy completion is now tracked as `FEAT-030`: keep global `BindAddr` on all non-web socket paths, add separate `WebBindAddr`, and audit remaining socket openers such as `Pinger`.
 **Updated:** 2026-04-19 — local `main` now includes the core `FEAT-001` FastKad / `nodes.fastkad.dat` port in commit `125720f`; `FEAT-001` is now `In Progress` rather than `Open` because its bootstrap diversity and stale-decay follow-through remains unfinished.
 **Updated:** 2026-04-19 — current `main` now completes `REF-004`: the original hidden-preference write-back fix from `4a02669` is now paired with Extended-options exposure/validation cleanup (`6c792d9`, `e6f0625`, `910828c`, `d3ccfd1`), and the retired `AICHTrustEveryHash` key is explicitly deleted from persisted config.
+**Updated:** 2026-04-19 — current `main` now includes the first `REF-025` cleanup slice in commit `3105ee3` (`chore: remove Connection options wizard entry`); the full legacy-feature removal remains unfinished, so `REF-025` is now `In Progress`.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -118,7 +119,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-022](REF-022.md) | Trivial | Open | Replace custom type aliases in types.h with \<cstdint\> standard types |
 | [REF-023](REF-023.md) | Minor | Open | Replace unsafe sprintf/_stprintf/wsprintf with safe equivalents |
 | [REF-024](REF-024.md) | Trivial | Open | Convert #define constants in Opcodes.h to constexpr in namespace |
-| [REF-025](REF-025.md) | Minor | Open | Remove legacy feature set — IRC, SMTP, Scheduler, MiniMule, wizard, splash, update checker |
+| [REF-025](REF-025.md) | Minor | In Progress | Remove legacy feature set — IRC, SMTP, Scheduler, MiniMule, wizard, splash, update checker |
 | [REF-026](REF-026.md) | Minor | **Done** | Manifest — keep Win10/11+ compatibility GUID only and move Common Controls into manifests |
 | [REF-027](REF-027.md) | Minor | Open | CaptchaGenerator — replace CxImage with ATL CImage / native GDI (community ref) |
 | [REF-028](REF-028.md) | Minor | Open | Upgrade MbedTLS to 4.0 — API rename + TLS 1.3 readiness (community ref) |
