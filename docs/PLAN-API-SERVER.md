@@ -1,7 +1,12 @@
-# eMule REST API Server — Named Pipe + Node.js Sidecar
+# Historical Named Pipe + Node.js Sidecar API Plan
 
-**Status:** Implemented / Canonical Contract
+**Status:** Historical / Superseded
+**Canonical shipped contract:** `REST-API-CONTRACT.md`
 **Related:** `WEB_APIs.md` (in-process approach analysis)
+
+> This document no longer describes the active `main` runtime.
+> The shipped API lives in-process in `eMule-main` under `/api/v1/...`.
+> Keep this file only as historical design context.
 
 ---
 
