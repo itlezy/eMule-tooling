@@ -1,7 +1,7 @@
 ---
 id: FEAT-030
 title: Bind policy completion — global `BindAddr` everywhere else, separate `WebBindAddr` for WebServer
-status: In Progress
+status: Done
 priority: Minor
 category: feature
 labels: [networking, bind, webserver, preferences, sockets, hardening]
@@ -70,8 +70,18 @@ Out of scope:
 
 ## Acceptance Criteria
 
-- [ ] `WebBindAddr` persists in the `WebServer` section
-- [ ] WebServer binds wildcard when `WebBindAddr` is empty
-- [ ] WebServer binds only the override IP when `WebBindAddr` is set
-- [ ] non-web socket paths continue to use the global `BindAddr`
-- [ ] ancillary audited socket paths no longer bypass the global bind policy
+- [x] `WebBindAddr` persists in the `WebServer` section
+- [x] WebServer binds wildcard when `WebBindAddr` is empty
+- [x] WebServer binds only the override IP when `WebBindAddr` is set
+- [x] non-web socket paths continue to use the global `BindAddr`
+- [x] ancillary audited socket paths no longer bypass the global bind policy
+
+## Mainline Outcome
+
+Landed on `main` across commits `a762ea1`, `ca80a00`, and `6244a50`:
+
+- split the WebServer listener onto persisted `WebBindAddr`
+- kept non-web socket paths on the existing global `BindAddr`
+- brought `Pinger` under the global bind policy
+- restored the status-bar bind/public-IP pane on the current UI baseline
+- expanded Kad contact and lookup metadata displays while finishing the bind-policy pass
