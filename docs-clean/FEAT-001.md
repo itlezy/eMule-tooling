@@ -1,14 +1,21 @@
 ---
 id: FEAT-001
 title: Kad FastKad — add diversity-aware bootstrap ranking and aggressive stale decay
-status: Open
+status: In Progress
 priority: Minor
 category: feature
 labels: [kad, fastkad, routing, bootstrap]
 milestone: ~
 created: 2026-04-08
+updated: 2026-04-19
 source: AUDIT-KAD.md (AUD_KAD_004, AUD_KAD_005)
 ---
+
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
 
 ## Summary
 
@@ -66,3 +73,21 @@ All improvements are **local policy only** — no Kad packet changes.
 - Adaptive concurrency limits
 
 **Porting note:** `FastKad.cpp/h` and `NodesDatSupport.cpp/h` are new files — add them to `emule.vcxproj` and include `FastKad.h` in `Kademlia.h`/`.cpp`. The bootstrap call in `Kademlia.cpp` needs a `GetBootstrapPriority`-ordered sort added to the node list preparation. The integration is commit `4798953` in experimental.
+
+## Mainline Progress
+
+Current local `main` is no longer at the pure-proposal stage.
+
+Landed in `main` via commit `125720f` (`FEAT-001: port FastKad and nodes.dat support`):
+
+- `FastKad.cpp/h` and `NodesDatSupport.cpp/h` are now compiled in the app project
+- bootstrap contact ranking now consults `GetBootstrapPriority(...)`
+- `nodes.fastkad.dat` sidecar persistence is wired through routing-zone load/save
+- response/reachability/failure tracking is wired into the live Kad flow
+- conservative response-time estimation and health/recency ranking are live
+
+Remaining follow-through keeps this item `In Progress` rather than `Done`:
+
+- explicit diversity-aware subnet balancing inside the FastKad bootstrap ranking policy
+- stronger stale-decay follow-through beyond the current recency bucket aging
+- any future operation-type quality-band or adaptive-concurrency extensions

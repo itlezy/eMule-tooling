@@ -1,5 +1,15 @@
 # eMule Clean Backlog — Issue Index
 
+This directory is the active backlog and revalidation layer for this repo.
+Use [`../docs/INDEX.md`](../docs/INDEX.md) for long-form background and
+reference reading.
+
+> Historical reference only: `stale-v0.72a-experimental-clean` and
+> `analysis\stale-v0.72a-experimental-clean` are retired reference sources, not
+> active branch targets or current baselines. Use them only as provenance or
+> idea-extraction sources; landed status is determined against `main`. See
+> [Historical References](../docs/HISTORICAL-REFERENCES.md).
+
 **Source of truth:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main` (`main` branch)  
 **Rebuilt:** 2026-04-08 — clean slate from git log + old docs salvage + fresh code audit  
 **Revalidated:** 2026-04-09 — deep diff against `stale-v0.72a-experimental-clean` (378 commits); BUG-009/010/011/012/015 confirmed Done in main; experimental reference implementations documented for all items done there  
@@ -28,9 +38,13 @@
 **Updated:** 2026-04-18 — search-result expansion is now tracked separately from `FEAT-016` as new `FEAT-029`: configurable ed2k result ceilings plus moderate Kad totals/lifetimes with Tweaks exposure.
 **Updated:** 2026-04-18 — `main` now includes standalone `FEAT-012` TCP listen-socket error-flood defense: accepted incoming pre-handshake TCP error/close bursts are tracked per IP and banned through the stock banned-IP path, with Tweaks hidden-security settings for enable/interval/threshold.
 **Updated:** 2026-04-18 — bind-policy completion is now tracked as `FEAT-030`: keep global `BindAddr` on all non-web socket paths, add separate `WebBindAddr`, and audit remaining socket openers such as `Pinger`.
+**Updated:** 2026-04-19 — local `main` now includes the core `FEAT-001` FastKad / `nodes.fastkad.dat` port in commit `125720f`; `FEAT-001` is now `In Progress` rather than `Open` because its bootstrap diversity and stale-decay follow-through remains unfinished.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
+**Directory role:** `docs-clean/` owns current backlog status and dated
+revalidation notes; `docs/` owns long-form background and historical reference
+analysis.
 **Revalidation rule:** Before implementing any item, re-check it against current `main` and current dependency pins.  
 **Regression rule:** new feature/fix work from this backlog should include targeted
 regression checks. When behavior changes, compare `main` against
@@ -137,7 +151,7 @@ regression checks. When behavior changes, compare `main` against
 
 | ID | Priority | Status | Title |
 |----|----------|--------|-------|
-| [FEAT-001](FEAT-001.md) | Minor | Open | Kad FastKad — diversity-aware bootstrap ranking + aggressive stale decay |
+| [FEAT-001](FEAT-001.md) | Minor | In Progress | Kad FastKad — diversity-aware bootstrap ranking + aggressive stale decay |
 | [FEAT-002](FEAT-002.md) | Major | Open | Kad SafeKad — layered trust model / CGNAT fix |
 | [FEAT-003](FEAT-003.md) | Minor | Open | Kad — Response usefulness scoring + subnet-diversity search fanout |
 | [FEAT-004](FEAT-004.md) | Minor | Open | Kad — Generalise KadPublishGuard abuse budget beyond PUBLISH_SOURCE |
@@ -201,7 +215,7 @@ regression checks. When behavior changes, compare `main` against
 7. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
 8. **REF-028** — MbedTLS 4.0 upgrade once the current WebServer/TLS surface is stable
 9. **FEAT-002** — SafeKad CGNAT fix
-10. **FEAT-001** — FastKad bootstrap ranking
+10. **FEAT-001** — FastKad diversity/stale-decay follow-through after the landed core port
 
 ### Do Later — useful, but not part of the current stabilization milestone
 
