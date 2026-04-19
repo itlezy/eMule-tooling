@@ -50,6 +50,7 @@ reference reading.
 **Updated:** 2026-04-19 — `BUG-031`, `CI-010`, and the remaining `FEAT-001` FastKad follow-through are now explicitly deferred by product decision; because the backlog schema has no `Deferred` state, they are tracked as `Blocked`.
 **Updated:** 2026-04-19 — `main` now includes the `BUG-003` cleanup in commit `a0a7d18`: the real remaining issue was narrowed to Kad metadata 64-bit formatting, that formatter is fixed, and the other historical `FIXME LARGE FILES` markers were removed as stale overstatements. `BUG-003` is marked Done.
 **Updated:** 2026-04-19 — current `main` now includes the MiniMule-specific `REF-025` cleanup slice in commit `867d303` (`REF-025: remove MiniMule feature`); the broader legacy-feature removal remains unfinished, so `REF-025` stays `In Progress`.
+**Updated:** 2026-04-19 — post-MiniMule revalidation added `REF-033` to track the smaller remaining IE-era baggage still present in current `main`: MSHTML-based `DropTarget` HTML parsing, HTML Help, stale IE-specific web-template branches, and leftover browser-hosting markers.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -139,6 +140,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-030](REF-030.md) | Minor | Open | Replace WSAAsyncGetHostByName with worker-thread resolver in DownloadQueue (experimental ref) |
 | [REF-031](REF-031.md) | Minor | **Done** | Review upload queue scoring against community and stale baselines |
 | [REF-032](REF-032.md) | Minor | Open | Use MFC-native property sheets and dynamic layout instead of CTreePropSheet / ResizableLib |
+| [REF-033](REF-033.md) | Trivial | Open | Remove remaining IE/MSHTML drag-drop, HTML Help, and legacy IE web-client baggage |
 
 ---
 
@@ -416,6 +418,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 10 open bugs + 1 in-progress bug + 27 refactors/boost items + 15 features + 9 CI = **62 non-done issues**.*
+*Total non-done: 10 open bugs + 1 in-progress bug + 28 refactors/boost items + 15 features + 9 CI = **63 non-done issues**.*
 
 *Status refresh through 2026-04-19: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031, CI-010, and the remaining FEAT-001 follow-through are now explicitly deferred and tracked as `Blocked`; CI-008 now also records the long-config `-c` live UI stability regression coverage.*
