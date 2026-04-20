@@ -54,6 +54,7 @@ reference reading.
 **Updated:** 2026-04-19 — added `REF-034` to track the real Crypto++ refresh candidate surfaced by the dependency advisory report: move from the current 8.4-based fork to a reviewed 8.9-based fork while preserving the narrow local `cryptlib.vcxproj` carry set for MSVC warnings and ARM64 support.
 **Updated:** 2026-04-19 — current `main` now includes `FEAT-013` in commits `94e0884` and `8d0832a`: the REST surface is delivered in-process through `WebServer.cpp` / `WebSocket.cpp` with a dedicated `WebServerJson.cpp` route layer, hashed `X-API-Key` auth, the experimental JSON contract reused without the named-pipe/sidecar runtime stack, and the experimental upload-tuning fields mapped onto the current broadband upload-budget controller. `FEAT-013` is marked Done.
 **Updated:** 2026-04-19 — `CI-008` now includes the first concrete REST regression slice on current `main`: native `web_api.tests.cpp` coverage for the landed `/api/v1` route/contract helpers plus the live `run-rest-api-smoke.ps1` harness for `X-API-Key` auth, representative read routes, live server/Kad/search scenarios, and HTML-vs-REST separation. The live harness now records an explicit degraded-network search skip when a session makes real connect/bootstrap attempts but never reaches a searchable network state.
+**Updated:** 2026-04-20 — added `FEAT-032` to track the NAT-mapping modernization pass now implemented locally on current `main`: remove the Windows-service UPnP backend, keep MiniUPnP as the `UPnP IGD` path, add `libpcpnatpmp` for `PCP/NAT-PMP`, and expose a Tweaks backend-mode selector. The code/build phase is complete, but the item stays `In Progress` pending live-network validation.
 **Priority scale:** Critical > Major > Minor > Trivial  
 **Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
 **Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
@@ -201,6 +202,7 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-028](FEAT-028.md) | Minor | **Done** | Virtualize and harden shared files list |
 | [FEAT-029](FEAT-029.md) | Minor | **Done** | Search result ceilings — configurable ed2k expansion plus moderate Kad totals/lifetimes |
 | [FEAT-030](FEAT-030.md) | Minor | **Done** | Bind policy completion — global `BindAddr` everywhere else, separate `WebBindAddr` for WebServer |
+| [FEAT-032](FEAT-032.md) | Minor | In Progress | NAT mapping modernization — keep MiniUPnP, drop WinServ, add PCP/NAT-PMP |
 
 ---
 
@@ -422,6 +424,6 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 10 open bugs + 1 in-progress bug + 28 refactors/boost items + 14 features + 9 CI = **62 non-done issues**.*
+*Total non-done: 10 open bugs + 1 in-progress bug + 28 refactors/boost items + 15 features + 9 CI = **63 non-done issues**.*
 
-*Status refresh through 2026-04-19: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031, CI-010, and the remaining FEAT-001 follow-through are now explicitly deferred and tracked as `Blocked`; CI-008 now also records the long-config `-c` live UI stability regression coverage.*
+*Status refresh through 2026-04-20: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031, CI-010, and the remaining FEAT-001 follow-through are now explicitly deferred and tracked as `Blocked`; CI-008 now also records the long-config `-c` live UI stability regression coverage; FEAT-032 now tracks the local MiniUPnP plus PCP/NAT-PMP runtime modernization pass pending live validation.*
