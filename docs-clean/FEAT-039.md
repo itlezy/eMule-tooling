@@ -40,6 +40,10 @@ This is a file-handling convenience feature with real operator value on long-run
 - near-duplicate mode must stay optional because false positives are possible
 - this feature should complement, not replace, the `KnownFileList` correctness fixes under
   `BUG-037`
+- a local strong-hash cache such as a BLAKE3 sidecar is a valid future implementation aid
+  for exact-duplicate confidence, but it is not required for the first version
+- if a BLAKE3 value is ever exposed on the network, it should start as advisory extra
+  metadata for upgraded peers only, not as a replacement for MD4 identity
 
 ## Acceptance Criteria
 
