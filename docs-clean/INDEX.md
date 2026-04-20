@@ -10,63 +10,42 @@ reference reading.
 > idea-extraction sources; landed status is determined against `main`. See
 > [Historical References](../docs/HISTORICAL-REFERENCES.md).
 
+## Current Snapshot
+
 **Source of truth:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main` (`main` branch)  
-**Rebuilt:** 2026-04-08 — clean slate from git log + old docs salvage + fresh code audit  
-**Revalidated:** 2026-04-09 — deep diff against `stale-v0.72a-experimental-clean` (378 commits); BUG-009/010/011/012/015 confirmed Done in main; experimental reference implementations documented for all items done there  
-**Revalidated:** 2026-04-10 — full cross-variant analysis pass: eMule-main new commits (06eaefe/4a02669/0300a9d), community-0.72 (irwir, 10 commits through 2026-01-05), eMuleAI (2026 release), stale-v0.72a-experimental-clean (378 commits, deep FIX/BUG CPP pass). BUG-001/BUG-016 confirmed Done in main; BUG-017 through BUG-021 new from experimental; REF-027 through REF-030 new from community+experimental; FEAT-018 through FEAT-022 new from eMuleAI+experimental.  
-**Revalidated:** 2026-04-12 — focused `community-0.72` vs `eMule-main` `srchybrid` diff review for stabilization/hardening only. Confirmed long-path shell delete gap (`BUG-022`), refreshed FEAT-010 scope, pivoted REST planning to extend `WebServer.cpp`, and added regression-expansion item `CI-008`. Async socket remains explicitly deferred for a future phase.  
-**Updated:** 2026-04-13 — `main` now includes the FEAT-010 long-path/share-state stabilization line, the FEAT-024 centralized share-ignore policy with additive `shareignore.dat`, and FEAT-025 filename normalization on download intake/completion. CI-008 long-path regressions and CI-009 share-ignore regressions are landed as well.
-**Revalidated:** 2026-04-13 — current app workspace HEAD (`e1ecdee`, branch `feature/feat028-shared-files-virtual-list`) is ahead of `main` (`021cb5b`) by FEAT-026/027 startup work. Added `BUG-023`, added `FEAT-025`/`026`/`027`, corrected FEAT-015/016/023 item docs to match `main`, and recorded historical `docs/` drift in [REVIEW-2026-04-13-main-workspace-revalidation](REVIEW-2026-04-13-main-workspace-revalidation.md).
-**Revalidated:** 2026-04-13 — Windows/MFC/toolchain deep dive. Confirmed current `main` still links WebServer/MbedTLS/id3lib, current local toolchain is VS 2022 `v143` / MFC 14.x, current code uses zero modern MFC UI host/layout classes, and `emule.vcxproj` still carries VC71-upgrade baggage plus DPI-off manifest settings. Added `REF-032`, corrected stale dependency/security source-doc rows, and recorded the details in [REVIEW-2026-04-13-windows-mfc-toolchain-deep-dive](REVIEW-2026-04-13-windows-mfc-toolchain-deep-dive.md).
-**Revalidated:** 2026-04-14 — focused bug-only pass on current `main`. Added `BUG-024` for the live `statUTC(HANDLE)` size-field corruption and `BUG-025` for wrong/stale hashing open diagnostics in `CKnownFile`. Recorded the pass in [REVIEW-2026-04-14-main-bug-pass](REVIEW-2026-04-14-main-bug-pass.md).
-**Revalidated:** 2026-04-14 — deeper bug-only follow-up on current `main`. Added `BUG-026` for search-tab teardown lifetime violations and `BUG-027` for destructive IP-filter promotion failure. Recorded the follow-up in [REVIEW-2026-04-14-main-bug-pass-deeper](REVIEW-2026-04-14-main-bug-pass-deeper.md).
-**Revalidated:** 2026-04-14 — deeper Windows/API and dependency pass. Added `BUG-028` for ANSI-only `id3lib` path handling in current MP3 metadata extraction, refreshed `REF-021` / `REF-030` with the remaining live Winsock and message-DNS surface, and recorded the deeper findings in [REVIEW-2026-04-14-api-deep-pass-id3lib-unicode](REVIEW-2026-04-14-api-deep-pass-id3lib-unicode.md).
-**Updated:** 2026-04-18 — persisted fresh startup/shutdown profiling conclusions under `FEAT-026`, `FEAT-027`, and `CI-008`, using the current `eMule-main` startup matrix `20260418-121956-eMule-main-debug` plus shutdown probes `shutdown-probe-20260418-122546-profiling` and `shutdown-repeat-20260418-122927`.
-**Updated:** 2026-04-18 — `main` now includes `BUG-026` search-tab teardown lifetime hardening in commit `8ba6248`; `BUG-026` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `BUG-027` IP-filter promotion hardening in commit `cc3553b`; `BUG-027` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `BUG-025` KnownFile hash-open diagnostics hardening in commit `897c207`; `BUG-025` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `BUG-024` handle-based `statUTC` size-field correction in commit `f33f38b`; `BUG-024` is marked Done.
-**Revalidated:** 2026-04-18 — focused `eMuleAI` vs current `eMule-main` hardening pass. Corrected stale landed statuses for `REF-007`, `FEAT-020`, `FEAT-022`, `FEAT-026`, and `FEAT-027`; added landed `BUG-029` and `FEAT-028`; promoted new stock-friendly hardening bugs `BUG-030` / `BUG-031` / `BUG-032`; refreshed `CI-008` with long-config `-c` live UI stability coverage; recorded the pass in [REVIEW-2026-04-18-emuleai-vs-main-hardening-pass](REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md).
-**Updated:** 2026-04-18 — `main` now includes `BUG-030` server-login crypt-flag hardening in commit `f9bb14b`; `BUG-030` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `BUG-032` AICH hashset save timeout removal in commit `8a5a33c`; `BUG-032` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `REF-019` `EncryptedStreamSocket` protocol-error hardening in commit `93b3450`; `REF-019` is marked Done.
-**Updated:** 2026-04-18 — narrow `REF-017` dead-code cleanup landed in current `main`: all remaining `CCM_SETUNICODEFORMAT` no-op calls, `MAXCON5WIN9X`, and one stale WinNT note were removed.
-**Updated:** 2026-04-18 — `REF-017` is now marked Done after revalidation confirmed that the only original targeted leftovers are intentionally retained `deadlake PROXYSUPPORT` comments and no further live dead-code workload remains.
-**Updated:** 2026-04-18 — `main` now includes `REF-018` defunct PeerCache surface removal plus legacy `FileBufferSizePref` / `QueueSizePref` load-read cleanup in commit `6751a50`; `REF-018` is marked Done.
-**Updated:** 2026-04-18 — `main` now includes `REF-026` manifest cleanup in commit `444f6ec`: Windows 10 / 11+ compatibility is declared via the Windows 10 GUID only, Common Controls 6.0 moved from linker pragmas into the embedded manifests, and DPI enablement remains deferred to `FEAT-017`.
-**Updated:** 2026-04-18 — `REF-001`, `REF-015`, and `REF-016` are now marked `Wont-Fix` to preserve the current low-drift branch direction: keep the existing ZIP reader, keep miniupnpc in the UPnP stack, and keep ResizableLib out-of-tree.
-**Updated:** 2026-04-18 — search-result expansion is now tracked separately from `FEAT-016` as new `FEAT-029`: configurable ed2k result ceilings plus moderate Kad totals/lifetimes with Tweaks exposure.
-**Updated:** 2026-04-18 — `main` now includes standalone `FEAT-012` TCP listen-socket error-flood defense: accepted incoming pre-handshake TCP error/close bursts are tracked per IP and banned through the stock banned-IP path, with Tweaks hidden-security settings for enable/interval/threshold.
-**Updated:** 2026-04-18 — bind-policy completion is now tracked as `FEAT-030`: keep global `BindAddr` on all non-web socket paths, add separate `WebBindAddr`, and audit remaining socket openers such as `Pinger`.
-**Updated:** 2026-04-19 — local `main` now includes the core `FEAT-001` FastKad / `nodes.fastkad.dat` port in commit `125720f`; `FEAT-001` is now `In Progress` rather than `Open` because its bootstrap diversity and stale-decay follow-through remains unfinished.
-**Updated:** 2026-04-19 — current `main` now completes `REF-004`: the original hidden-preference write-back fix from `4a02669` is now paired with Extended-options exposure/validation cleanup (`6c792d9`, `e6f0625`, `910828c`, `d3ccfd1`), and the retired `AICHTrustEveryHash` key is explicitly deleted from persisted config.
-**Updated:** 2026-04-19 — current `main` now includes the first `REF-025` cleanup slice in commit `3105ee3` (`chore: remove Connection options wizard entry`); the full legacy-feature removal remains unfinished, so `REF-025` is now `In Progress`.
-**Updated:** 2026-04-19 — current `main` now includes the `BUG-028` mitigation commit `5cc8e59` (`prefer MediaInfo.dll for AV metadata routing`); the Unicode-unsafe `id3lib` fallback remains, so the item is now `In Progress` rather than `Open`.
-**Updated:** 2026-04-19 — `BUG-005` is now marked `Wont-Fix` by explicit product decision: Kad buddy callback encryption / `RequireCrypt` incompatibility is understood but intentionally not pursued on the current branch direction. `REF-021` remains valid but is explicitly deferred for now; because the backlog schema has no `Deferred` status, it is tracked as `Blocked`.
-**Updated:** 2026-04-19 — added `BUG-033` to persist the explicit `Wont-Fix` decision for the shutdown-only `TerminateThread` fallbacks in `WebSocket.cpp` and `UPnPImplMiniLib.cpp`.
-**Updated:** 2026-04-19 — added `BUG-034` to track the broader release-silent `catch (...)` plus `ASSERT(0)` pattern across `ArchiveRecovery`, `Collection`, `WebServer`, `ServerSocket`, and similar paths. This stays `Open`; future fixes should add explicit logging where practical rather than silently swallowing unexpected exceptions.
-**Updated:** 2026-04-19 — added `BUG-035` to track the broader non-exception control-flow debt where live runtime paths still rely on bare `ASSERT(0)` placeholders without proper recovery or logging. Representative current anchors include `TreePropSheet.cpp`, `TransferWnd.cpp`, and `SHAHashSet.cpp`.
-**Updated:** 2026-04-19 — added `CI-010` to track the remaining app-local warning debt after the external-header noise reduction pass. This keeps real source-fix buckets (`C5262`, `C4244`, targeted `C5219`) separate from the deferred `REF-021` Winsock cleanup and from framework-heavy `C4191` triage.
-**Updated:** 2026-04-19 — `BUG-031`, `CI-010`, and the remaining `FEAT-001` FastKad follow-through are now explicitly deferred by product decision; because the backlog schema has no `Deferred` state, they are tracked as `Blocked`.
-**Updated:** 2026-04-19 — `main` now includes the `BUG-003` cleanup in commit `a0a7d18`: the real remaining issue was narrowed to Kad metadata 64-bit formatting, that formatter is fixed, and the other historical `FIXME LARGE FILES` markers were removed as stale overstatements. `BUG-003` is marked Done.
-**Updated:** 2026-04-19 — current `main` now includes the MiniMule-specific `REF-025` cleanup slice in commit `867d303` (`REF-025: remove MiniMule feature`); the broader legacy-feature removal remains unfinished, so `REF-025` stays `In Progress`.
-**Updated:** 2026-04-19 — post-MiniMule revalidation added `REF-033` to track the smaller remaining IE-era baggage still present in current `main`: MSHTML-based `DropTarget` HTML parsing, HTML Help, stale IE-specific web-template branches, and leftover browser-hosting markers.
-**Updated:** 2026-04-19 — added `REF-034` to track the real Crypto++ refresh candidate surfaced by the dependency advisory report: move from the current 8.4-based fork to a reviewed 8.9-based fork while preserving the narrow local `cryptlib.vcxproj` carry set for MSVC warnings and ARM64 support.
-**Updated:** 2026-04-19 — current `main` now includes `FEAT-013` in commits `94e0884` and `8d0832a`: the REST surface is delivered in-process through `WebServer.cpp` / `WebSocket.cpp` with a dedicated `WebServerJson.cpp` route layer, hashed `X-API-Key` auth, the experimental JSON contract reused without the named-pipe/sidecar runtime stack, and the experimental upload-tuning fields mapped onto the current broadband upload-budget controller. `FEAT-013` is marked Done.
-**Updated:** 2026-04-19 — `CI-008` now includes the first concrete REST regression slice on current `main`: native `web_api.tests.cpp` coverage for the landed `/api/v1` route/contract helpers plus the live `run-rest-api-smoke.ps1` harness for `X-API-Key` auth, representative read routes, live server/Kad/search scenarios, and HTML-vs-REST separation. The live harness now records an explicit degraded-network search skip when a session makes real connect/bootstrap attempts but never reaches a searchable network state.
-**Updated:** 2026-04-20 — added `FEAT-032` to track the NAT-mapping modernization pass now implemented locally on current `main`: remove the Windows-service UPnP backend, keep MiniUPnP as the `UPnP IGD` path, add `libpcpnatpmp` for `PCP/NAT-PMP`, and expose a Tweaks backend-mode selector. The code/build phase is complete, but the item stays `In Progress` pending live-network validation.
+**Current non-done count:** `66`  
+**Latest status refresh:** 2026-04-20
+
+Latest review trail:
+
+- [REVIEW-2026-04-20-emuleai-mods-main-backlog-pass](REVIEW-2026-04-20-emuleai-mods-main-backlog-pass.md)
+- [REVIEW-2026-04-20-feature-expansion-beyond-stock](REVIEW-2026-04-20-feature-expansion-beyond-stock.md)
+- [REVIEW-2026-04-18-emuleai-vs-main-hardening-pass](REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md)
+
+## Operating Rules
+
 **Priority scale:** Critical > Major > Minor > Trivial  
-**Status values:** Open / In Progress / Blocked / Done / Wont-Fix  
-**Important:** Items marked Done below are verified in `eMule-main`. Items marked In Progress may already be implemented on dedicated bug/feature branches but are not considered landed until merged to `main`. Experimental-only work (see individual docs) is NOT in main unless the item status below says otherwise.  
+**Status values:** Open / In Progress / Blocked / Done / Wont-Fix
+
 **Directory role:** `docs-clean/` owns current backlog status and dated
 revalidation notes; `docs/` owns long-form background and historical reference
 analysis.
-**Revalidation rule:** Before implementing any item, re-check it against current `main` and current dependency pins.  
-**Regression rule:** new feature/fix work from this backlog should include targeted
+
+**Important:** Items marked Done below are verified in `eMule-main`. Items marked In
+Progress may already be implemented on dedicated bug/feature branches but are not
+considered landed until merged to `main`. Experimental-only work (see individual docs) is
+not in `main` unless the item status below says otherwise.
+
+**Revalidation rule:** Before implementing any item, re-check it against current `main`
+and current dependency pins.
+
+**Regression rule:** New feature/fix work from this backlog should include targeted
 regression checks. When behavior changes, compare `main` against
-`oracle/v0.72a-build` as the seam-enabled oracle baseline derived from the
-`build` release branch where that comparison is meaningful.
-**Oracle stack rule:** the old 0.72a comparison stack is layered, not flat:
+`oracle/v0.72a-build` as the seam-enabled oracle baseline derived from the `build`
+release branch where that comparison is meaningful.
+
+**Oracle stack rule:**
+
 - `oracle/v0.72a-build` = baseline seam-enabled oracle
 - `tracing/v0.72a` = observability-only derivative of oracle
 - `tracing-harness/v0.72a` = behavior-changing parity-harness derivative of tracing
@@ -112,6 +91,8 @@ regression checks. When behavior changes, compare `main` against
 | [BUG-033](BUG-033.md) | Minor | Wont-Fix | WebSocket and MiniUPnP shutdown still use forced thread termination |
 | [BUG-034](BUG-034.md) | Minor | Open | Release paths silently swallow unexpected exceptions via catch (...) plus ASSERT(0) |
 | [BUG-035](BUG-035.md) | Minor | Open | Historical control-flow still uses bare ASSERT(0) without recovery or logging |
+| [BUG-036](BUG-036.md) | Major | Open | `known.met` and `cancelled.met` still save in place and can truncate on failure |
+| [BUG-037](BUG-037.md) | Major | Open | Same-hash KnownFile replacement can unshare or mis-track equivalent files |
 
 ---
 
@@ -143,7 +124,7 @@ regression checks. When behavior changes, compare `main` against
 | [REF-029](REF-029.md) | Major | Open | Move UDP sockets to WSAPoll backend — AsyncDatagramSocket (experimental ref) |
 | [REF-030](REF-030.md) | Minor | Open | Replace WSAAsyncGetHostByName with worker-thread resolver in DownloadQueue (experimental ref) |
 | [REF-031](REF-031.md) | Minor | **Done** | Review upload queue scoring against community and stale baselines |
-| [REF-032](REF-032.md) | Minor | Open | Use MFC-native property sheets and dynamic layout instead of CTreePropSheet / ResizableLib |
+| [REF-032](REF-032.md) | Minor | In Progress | Use MFC-native property sheets and dynamic layout instead of CTreePropSheet / ResizableLib |
 | [REF-033](REF-033.md) | Trivial | Open | Remove remaining IE/MSHTML drag-drop, HTML Help, and legacy IE web-client baggage |
 | [REF-034](REF-034.md) | Minor | Open | Upgrade Crypto++ from 8.4 to 8.9 and refresh the local MSVC/ARM64 project fork |
 
@@ -202,7 +183,16 @@ regression checks. When behavior changes, compare `main` against
 | [FEAT-028](FEAT-028.md) | Minor | **Done** | Virtualize and harden shared files list |
 | [FEAT-029](FEAT-029.md) | Minor | **Done** | Search result ceilings — configurable ed2k expansion plus moderate Kad totals/lifetimes |
 | [FEAT-030](FEAT-030.md) | Minor | **Done** | Bind policy completion — global `BindAddr` everywhere else, separate `WebBindAddr` for WebServer |
+| [FEAT-031](FEAT-031.md) | Minor | Open | Auto-browse compatible remote shared-file inventories with persisted cache |
 | [FEAT-032](FEAT-032.md) | Minor | In Progress | NAT mapping modernization — keep MiniUPnP, drop WinServ, add PCP/NAT-PMP |
+| [FEAT-033](FEAT-033.md) | Minor | **Done** | Disk-space floor hardening and legacy import-flow retirement |
+| [FEAT-034](FEAT-034.md) | Minor | Open | Shared-files reload should stop blocking the UI on large trees |
+| [FEAT-035](FEAT-035.md) | Major | Open | IPv6 dual-stack networking for peers, friends, Kad, and server surfaces |
+| [FEAT-036](FEAT-036.md) | Major | Open | NAT traversal and extended source exchange for LowID-to-LowID connectivity |
+| [FEAT-037](FEAT-037.md) | Minor | Open | Release-oriented sharing controls — PowerShare, Release Bonus, and Share Only The Need |
+| [FEAT-038](FEAT-038.md) | Minor | Open | Shared-files watcher and live recursive share sync |
+| [FEAT-039](FEAT-039.md) | Minor | Open | Download checker — duplicate and near-duplicate intake guard |
+| [FEAT-040](FEAT-040.md) | Major | Open | Headless core with modern web/mobile controller and multi-user permissions |
 
 ---
 
@@ -227,24 +217,27 @@ regression checks. When behavior changes, compare `main` against
 
 ### Do First — stabilization / hardening with minimal drift
 
-1. **BUG-028** — remaining MP3 metadata fallback Unicode risk if `id3lib` stays
-2. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
-3. **BUG-031** — bounded retry for transient shared-file hashing open failures *(explicitly deferred / Blocked)*
+1. **BUG-036** — move `known.met` / `cancelled.met` saves to atomic replacement instead of in-place truncation
+2. **BUG-037** — fix destructive hash-only KnownFile replacement before it unshares or mis-tracks duplicates
+3. **BUG-028** — remaining MP3 metadata fallback Unicode risk if `id3lib` stays
+4. **BUG-002, BUG-013** — ArchiveRecovery correctness/OOM bugs if the feature is retained
+5. **BUG-031** — bounded retry for transient shared-file hashing open failures *(explicitly deferred / Blocked)*
 
 ### Do Second — narrow stability items still close to current behavior
 
-5. **BUG-004 through BUG-006, BUG-023, BUG-028, BUG-034, BUG-035** — targeted correctness fixes
-6. **BUG-008** — CaptchaGenerator rand() & 8 or fold into REF-027
-7. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
-8. **CI-010** — continue lowering the remaining app-local warning floor now that SDK and third-party warning mass is contained *(explicitly deferred / Blocked)*
-9. **REF-028** — MbedTLS 4.0 upgrade once the current WebServer/TLS surface is stable
-10. **FEAT-002** — SafeKad CGNAT fix
-11. **FEAT-001** — FastKad diversity/stale-decay follow-through after the landed core port *(explicitly deferred / Blocked)*
+1. **BUG-004 through BUG-006, BUG-023, BUG-028, BUG-034, BUG-035** — targeted correctness fixes
+2. **BUG-008** — CaptchaGenerator rand() & 8 or fold into REF-027
+3. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
+4. **CI-010** — continue lowering the remaining app-local warning floor now that SDK and third-party warning mass is contained *(explicitly deferred / Blocked)*
+5. **REF-028** — MbedTLS 4.0 upgrade once the current WebServer/TLS surface is stable
+6. **FEAT-002** — SafeKad CGNAT fix
+7. **FEAT-001** — FastKad diversity/stale-decay follow-through after the landed core port *(explicitly deferred / Blocked)*
 
 ### Do Later — useful, but not part of the current stabilization milestone
 
 - **BUG-023** — shared-file ED2K published-state UI false `No` after publish reset; small correctness fix, low protocol risk
 - **FEAT-017, REF-026, REF-032** — DPI/manifest/MFC-host modernization
+- **FEAT-034** — keep manual shared-files reload responsive on large trees without importing the full watcher/thread model
 - **CI-001 through CI-006** — broader build/tooling modernization
 - **REF-017, REF-018, REF-020, REF-021, REF-023, REF-025** — cleanup and legacy removal passes
 - **REF-027** — CaptchaGenerator rewrite
@@ -252,6 +245,10 @@ regression checks. When behavior changes, compare `main` against
 - **FEAT-014** — optional OpenAPI/external gateway follow-up after FEAT-013
 - **FEAT-018 through FEAT-021** — larger product features outside the hardening milestone
 - **CI-007** — Kad fuzz tests after the broader CI/toolchain stack is ready
+
+### Expansion Track — explicitly beyond stock
+
+- **FEAT-031, FEAT-035 through FEAT-040** — user-directed feature-expansion backlog; evaluate independently from the stabilization/hardening line
 
 ---
 
@@ -299,10 +296,18 @@ FEAT-024 (share-ignore policy) ──► CI-009 (share-ignore regressions)
 FEAT-025 (filename normalization) — standalone intake/completion hardening
 FEAT-026 (shared startup cache) ──► FEAT-027 (startup sequencing, profiling, and startup-path churn cleanup)
 FEAT-027 (startup sequencing/profiling) ──► FEAT-028 (shared-files control virtualization and churn reduction)
+FEAT-028 (shared-files virtualization) ──► FEAT-034 (manual reload freeze reduction on the same surface)
+FEAT-034 (manual reload freeze reduction) ──► FEAT-038 (shared-files watcher/live sync)
+FEAT-015/023 (upload controller/scoring) ──► FEAT-037 (release-oriented sharing controls)
 FEAT-017 (DPI) ──► REF-026 (manifest) — apply together
 FEAT-017 (DPI) ──► REF-032 (modern MFC layout hosts) — apply on the same UI surfaces
 FEAT-017 (DPI) ──► FEAT-019 (dark mode — pair for modern UI milestone)
 FEAT-018 (µTP) ──► coordinate with REF-029 (WSAPoll UDP demux)
+FEAT-018 (µTP) ──► FEAT-036 (hole-punch and relay retry coordination)
+FEAT-032 (NAT mapping modernization) ──► FEAT-036 (connectivity stack follow-up)
+FEAT-035 (IPv6 dual-stack) ──► coordinate with FEAT-036 (future connectivity path)
+FEAT-013 (REST API) ──► FEAT-040 (headless/web/mobile control surface)
+FEAT-014 (OpenAPI/external gateway) ──► FEAT-040 (remote-controller/product layer)
 CI-006 (ASan) ──► BUG-018/019 follow-up concurrency verification
 ```
 
@@ -345,6 +350,7 @@ These items were verified in `eMule-main` and are genuinely done:
 | FEAT-028 — Shared Files virtualization | commit `fc70cf9` — owner-data Shared Files list with hardened reload/state handling |
 | FEAT-029 — Search result ceilings | commit `1dd710c` — configurable ed2k and moderate Kad search result/lifetime ceilings |
 | FEAT-030 — Bind policy completion | commits `a762ea1`, `ca80a00`, `6244a50` — `WebBindAddr`, ancillary bind audit completion, and follow-up UI restoration |
+| FEAT-033 — Disk-space floor hardening and legacy import-flow retirement | commit `e15e9f4` — separate protected disk floors plus stop/save behavior and legacy import-flow removal |
 | FEAT-013 — In-process WebServer REST API | commits `94e0884`, `8d0832a` — `/api/v1` JSON surface, hashed `X-API-Key` auth, `WebServerJson.cpp`, vendored `nlohmann/json.hpp`, and upload-tuning parity mapped to the broadband controller |
 | BUG-029 — Long-path tail hardening | current `main` commit series `bb7ef92` through `1e71a16` |
 | BUG-030 — Server login crypt flags | commit `f9bb14b` — suppress callback crypt request/require flags on already-obfuscated server sockets |
@@ -417,6 +423,8 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 | `AUDIT-CODEREVIEW.md` | CODEREV_001 fixed in main; 002/003/004/011 not in main; 006/007 still need revalidation because WebSocket is still live | BUG-007, BUG-008, REF-028 |
 | eMuleAI v1.3 analysis | Initial source for `ReplaceFileAtomically`, `CanWritePartMetFiles`, shareddir lock, destructor guard, and feature references | BUG-009 through BUG-012 (Done), FEAT-018 through FEAT-022 |
 | `eMuleAI` hardening revalidation (2026-04-18) | Current `main` already contains REF-007, FEAT-020/022/026/027/028, BUG-029, BUG-030, and now BUG-032; remaining stock-friendly candidate is the narrow hashing-open retry bug | BUG-031 |
+| `eMuleAI` + mods + web revalidation (2026-04-20) | Local `main` catch-up through `FEAT-033`, focused KnownFile persistence/dedup review, and filtered current community-demand scan | FEAT-033, REF-032, BUG-036, BUG-037, FEAT-034 |
+| Feature expansion pass beyond stock (2026-04-20) | User-directed backlog expansion using current eMuleAI feature notes, historical mod catalogs, and fresh web-demand signals | FEAT-031, FEAT-035, FEAT-036, FEAT-037, FEAT-038, FEAT-039, FEAT-040 |
 | `stale-v0.72a-experimental-clean` diff (2026-04-09) | 378 commits; 16 backlog items with reference impls | See Experimental Branch Reference table above |
 
 ---
@@ -424,6 +432,229 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 10 open bugs + 1 in-progress bug + 28 refactors/boost items + 15 features + 9 CI = **63 non-done issues**.*
+*Total non-done: 12 bugs + 21 refactors/boost items + 24 features + 9 CI = **66 non-done issues**.*
 
-*Status refresh through 2026-04-20: FEAT-029 and FEAT-030 are now marked Done in `main`; REF-007, FEAT-020, FEAT-022, FEAT-026, and FEAT-027 are now marked Done in `main`; FEAT-028, BUG-029, BUG-030, and BUG-032 were added as landed `main` work; BUG-031, CI-010, and the remaining FEAT-001 follow-through are now explicitly deferred and tracked as `Blocked`; CI-008 now also records the long-config `-c` live UI stability regression coverage; FEAT-032 now tracks the local MiniUPnP plus PCP/NAT-PMP runtime modernization pass pending live validation.*
+*Status refresh through 2026-04-20: `FEAT-033` is now marked Done in local `main`; `REF-032` is corrected to `In Progress` rather than `Open`; `BUG-036`, `BUG-037`, and `FEAT-034` were added from the fresh eMuleAI/mods/main revalidation; `FEAT-031` is restored to the active index after drift; `FEAT-035` through `FEAT-040` are now tracked as explicit expansion features beyond the previous stock-preserving backlog line; `FEAT-032` still tracks the local MiniUPnP plus PCP/NAT-PMP runtime modernization pass pending live validation.*
+
+## History
+
+**Rebuilt:** 2026-04-08 — clean slate from git log + old docs salvage + fresh code audit
+
+**Revalidated:** 2026-04-09 — deep diff against `stale-v0.72a-experimental-clean`
+(378 commits); BUG-009/010/011/012/015 confirmed Done in main; experimental reference
+implementations documented for all items done there
+
+**Revalidated:** 2026-04-10 — full cross-variant analysis pass: eMule-main new commits
+(06eaefe/4a02669/0300a9d), community-0.72 (irwir, 10 commits through 2026-01-05),
+eMuleAI (2026 release), stale-v0.72a-experimental-clean (378 commits, deep FIX/BUG CPP
+pass). BUG-001/BUG-016 confirmed Done in main; BUG-017 through BUG-021 new from
+experimental; REF-027 through REF-030 new from community+experimental; FEAT-018 through
+FEAT-022 new from eMuleAI+experimental.
+
+**Revalidated:** 2026-04-12 — focused `community-0.72` vs `eMule-main` `srchybrid` diff
+review for stabilization/hardening only. Confirmed long-path shell delete gap
+(`BUG-022`), refreshed FEAT-010 scope, pivoted REST planning to extend `WebServer.cpp`,
+and added regression-expansion item `CI-008`. Async socket remains explicitly deferred
+for a future phase.
+
+**Updated:** 2026-04-13 — `main` now includes the FEAT-010 long-path/share-state
+stabilization line, the FEAT-024 centralized share-ignore policy with additive
+`shareignore.dat`, and FEAT-025 filename normalization on download intake/completion.
+CI-008 long-path regressions and CI-009 share-ignore regressions are landed as well.
+
+**Revalidated:** 2026-04-13 — current app workspace HEAD (`e1ecdee`, branch
+`feature/feat028-shared-files-virtual-list`) is ahead of `main` (`021cb5b`) by
+FEAT-026/027 startup work. Added `BUG-023`, added `FEAT-025`/`026`/`027`, corrected
+FEAT-015/016/023 item docs to match `main`, and recorded historical `docs/` drift in
+[REVIEW-2026-04-13-main-workspace-revalidation](REVIEW-2026-04-13-main-workspace-revalidation.md).
+
+**Revalidated:** 2026-04-13 — Windows/MFC/toolchain deep dive. Confirmed current `main`
+still links WebServer/MbedTLS/id3lib, current local toolchain is VS 2022 `v143` / MFC
+14.x, current code uses zero modern MFC UI host/layout classes, and `emule.vcxproj`
+still carries VC71-upgrade baggage plus DPI-off manifest settings. Added `REF-032`,
+corrected stale dependency/security source-doc rows, and recorded the details in
+[REVIEW-2026-04-13-windows-mfc-toolchain-deep-dive](REVIEW-2026-04-13-windows-mfc-toolchain-deep-dive.md).
+
+**Revalidated:** 2026-04-14 — focused bug-only pass on current `main`. Added `BUG-024`
+for the live `statUTC(HANDLE)` size-field corruption and `BUG-025` for wrong/stale
+hashing open diagnostics in `CKnownFile`. Recorded the pass in
+[REVIEW-2026-04-14-main-bug-pass](REVIEW-2026-04-14-main-bug-pass.md).
+
+**Revalidated:** 2026-04-14 — deeper bug-only follow-up on current `main`. Added
+`BUG-026` for search-tab teardown lifetime violations and `BUG-027` for destructive
+IP-filter promotion failure. Recorded the follow-up in
+[REVIEW-2026-04-14-main-bug-pass-deeper](REVIEW-2026-04-14-main-bug-pass-deeper.md).
+
+**Revalidated:** 2026-04-14 — deeper Windows/API and dependency pass. Added `BUG-028`
+for ANSI-only `id3lib` path handling in current MP3 metadata extraction, refreshed
+`REF-021` / `REF-030` with the remaining live Winsock and message-DNS surface, and
+recorded the deeper findings in
+[REVIEW-2026-04-14-api-deep-pass-id3lib-unicode](REVIEW-2026-04-14-api-deep-pass-id3lib-unicode.md).
+
+**Updated:** 2026-04-18 — persisted fresh startup/shutdown profiling conclusions under
+`FEAT-026`, `FEAT-027`, and `CI-008`, using the current `eMule-main` startup matrix
+`20260418-121956-eMule-main-debug` plus shutdown probes
+`shutdown-probe-20260418-122546-profiling` and
+`shutdown-repeat-20260418-122927`.
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-026` search-tab teardown lifetime
+hardening in commit `8ba6248`; `BUG-026` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-027` IP-filter promotion hardening in
+commit `cc3553b`; `BUG-027` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-025` KnownFile hash-open diagnostics
+hardening in commit `897c207`; `BUG-025` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-024` handle-based `statUTC`
+size-field correction in commit `f33f38b`; `BUG-024` is marked Done.
+
+**Revalidated:** 2026-04-18 — focused `eMuleAI` vs current `eMule-main` hardening pass.
+Corrected stale landed statuses for `REF-007`, `FEAT-020`, `FEAT-022`, `FEAT-026`, and
+`FEAT-027`; added landed `BUG-029` and `FEAT-028`; promoted new stock-friendly hardening
+bugs `BUG-030` / `BUG-031` / `BUG-032`; refreshed `CI-008` with long-config `-c` live UI
+stability coverage; recorded the pass in
+[REVIEW-2026-04-18-emuleai-vs-main-hardening-pass](REVIEW-2026-04-18-emuleai-vs-main-hardening-pass.md).
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-030` server-login crypt-flag
+hardening in commit `f9bb14b`; `BUG-030` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `BUG-032` AICH hashset save timeout
+removal in commit `8a5a33c`; `BUG-032` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `REF-019` `EncryptedStreamSocket`
+protocol-error hardening in commit `93b3450`; `REF-019` is marked Done.
+
+**Updated:** 2026-04-18 — narrow `REF-017` dead-code cleanup landed in current `main`:
+all remaining `CCM_SETUNICODEFORMAT` no-op calls, `MAXCON5WIN9X`, and one stale WinNT
+note were removed.
+
+**Updated:** 2026-04-18 — `REF-017` is now marked Done after revalidation confirmed that
+the only original targeted leftovers are intentionally retained `deadlake PROXYSUPPORT`
+comments and no further live dead-code workload remains.
+
+**Updated:** 2026-04-18 — `main` now includes `REF-018` defunct PeerCache surface
+removal plus legacy `FileBufferSizePref` / `QueueSizePref` load-read cleanup in commit
+`6751a50`; `REF-018` is marked Done.
+
+**Updated:** 2026-04-18 — `main` now includes `REF-026` manifest cleanup in commit
+`444f6ec`: Windows 10 / 11+ compatibility is declared via the Windows 10 GUID only,
+Common Controls 6.0 moved from linker pragmas into the embedded manifests, and DPI
+enablement remains deferred to `FEAT-017`.
+
+**Updated:** 2026-04-18 — `REF-001`, `REF-015`, and `REF-016` are now marked `Wont-Fix`
+to preserve the current low-drift branch direction: keep the existing ZIP reader, keep
+miniupnpc in the UPnP stack, and keep ResizableLib out-of-tree.
+
+**Updated:** 2026-04-18 — search-result expansion is now tracked separately from
+`FEAT-016` as new `FEAT-029`: configurable ed2k result ceilings plus moderate Kad
+totals/lifetimes with Tweaks exposure.
+
+**Updated:** 2026-04-18 — `main` now includes standalone `FEAT-012` TCP listen-socket
+error-flood defense: accepted incoming pre-handshake TCP error/close bursts are tracked
+per IP and banned through the stock banned-IP path, with Tweaks hidden-security settings
+for enable/interval/threshold.
+
+**Updated:** 2026-04-18 — bind-policy completion is now tracked as `FEAT-030`: keep
+global `BindAddr` on all non-web socket paths, add separate `WebBindAddr`, and audit
+remaining socket openers such as `Pinger`.
+
+**Updated:** 2026-04-19 — local `main` now includes the core `FEAT-001` FastKad /
+`nodes.fastkad.dat` port in commit `125720f`; `FEAT-001` is now `In Progress` rather
+than `Open` because its bootstrap diversity and stale-decay follow-through remains
+unfinished.
+
+**Updated:** 2026-04-19 — current `main` now completes `REF-004`: the original
+hidden-preference write-back fix from `4a02669` is now paired with Extended-options
+exposure/validation cleanup (`6c792d9`, `e6f0625`, `910828c`, `d3ccfd1`), and the
+retired `AICHTrustEveryHash` key is explicitly deleted from persisted config.
+
+**Updated:** 2026-04-19 — current `main` now includes the first `REF-025` cleanup slice
+in commit `3105ee3` (`chore: remove Connection options wizard entry`); the full
+legacy-feature removal remains unfinished, so `REF-025` is now `In Progress`.
+
+**Updated:** 2026-04-19 — current `main` now includes the `BUG-028` mitigation commit
+`5cc8e59` (`prefer MediaInfo.dll for AV metadata routing`); the Unicode-unsafe `id3lib`
+fallback remains, so the item is now `In Progress` rather than `Open`.
+
+**Updated:** 2026-04-19 — `BUG-005` is now marked `Wont-Fix` by explicit product
+decision: Kad buddy callback encryption / `RequireCrypt` incompatibility is understood
+but intentionally not pursued on the current branch direction. `REF-021` remains valid
+but is explicitly deferred for now; because the backlog schema has no `Deferred` status,
+it is tracked as `Blocked`.
+
+**Updated:** 2026-04-19 — added `BUG-033` to persist the explicit `Wont-Fix` decision
+for the shutdown-only `TerminateThread` fallbacks in `WebSocket.cpp` and
+`UPnPImplMiniLib.cpp`.
+
+**Updated:** 2026-04-19 — added `BUG-034` to track the broader release-silent
+`catch (...)` plus `ASSERT(0)` pattern across `ArchiveRecovery`, `Collection`,
+`WebServer`, `ServerSocket`, and similar paths. This stays `Open`; future fixes should
+add explicit logging where practical rather than silently swallowing unexpected
+exceptions.
+
+**Updated:** 2026-04-19 — added `BUG-035` to track the broader non-exception
+control-flow debt where live runtime paths still rely on bare `ASSERT(0)` placeholders
+without proper recovery or logging. Representative current anchors include
+`TreePropSheet.cpp`, `TransferWnd.cpp`, and `SHAHashSet.cpp`.
+
+**Updated:** 2026-04-19 — added `CI-010` to track the remaining app-local warning debt
+after the external-header noise reduction pass. This keeps real source-fix buckets
+(`C5262`, `C4244`, targeted `C5219`) separate from the deferred `REF-021` Winsock
+cleanup and from framework-heavy `C4191` triage.
+
+**Updated:** 2026-04-19 — `BUG-031`, `CI-010`, and the remaining `FEAT-001` FastKad
+follow-through are now explicitly deferred by product decision; because the backlog
+schema has no `Deferred` state, they are tracked as `Blocked`.
+
+**Updated:** 2026-04-19 — `main` now includes the `BUG-003` cleanup in commit `a0a7d18`:
+the real remaining issue was narrowed to Kad metadata 64-bit formatting, that formatter
+is fixed, and the other historical `FIXME LARGE FILES` markers were removed as stale
+overstatements. `BUG-003` is marked Done.
+
+**Updated:** 2026-04-19 — current `main` now includes the MiniMule-specific `REF-025`
+cleanup slice in commit `867d303` (`REF-025: remove MiniMule feature`); the broader
+legacy-feature removal remains unfinished, so `REF-025` stays `In Progress`.
+
+**Updated:** 2026-04-19 — post-MiniMule revalidation added `REF-033` to track the
+smaller remaining IE-era baggage still present in current `main`: MSHTML-based
+`DropTarget` HTML parsing, HTML Help, stale IE-specific web-template branches, and
+leftover browser-hosting markers.
+
+**Updated:** 2026-04-19 — added `REF-034` to track the real Crypto++ refresh candidate
+surfaced by the dependency advisory report: move from the current 8.4-based fork to a
+reviewed 8.9-based fork while preserving the narrow local `cryptlib.vcxproj` carry set
+for MSVC warnings and ARM64 support.
+
+**Updated:** 2026-04-19 — current `main` now includes `FEAT-013` in commits `94e0884`
+and `8d0832a`: the REST surface is delivered in-process through `WebServer.cpp` /
+`WebSocket.cpp` with a dedicated `WebServerJson.cpp` route layer, hashed `X-API-Key`
+auth, the experimental JSON contract reused without the named-pipe/sidecar runtime
+stack, and the experimental upload-tuning fields mapped onto the current broadband
+upload-budget controller. `FEAT-013` is marked Done.
+
+**Updated:** 2026-04-19 — `CI-008` now includes the first concrete REST regression slice
+on current `main`: native `web_api.tests.cpp` coverage for the landed `/api/v1`
+route/contract helpers plus the live `run-rest-api-smoke.ps1` harness for `X-API-Key`
+auth, representative read routes, live server/Kad/search scenarios, and HTML-vs-REST
+separation. The live harness now records an explicit degraded-network search skip when a
+session makes real connect/bootstrap attempts but never reaches a searchable network
+state.
+
+**Updated:** 2026-04-20 — added `FEAT-032` to track the NAT-mapping modernization pass
+now implemented locally on current `main`: remove the Windows-service UPnP backend, keep
+MiniUPnP as the `UPnP IGD` path, add `libpcpnatpmp` for `PCP/NAT-PMP`, and expose a
+Tweaks backend-mode selector. The code/build phase is complete, but the item stays
+`In Progress` pending live-network validation.
+
+**Revalidated:** 2026-04-20 — fresh local-`main` catch-up through `c06f403` plus
+focused `eMuleAI`, `mods-archive`, and retired-stale comparisons. Recorded the pass in
+[REVIEW-2026-04-20-emuleai-mods-main-backlog-pass](REVIEW-2026-04-20-emuleai-mods-main-backlog-pass.md),
+added landed `FEAT-033`, moved `REF-032` to `In Progress`, promoted `BUG-036` /
+`BUG-037`, and added the narrow performance candidate `FEAT-034`.
+
+**Expanded:** 2026-04-20 — user-directed feature-expansion pass beyond the usual
+stock-preserving line. Restored missing `FEAT-031` to the active index and added
+higher-drift expansion items `FEAT-035` through `FEAT-040` from current eMuleAI release
+notes, historical mod feature catalogs, and fresh web-demand signals. Recorded in
+[REVIEW-2026-04-20-feature-expansion-beyond-stock](REVIEW-2026-04-20-feature-expansion-beyond-stock.md).

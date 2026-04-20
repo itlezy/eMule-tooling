@@ -1,0 +1,55 @@
+---
+id: FEAT-037
+title: Release-oriented sharing controls — PowerShare, Release Bonus, and Share Only The Need
+status: Open
+priority: Minor
+category: feature
+labels: [sharing, release, powershare, upload, queue, rarity, mods]
+milestone: ~
+created: 2026-04-20
+source: MorphXT FAQ; Mephisto FAQ; historical eMule feature catalogs
+---
+
+## Summary
+
+Add an explicit release/distribution policy layer for rare or newly published files.
+
+This feature groups several historically popular mod behaviors under one controlled design:
+
+- `PowerShare`
+- release bonus / release-priority queue behavior
+- `Share Only The Need` or similar rarity-aware distribution controls
+
+## Why Add It
+
+This is one of the clearest examples of "beyond stock" eMule behavior that users of older
+mods actively valued. Historical MorphXT/Mephisto/Pawcio feature catalogs consistently put
+release-focused sharing policy near the center of their differentiation.
+
+For an archival/community-sharing branch, this can be more valuable than another general UI
+tweak.
+
+## Intended Mainline Shape
+
+- per-file and/or category-level release sharing mode
+- optional PowerShare policy that prioritizes serving a chosen file regardless of normal
+  queue dynamics
+- optional release bonus or focused upload treatment for selected files
+- rarity-aware controls that prefer scarce parts/files over overserved ones
+- guardrails so these policies cannot silently starve the rest of the upload ecosystem
+
+## Scope Constraints
+
+- integrate with the current broadband upload controller instead of replacing it
+- keep the feature opt-in and explicit
+- favor a smaller modernized control surface over porting every legacy mod knob
+- coordinate with anti-abuse logic so aggressive release settings do not become a leecher
+  fingerprint
+
+## Acceptance Criteria
+
+- [ ] a file can be marked for release-oriented sharing policy
+- [ ] upload queue behavior measurably favors the selected release file(s)
+- [ ] scarcity-aware distribution can prefer under-served parts or files
+- [ ] normal uploads remain bounded and not permanently starved
+- [ ] operators can disable the entire feature globally
