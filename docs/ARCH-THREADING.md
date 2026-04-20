@@ -56,6 +56,33 @@ not yet at the final IOCP-style architecture described later in this document.
 | `CLoadDataThread` | Indexed.h:64 | BELOW_NORMAL | Load Kademlia index data from disk | CMutex m_mutSync + volatile flags |
 | `CStartDiscoveryThread` | UPnPImplMiniLib.h:36 | NORMAL | miniupnpc UPnP device discovery | CMutex m_mutBusy |
 
+### 1.1.1 Monitored Shared-Directory Watcher Limit
+
+Current `main` also runs one background monitored shared-directory watcher thread
+(`CemuleApp::RunSharedDirectoryMonitorLoop`) for roots enabled through
+`Share with Subdirectories and Monitor`.
+
+That implementation currently uses:
+
+- `WaitForMultipleObjects`
+- one stop event
+- one reconfigure/wake event
+- two `FindFirstChangeNotification` handles per monitored root
+  - one file-change watcher
+  - one directory-change watcher
+
+Because `WaitForMultipleObjects` can wait on at most `MAXIMUM_WAIT_OBJECTS`
+(`64`) handles, the current design has a hard monitored-root ceiling of:
+
+`(64 - 2) / 2 = 31`
+
+This is an accepted current limitation, not a temporary bug workaround.
+Roots beyond that ceiling are intentionally downgraded out of monitored mode
+instead of falling back to polling. If this limit becomes a product problem, the
+intended fix is architectural: move the monitored-share watcher path to
+`ReadDirectoryChangesW` with an overlapped/IOCP-capable design rather than
+trying to stretch the current `WaitForMultipleObjects` fan-in model.
+
 ### 1.2 Everything Else: The UI Thread
 
 The UI thread still owns the 100ms `SetTimer` loop and the bulk of protocol scheduling work:
