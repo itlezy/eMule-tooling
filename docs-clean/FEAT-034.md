@@ -39,7 +39,15 @@ The first implementation slice landed on `main` on 2026-04-21:
 - `0aaadbe` — shared reload deferral policy is exposed through seams for native tests
 - `f138856` in `repos\eMule-build-tests` — native seam coverage and live-profile summary parsing were updated for the new readiness/hash-drain split
 
-This reduces the startup and reload churn caused by hash-thread creation and repeated list rebuilds. It does **not** yet move the directory enumeration pass itself fully off the UI thread, so this item remains `In Progress` rather than `Done`.
+The follow-up hardening slice landed after review:
+
+- `7cbad68` — startup-deferred Shared Files list reloads now stay pending while shared hashing is active and flush only after hash drain
+- `85fcaf6` — the shared hash worker waits for the UI thread to consume each posted completion before starting the next job
+- `ff254ab` — shared hash completion posting retries while the UI is still alive before discarding a result during shutdown/error paths
+- `67d85de` and `306bb63` in `repos\eMule-build-tests` — native seam coverage for the deferred-list reload gate and worker backpressure
+- `f711688` in `repos\eMule-build-tests` — live startup-profile coverage now fails if the Shared Files list rebuilds repeatedly during hash drain
+
+The targeted long-path recursive live scenario now shows one final coalesced list rebuild during shared hash drain instead of repeated periodic reloads. This reduces the startup and reload churn caused by hash-thread creation and repeated list rebuilds. It does **not** yet move the directory enumeration pass itself fully off the UI thread, so this item remains `In Progress` rather than `Done`.
 
 ## Comparison Notes
 
@@ -74,6 +82,7 @@ broader `eMuleAI` shared-files feature import.
 
 - [ ] manual shared-files reload returns control quickly on large trees
 - [x] repeated reload requests coalesce instead of starting overlapping scans while hashing is active
-- [ ] final shared-file results converge to the same set as the synchronous path
+- [x] targeted long-path live profile converges to the expected final visible Shared Files rows after hash drain
+- [ ] general final shared-file results converge to the same set as the synchronous path across broader reload scenarios
 - [x] uploads, share state, and GUI counters remain stable while shared hashes drain in the background
 - [x] no always-on watcher or wider product drift is introduced
