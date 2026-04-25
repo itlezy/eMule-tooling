@@ -34,10 +34,10 @@ The backlog was stale after April 20. Current `main` now includes:
 
 `BUG-036` is now `Done`.
 
-`BUG-037` is `In Progress`, not `Done`. The duplicate shared-path sidecar is
-landed and covered by startup reuse flows, but current
-`CKnownFileList::SafeAddKFile()` still removes and replaces the old known-file
-entry on MD4 collision.
+`BUG-037` later completed on the same-day hardening line. The duplicate
+shared-path sidecar is landed and covered by startup reuse flows, and the
+follow-up KnownFile collision slice narrowed `CKnownFileList::SafeAddKFile()`
+so live shared/download owners are preserved on same-MD4 collisions.
 
 `FEAT-034` is still `In Progress`. The worker, deferral, backlog, and shutdown
 handling slices landed, and TEST-034 coverage expanded substantially. The

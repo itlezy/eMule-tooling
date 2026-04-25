@@ -1,9 +1,13 @@
 # Rules
+- read `EMULE_WORKSPACE_ROOT\repos\eMule-tooling\docs\WORKSPACE_POLICY.md` at the start of every workspace task
 - canonical roots are expressed through `EMULE_WORKSPACE_ROOT` or `-EmuleWorkspaceRoot`
 - the authoritative workspace policy lives in `EMULE_WORKSPACE_ROOT\repos\eMule-tooling\docs\WORKSPACE_POLICY.md`
 - the canonical tests repo is `EMULE_WORKSPACE_ROOT\repos\eMule-build-tests`
 - the canonical remote repo is `EMULE_WORKSPACE_ROOT\repos\eMule-remote`
 - the canonical app worktrees live under `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\...`
+- routine work uses granular commits directly on each repo's `main`; create branches only when explicitly requested
+- interactive build, validation, and test commands must use `EMULE_WORKSPACE_ROOT\repos\eMule-build\workspace.ps1` or `workspace.cmd`
+- do not run ad hoc direct `MSBuild` from app worktrees, `srchybrid`, or `eMule-build-tests`
 - do not restate the full workspace contract here; that belongs in the central workspace policy document
 - when editing tracked text files, you must honor the repo-local `.editorconfig` and `.gitattributes`; normalize edited files before finishing
 - comment added code only when the purpose is not obvious

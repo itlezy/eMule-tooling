@@ -5,6 +5,21 @@ This document is the single source of truth for the canonical eMule workspace.
 All workspace-wide directives should point here instead of restating policy in
 repo-local docs.
 
+## Mandatory Preflight
+
+- Read this policy at the start of every workspace task before running build,
+  validation, test, commit, or cleanup commands.
+- Check `git status --short --branch` in each repo that will be read for
+  current-state decisions or edited.
+- Routine active work happens through granular commits on each repo's `main`
+  branch unless the user explicitly requests a separate branch.
+- App edits belong in `workspaces\v0.72a\app\eMule-main`; do not edit the
+  canonical `repos\eMule` branch-store checkout for normal app work.
+- Interactive build, validation, and test commands must go through
+  `repos\eMule-build\workspace.ps1` or `workspace.cmd`.
+- Do not run ad hoc direct `MSBuild` commands from an app worktree,
+  `srchybrid`, or `repos\eMule-build-tests`.
+
 ## Workspace Roots
 
 - Canonical workspace paths are expressed through `EMULE_WORKSPACE_ROOT`.
@@ -30,8 +45,10 @@ repo-local docs.
 ### App Repo
 
 - `main` is the only integration branch.
-- Short-lived working branches should be cut from `main`.
-- Recommended names:
+- Routine active app work is done directly in `eMule-main` on `main`.
+- Short-lived working branches are exceptional and should be used only when the
+  user explicitly requests one or an already-documented workflow requires one.
+- If a short-lived branch is explicitly requested, recommended names are:
   - `feature/<topic>`
   - `fix/<topic>`
   - `chore/<topic>`
@@ -117,26 +134,30 @@ extended for it.
 
 ## Merge and History Hygiene
 
-- The default merge strategy back to `main` is squash merge.
+- The default active workflow is direct, granular commits on `main`.
+- If an explicit working branch is requested, the default merge strategy back
+  to `main` is squash merge.
 - `main` history should stay curated and readable.
 - Do not push `WIP`, checkpoint, or debug commits to `main`.
 - One `main` commit should represent one coherent outcome.
 - Commits must stay granular and behavior-focused; do not bundle unrelated work into one commit.
 - When a change spans multiple repos, create and verify those commits sequentially; do not launch parallel commits.
 - Commit messages for feature, bug, refactor, and CI backlog work must include the tracked item id such as `BUG-017`, `FEAT-015`, `REF-021`, or `CI-003`.
-- Direct commits to `main` are acceptable only for very small administrative or
-  policy corrections.
+- Push each completed `main` commit to its `origin/main` before starting the
+  next unrelated slice unless the user explicitly asks to hold local commits.
 
 ## Development Workflow
 
-- Normal development starts from `main` on short-lived branches.
-- Recommended branch families are:
+- Normal development starts from a clean understanding of current `main` and
+  proceeds directly on `main` in the relevant repo.
+- Recommended branch families, when a branch is explicitly requested, are:
   - `feature/<topic>` for new behavior
   - `fix/<topic>` for bug fixes
   - `chore/<topic>` for tooling, docs, or repo hygiene
 - Keep working branches such as `feature/*`, `fix/*`, and `chore/*` after
   merge until there is an explicit later decision to delete or retire them.
-- The normal path back to `main` is feature branch plus squash merge.
+- The normal path for routine work is commit and push each coherent slice on
+  `main`.
 - One working branch should pursue one coherent outcome.
 - Avoid mixing unrelated behavior changes, dependency churn, tooling churn, and
   large cleanup in one branch unless they are inseparable.
@@ -260,12 +281,14 @@ extended for it.
 - App worktrees do not by themselves define a complete supported app-build
   environment; dependency materialization and third-party build inputs are part
   of the `eMulebb-setup` plus `eMule-build` contract.
-- Direct `msbuild` of `srchybrid\emule.vcxproj` from an app worktree is not the
-  default supported validation path unless the `eMule-build` materialized build
-  environment is already known to be active.
-- If a direct app-project build fails because third-party headers or libraries
-  are unresolved, report that the supported `eMule-build` path was bypassed
-  rather than describing the workspace as generically missing materialization.
+- Interactive build, validation, and test work must use
+  `repos\eMule-build\workspace.ps1` or `workspace.cmd`.
+- Direct ad hoc `MSBuild` commands from an app worktree, `srchybrid`, or
+  `repos\eMule-build-tests` are prohibited. Direct `MSBuild` invocation is
+  allowed only inside owned orchestration implementation that is itself called
+  through the supported `eMule-build` entrypoints.
+- If a build fails, report the supported `eMule-build` command and log path.
+  Do not diagnose the workspace from an unsupported direct app-project build.
 - Repo-local docs must not redefine dependency pin authority or workspace
   topology.
 
@@ -288,6 +311,8 @@ extended for it.
 - Workspace-wide development rules belong only in this document.
 - Workspace-wide hooks and workspace-wide policy must be centralized in
   `repos\eMule-tooling`.
+- `repos\eMule-tooling\RESUME.md` may be used as a short current handoff
+  pointer. Detailed durable analysis belongs in tooling docs.
 - Repo-local `AGENTS.md` files should stay thin and repo-specific.
 - Repo-local docs must point to this policy rather than restating workspace
   branch, worktree, setup, or dependency authority.

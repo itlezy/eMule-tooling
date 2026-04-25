@@ -65,11 +65,16 @@ Assert-FileNotContains $buildWorkspaceScript 'emule\.slnx?' 'workspace.ps1 must 
 
 foreach ($activeDocPath in @(
     (Resolve-WorkspacePath 'repos\eMule-build\README.md'),
+    (Resolve-WorkspacePath 'repos\eMule-build-tests\README.md'),
     (Resolve-WorkspacePath 'repos\eMule-tooling\README.md'),
     (Resolve-WorkspacePath 'repos\eMule-tooling\AGENTS.md'),
     (Resolve-WorkspacePath 'repos\eMule-tooling\docs\WORKSPACE_POLICY.md')
 )) {
     Assert-FileNotContains $activeDocPath 'emule\.slnx?' "$activeDocPath must not describe emule.sln or emule.slnx as active build entrypoints."
+    Assert-FileNotContains `
+        $activeDocPath `
+        '(?i)(^|\s|`|&)(?:&\s*)?msbuild(?:\.exe)?\s+(?:[./\\\w:-]+\.vcxproj|[./\\\w:-]+\.slnx?|/t:|/p:|-t:|-p:)' `
+        "$activeDocPath must not document direct MSBuild command lines as active build entrypoints; use repos\eMule-build\workspace.ps1."
 }
 
 Write-Host 'Project entrypoint audit passed.'
