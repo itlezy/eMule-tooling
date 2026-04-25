@@ -8,6 +8,8 @@
 - marked `BUG-037` Done in `docs-clean`
 - confirmed focused KnownFile tests, the canonical Debug x64 app build, and
   Shared Files UI `duplicate-startup-reuse` live validation pass
+- locked `FEAT-032` Automatic NAT mapping order through app `a2f1143` and
+  test coverage `df9a9cc`: UPnP IGD is first, PCP/NAT-PMP is fallback
 
 ## Next Chunk
 

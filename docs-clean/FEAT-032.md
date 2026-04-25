@@ -64,6 +64,8 @@ The current local workspace implementation has completed the code/build phase:
   - `PCP/NAT-PMP only`
 - updated `eMule-build` so `build-app` now requires and passes the
   `libpcpnatpmp` static library through the supported workspace build path
+- locked the `Automatic` backend order through a seam-level policy so
+  `UPnP IGD (MiniUPnP)` is attempted before `PCP/NAT-PMP`
 
 ## Remaining Completion Work
 
@@ -81,6 +83,7 @@ Still needed before this should be marked `Done`:
 - [x] `miniupnpc` remains the `UPnP IGD` backend
 - [x] `libpcpnatpmp` is linked into the supported app build
 - [x] Tweaks exposes `Automatic` / `UPnP IGD only` / `PCP/NAT-PMP only`
+- [x] native tests cover `Automatic` as UPnP IGD first, then PCP/NAT-PMP
 - [x] WinServ-only active prefs are removed from runtime behavior
 - [x] supported `eMule-build` app builds pass for active architectures
 - [ ] live-network NAT-mapping validation completed on current `main`
