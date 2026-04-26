@@ -44,10 +44,10 @@ shape intact:
 
 - `Ed2kSearchMaxResults = 0`
 - `Ed2kSearchMaxMoreRequests = 0`
-- `KadFileSearchTotal = 500`
-- `KadKeywordSearchTotal = 500`
-- `KadFileSearchLifetime = 60`
-- `KadKeywordSearchLifetime = 60`
+- `KadFileSearchTotal = 750`
+- `KadKeywordSearchTotal = 750`
+- `KadFileSearchLifetime = 90`
+- `KadKeywordSearchLifetime = 90`
 
 Validation bounds:
 

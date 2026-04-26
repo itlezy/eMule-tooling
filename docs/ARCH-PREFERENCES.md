@@ -101,6 +101,12 @@ The last two groups are documented because they still live in the same file, but
 | `YourHostname` | `eMule` | `RW` | Yes | empty | Optional hostname override displayed/used by the app. |
 | `NetworkED2K` | `eMule` | `RW` | Yes | `true` | Enable the eD2k network layer. |
 | `NetworkKademlia` | `eMule` | `RW` | Yes | `true` | Enable the Kad network layer. |
+| `Ed2kSearchMaxResults` | `eMule` | `RW` | Advanced tree | `0` | Maximum eD2k search results; `0` keeps the search uncapped. |
+| `Ed2kSearchMaxMoreRequests` | `eMule` | `RW` | Advanced tree | `0` | Maximum extra eD2k search-more requests; `0` keeps the request count uncapped. |
+| `KadFileSearchTotal` | `eMule` | `RW` | Advanced tree | `750` | Total Kad file-search budget; clamped to `100..5000`. |
+| `KadKeywordSearchTotal` | `eMule` | `RW` | Advanced tree | `750` | Total Kad keyword-search budget; clamped to `100..5000`. |
+| `KadFileSearchLifetime` | `eMule` | `RW` | Advanced tree | `90` seconds | Kad file-search lifetime; clamped to `30..180` seconds. |
+| `KadKeywordSearchLifetime` | `eMule` | `RW` | Advanced tree | `90` seconds | Kad keyword-search lifetime; clamped to `30..180` seconds. |
 
 ### Directories, Files, And Download Behavior
 
@@ -126,7 +132,7 @@ The last two groups are documented because they still live in the same file, but
 | `RememberCancelledFiles` | `eMule` | `RW` | Yes | `true` | Keep memory of cancelled files. |
 | `RememberDownloadedFiles` | `eMule` | `RW` | Yes | `true` | Keep memory of already-downloaded files. |
 | `AutoClearCompleted` | `eMule` | `RW` | Yes | `false` | Automatically clear finished downloads from the list. |
-| `FileBufferSize` | `eMule` | `RW` | Yes | `2 * 1024 * 1024` | Global file buffer size in bytes. Exposed via the Tweaks slider. |
+| `FileBufferSize` | `eMule` | `RW` | Yes | `64 * 1024 * 1024` | Global file buffer size in bytes. Exposed via the Tweaks slider. |
 | `QueueSize` | `eMule` | `RW` | Yes | derived from app default | Queue size cap. |
 
 ### Display / UI / Toolbar
@@ -221,9 +227,9 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 
 | INI key | Section | Mode | UI | Default | Explanation |
 | --- | --- | --- | --- | --- | --- |
-| `CreateCrashDump` | `eMule` | `RW` | Advanced tree | `0` | Crash dump mode: disabled, ask, or create automatically. |
-| `MaxLogFileSize` | `eMule` | `RW` | Advanced tree | `1048576` bytes | Maximum on-disk log file size. Tweaks edits it in KiB; `0` means no rotation limit. Direct INI values are bounded on load. |
-| `MaxLogBuff` | `eMule` | `RW` | Advanced tree | `64` KiB | Maximum in-memory log view buffer. Direct INI values are bounded on load. |
+| `CreateCrashDump` | `eMule` | `RW` | Advanced tree | `1` | Crash dump mode: disabled, ask, or create automatically. |
+| `MaxLogFileSize` | `eMule` | `RW` | Advanced tree | `16777216` bytes | Maximum on-disk log file size. Tweaks edits it in KiB; `0` means no rotation limit. Direct INI values are bounded on load. |
+| `MaxLogBuff` | `eMule` | `RW` | Advanced tree | `256` KiB | Maximum in-memory log view buffer. Direct INI values are bounded on load. |
 | `LogFileFormat` | `eMule` | `RW` | Advanced tree | `Unicode` | On-disk log encoding: UTF-16 Unicode or UTF-8. |
 | `FullVerbose` | `eMule` | `RW` | Advanced tree | `false` | Full verbose trace when verbose logging is enabled. |
 | `HighresTimer` | `eMule` | `RW` | Advanced tree | `false` | Requests a high-resolution Windows timer while eMule is running. |
@@ -256,6 +262,9 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `PartiallyPurgeOldKnownFiles` | `eMule` | `RW` | Advanced tree | `true` | Allows more aggressive cleanup of stale known-file entries. |
 | `RearrangeKadSearchKeywords` | `eMule` | `RW` | Advanced tree | `true` | Reorder Kad search keywords before issuing the search. |
 | `MessageFromValidSourcesOnly` | `eMule` | `RW` | Advanced tree | `true` | Message acceptance gate used by `BaseClient.cpp`. |
+| `GeoLocationEnabled` | `eMule` | `RW` | Advanced tree | `true` | Enables IP geolocation display and automatic DB refresh checks. |
+| `GeoLocationCheckDays` | `eMule` | `RW` | Advanced tree | `30` days | Automatic geolocation DB refresh interval; clamped to `7..365`. |
+| `GeoLocationLastCheckTime` | `eMule` | `RW` | Geolocation updater | `0` | Last geolocation DB refresh attempt timestamp; `0` makes the enabled updater due on first run. |
 | `PerfLog:Mode` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging enable/mode. Tweaks exposes this as an enable checkbox. |
 | `PerfLog:FileFormat` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging output format: CSV or MRTG. |
 | `PerfLog:File` | `PerfLog` | `RW` | Advanced tree | config-dir default | Performance logging base file path. |
@@ -295,7 +304,7 @@ Documented-only active keys:
 
 ## UI Defaults Which Are Not First-Class `CPreferences` Keys
 
-These values are currently defaulted directly in UI code or autocomplete history behavior, not stored as first-class `CPreferences` members.
+These values are currently defaulted directly in UI code through `CPreferences` default helpers, not stored as first-class persisted preference members.
 
 | Setting | Current default | Where it is implemented | Explanation |
 | --- | --- | --- | --- |
