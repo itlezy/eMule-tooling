@@ -13,7 +13,7 @@ reference reading.
 ## Current Snapshot
 
 **Source of truth:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main` (`main` branch)  
-**Current non-done count:** `68`
+**Current non-done count:** `67`
 **Latest status refresh:** 2026-04-26
 
 Latest review trail:
@@ -130,7 +130,7 @@ release branch where that comparison is meaningful.
 | [BUG-069](BUG-069.md) | Major | **Done** | WebServer static resource requests can escape the web root and allocate whole files |
 | [BUG-070](BUG-070.md) | Minor | **Done** | Ignored helper-thread launch failures can hang shutdown waits |
 | [BUG-071](BUG-071.md) | Major | **Done** | server.met persistence still uses destructive backup and promotion moves |
-| [BUG-072](BUG-072.md) | Minor | Open | Kad preferences and routing snapshots still save in place |
+| [BUG-072](BUG-072.md) | Minor | **Done** | Kad preferences and routing snapshots still save in place |
 | [BUG-073](BUG-073.md) | Major | **Done** | WebServer session and bad-login state is mutated from request threads without synchronization |
 | [BUG-074](BUG-074.md) | Minor | Open | Archive preview scanner uses volatile cancellation and synchronous UI handoff |
 
@@ -490,9 +490,9 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 15 bugs + 21 refactors/boost items + 26 features + 9 CI = **71 non-done issues**.*
+*Total non-done: 14 bugs + 21 refactors/boost items + 26 features + 9 CI = **70 non-done issues**.*
 
-*Status refresh through 2026-04-26: current `main` is reconciled through `dca6bba`; `FEAT-038` is documented as Done; `BUG-068`, `FEAT-043`, and `FEAT-044` were added from the eMuleAI/mod scan; `BUG-069` through `BUG-074` were added from the direct current-main bug/concurrency scan; `BUG-004` and `BUG-028` were refreshed with cross-variant notes; `BUG-070` is now Done.*
+*Status refresh through 2026-04-26: current `main` is reconciled through `dca6bba`; `FEAT-038` is documented as Done; `BUG-068`, `FEAT-043`, and `FEAT-044` were added from the eMuleAI/mod scan; `BUG-069` through `BUG-074` were added from the direct current-main bug/concurrency scan; `BUG-004` and `BUG-028` were refreshed with cross-variant notes; `BUG-070` and `BUG-072` are now Done.*
 
 ## History
 
@@ -735,3 +735,9 @@ failure hardening in app commit `7cbdbc9` and tests commit `60ec43a`: upload dis
 I/O, part-file writes, and upload bandwidth throttling capture `AfxBeginThread`
 failures, avoid invalid IOCP posts, avoid impossible shutdown waits, and carry native
 seam coverage for the launch-failure decisions.
+
+**Updated:** 2026-04-26 — current `main` now includes `BUG-072` Kad persistence
+promotion hardening in app commit `efb8871` and tests commit `f31b890`:
+`preferencesKad.dat` and `nodes.dat` are saved through checked temp-file promotion,
+the bootstrap-empty guard is preserved, and FastKad sidecar metadata is ordered after
+successful `nodes.dat` promotion.
