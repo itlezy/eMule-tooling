@@ -262,6 +262,10 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `PerfLog:Interval` | `PerfLog` | `RW` | Advanced tree | `5` minutes | Performance logging sample interval. |
 | `MaxFileUploadSizeMB` | `WebServer` | `RW` | WebServer page | `5` | Maximum single WebServer upload size in MiB. |
 | `AllowedIPs` | `WebServer` | `RW` | WebServer page | empty | Optional semicolon-separated IPv4 allow-list for WebServer clients. |
+| `AutoIPFilterUpdate` | `eMule` | `RW` | Security page | `false` | Enables post-startup automatic `ipfilter.dat` refreshes. |
+| `IPFilterUpdatePeriodDays` | `eMule` | `RW` | Security page | `7` days | Day interval for automatic IP-filter update attempts; clamped to `1..365`. |
+| `LastIPFilterUpdate` | `eMule` | `RW` | Automatic updater | `0` | Last automatic IP-filter update attempt timestamp. |
+| `IPFilterUpdateUrl` | `eMule` | `RW` | Security page | `http://upd.emule-security.org/ipfilter.zip` | URL used by manual and automatic IP-filter updates. |
 
 Documented-only active keys:
 
@@ -298,7 +302,6 @@ These values are currently defaulted directly in UI code or autocomplete history
 | Server.met URL | `http://upd.emule-security.org/server.met` | `ServerWnd.cpp` | Default text shown in the server.met URL edit when empty. |
 | Nodes.dat URL | `http://upd.emule-security.org/nodes.dat` | `KademliaWnd.cpp` | Default text shown in the Kad bootstrap URL edit when empty. |
 | Kad bootstrap mode | `Load nodes from URL` | `KademliaWnd.cpp` | Default radio selection in the Kad tab. |
-| IP filter URL | `http://upd.emule-security.org/ipfilter.zip` | `PPgSecurity.cpp` | Default text shown in the IP filter URL edit when empty. |
 
 ## Technical Notes For Non-Obvious Settings
 

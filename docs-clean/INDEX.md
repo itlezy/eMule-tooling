@@ -225,7 +225,7 @@ release branch where that comparison is meaningful.
 | [FEAT-039](FEAT-039.md) | Minor | Open | Download checker — duplicate and near-duplicate intake guard |
 | [FEAT-040](FEAT-040.md) | Major | Open | Headless core with modern web/mobile controller and multi-user permissions |
 | [FEAT-041](FEAT-041.md) | Minor | Open | Download Inspector automation for stale downloads and majority-name rename |
-| [FEAT-042](FEAT-042.md) | Minor | Open | Automatic IP filter update scheduling |
+| [FEAT-042](FEAT-042.md) | Minor | **Done** | Automatic IP filter update scheduling |
 
 ---
 

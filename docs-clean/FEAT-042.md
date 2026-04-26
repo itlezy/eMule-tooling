@@ -1,7 +1,7 @@
 ---
 id: FEAT-042
 title: Automatic IP filter update scheduling
-status: Open
+status: Done
 priority: Minor
 category: feature
 labels: [ipfilter, security, automation, preferences, emuleai]
@@ -15,18 +15,19 @@ source: `analysis\emuleai` v1.4 release notes
 Add an optional scheduler for updating `ipfilter.dat` from a configured URL
 using the already-hardened safe download and promotion path.
 
-## Intended Mainline Shape
+## Mainline Shape
 
-- reuse the existing manual IP-filter update implementation
-- add an explicit auto-update toggle
-- add a configurable update interval in days
-- log success, no-change, and failure states clearly
-- avoid deleting or replacing the live filter if download or validation fails
+- reuses the manual IP-filter archive/plain-file install and atomic promotion path
+- adds an explicit Security-page auto-update toggle and configurable day interval
+- stores a first-class update URL, defaulting to `http://upd.emule-security.org/ipfilter.zip`
+- queues one post-startup background refresh when enabled and due
+- reloads the running `CIPFilter` instance and reapplies filtered-server pruning after successful promotion
+- rejects empty or markup-like downloads before they can replace the live filter
 
 ## Acceptance Criteria
 
-- [ ] automatic updates are disabled by default
-- [ ] the interval is persisted and validated
-- [ ] the manual update path and automatic path share the same safe promotion
+- [x] automatic updates are disabled by default
+- [x] the interval is persisted and validated
+- [x] the manual update path and automatic path share the same safe promotion
       logic
-- [ ] invalid downloads preserve the previous live `ipfilter.dat`
+- [x] invalid downloads preserve the previous live `ipfilter.dat`
