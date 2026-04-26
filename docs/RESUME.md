@@ -10,30 +10,34 @@ explicitly asks for a current handoff. Do not use it for mid-task planning.
 - Active app worktree: `workspaces\v0.72a\app\eMule-main` on `main`.
 - Supporting repos checked this session: `repos\eMule-build-tests` and
   `repos\eMule-tooling` on `main`.
-- The session handoff location is now
-  `repos\eMule-tooling\docs\RESUME.md`; stale top-level tooling handoff state
-  is removed from active policy.
-- All touched repos were clean on `main...origin/main` after the FEAT-042
-  commits listed below.
-- FEAT-042 automatic IP-filter update scheduling is implemented, tested,
-  documented, committed, and pushed:
-  - app: `dca6bba FEAT-042 add automatic IP filter updater`
-  - tests: `78a9576 FEAT-042 cover IP filter auto update controls`
-  - tooling docs: `272a727 FEAT-042 document IP filter updater completion`
-- Full aggregate live E2E was intentionally stopped because it entered the
-  large auto-browse download path. No leftover live harness processes were
-  running afterward.
+- All checked active repos are clean on `main...origin/main`.
+- Latest app commit: `bb84294 FEAT-029 update reviewed preference defaults`.
+- Latest tests commit: `f4c2ff2 CI-002 use LF for test source files`.
+- Latest tooling commit:
+  `f3f2f09 BUG-002 BUG-013 BUG-028 BUG-074 close retained legacy surfaces`.
+- Release-closure backlog decisions recorded and pushed:
+  - `BUG-002`, `BUG-013`, and `BUG-074` are Wont-Fix by product decision;
+    archive preview/recovery is retained unchanged.
+  - `BUG-028` is Wont-Fix by product decision; the retained `id3lib` fallback
+    risk is accepted for Release 1.
+- Current backlog non-done count is `62`.
+- Proposed next slice is `BUG-023` Shared Files ED2K publish-state UI fix, with
+  no new seams.
 
 ## Validation References
 
+Recent completed validation from this session:
+
 - `workspace.ps1 validate` passed.
-- `workspace.ps1 build-app -Config Release -Platform x64` passed.
 - `workspace.ps1 build-tests -Config Release -Platform x64` passed.
-- `workspace.ps1 test -Config Release -Platform x64` passed (`434 passed`,
-  `65 skipped`).
-- `workspace.ps1 python-tests -PythonTestQuiet` passed (`74 passed`).
-- `workspace.ps1 live-e2e -LiveSuite preference-ui` passed and persisted the
-  new IP-filter controls.
+- `workspace.ps1 test -Config Release -Platform x64` passed (`451 passed`,
+  `70 skipped`).
+- `workspace.ps1 build-app -Config Release -Platform x64` passed.
+- `workspace.ps1 build-app -Config Debug -Platform x64` passed.
+- Docs-only Wont-Fix closure validation passed:
+  - source normalization check
+  - Wont-Fix/index consistency check
+  - `git diff --check`
 
 ## Next Steps
 
@@ -42,7 +46,12 @@ explicitly asks for a current handoff. Do not use it for mid-task planning.
 - Use `repos\eMule-build\workspace.ps1` or `workspace.cmd` for build,
   validation, test, and live commands.
 - Do not run direct MSBuild from app worktrees or test repos.
-- Avoid the full aggregate live suite when the auto-browse large-download path
-  is not needed; prefer targeted live suites for the changed surface.
-- For release validation, choose explicit live suites up front so large P2P
-  download scenarios are deliberate.
+- If continuing code work, implement `BUG-023` without new seams:
+  - add a transient `CKnownFile` ED2K republish-pending flag
+  - make `RepublishFile()` queue republish without flipping visible
+    `PublishedED2K` to false
+  - make `SendListToServer()` include pending files and clear pending state
+    after successful packet inclusion
+  - update docs after app validation
+- Also clean stale triage in `docs-clean\INDEX.md`: `BUG-072` is already Done
+  and should no longer appear in "Do First."
