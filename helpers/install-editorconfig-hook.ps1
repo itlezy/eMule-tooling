@@ -113,6 +113,11 @@ if ($LASTEXITCODE -ne 0) {
     throw "Failed to configure core.hooksPath for '$repoRootPath'."
 }
 
+& git -C $repoRootPath config --local core.autocrlf false
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to configure core.autocrlf for '$repoRootPath'."
+}
+
 if ((Test-Path -LiteralPath $existingPreCommitPath -PathType Leaf) -and
     $existingPreCommitPath -ne $sharedPreCommitPath -and
     [string]::IsNullOrWhiteSpace($configuredHooksPathResolved)) {
@@ -125,3 +130,4 @@ if ((Test-Path -LiteralPath $existingPreCommitPath -PathType Leaf) -and
 $installedHooksDir = Get-GitPath -RepoRoot $repoRootPath -GitPath 'hooks'
 Write-Host ("Configured editorconfig hook for {0}" -f $repoRootPath) -ForegroundColor Green
 Write-Host ("core.hooksPath: {0}" -f $installedHooksDir)
+Write-Host 'core.autocrlf: false'

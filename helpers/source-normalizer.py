@@ -83,6 +83,14 @@ class NormalizationOutcome:
     written: bool
 
 
+@dataclass(frozen=True)
+class GitFileAttributes:
+    """Stores Git attributes that affect the working-tree text representation."""
+
+    eol: str | None = None
+    working_tree_encoding: str | None = None
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments for audit and normalization modes."""
 
@@ -210,6 +218,83 @@ def get_editorconfig_properties(path: Path) -> dict[str, str]:
     """Return EditorConfig properties for a file path."""
 
     return editorconfig.get_properties(os.path.abspath(path))
+
+
+def iter_chunks(items: list[str], chunk_size: int) -> list[list[str]]:
+    """Split a list into stable chunks for command-line safe Git calls."""
+
+    return [items[index : index + chunk_size] for index in range(0, len(items), chunk_size)]
+
+
+def clean_git_attr_value(value: str) -> str | None:
+    """Return a usable Git attribute value, ignoring unset/unspecified markers."""
+
+    normalized = value.strip()
+    if not normalized or normalized in {"unspecified", "unset"}:
+        return None
+    return normalized
+
+
+def map_git_working_tree_encoding(value: str) -> str | None:
+    """Map Git working-tree-encoding values onto normalizer charset labels."""
+
+    normalized = value.strip().lower().replace("_", "-")
+    aliases = {
+        "utf-8": "utf-8",
+        "utf8": "utf-8",
+        "utf-8-bom": "utf-8-bom",
+        "utf-16le": "utf-16le",
+        "utf-16le-bom": "utf-16le",
+        "utf-16be": "utf-16be",
+        "utf-16be-bom": "utf-16be",
+    }
+    return aliases.get(normalized)
+
+
+def get_git_file_attributes(root_path: Path, files: list[Path]) -> dict[Path, GitFileAttributes]:
+    """Return Git attributes that should override EditorConfig normalization details."""
+
+    if not files:
+        return {}
+
+    relative_paths = [relative_display_path(root_path, file_path).replace("\\", "/") for file_path in files]
+    attributes_by_relative: dict[str, dict[str, str]] = defaultdict(dict)
+
+    for chunk in iter_chunks(relative_paths, 200):
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(root_path),
+                "check-attr",
+                "-z",
+                "eol",
+                "working-tree-encoding",
+                "--",
+                *chunk,
+            ],
+            capture_output=True,
+            text=False,
+            check=False,
+        )
+        if result.returncode != 0:
+            continue
+
+        parts = result.stdout.decode("utf-8", errors="surrogateescape").split("\0")
+        for index in range(0, max(0, len(parts) - 2), 3):
+            relative_path = parts[index]
+            attribute_name = parts[index + 1]
+            attribute_value = clean_git_attr_value(parts[index + 2])
+            if attribute_value is not None:
+                attributes_by_relative[relative_path][attribute_name] = attribute_value
+
+    resolved: dict[Path, GitFileAttributes] = {}
+    for relative_path, attributes in attributes_by_relative.items():
+        resolved[(root_path / relative_path).resolve()] = GitFileAttributes(
+            eol=attributes.get("eol"),
+            working_tree_encoding=attributes.get("working-tree-encoding"),
+        )
+    return resolved
 
 
 def detect_line_ending(text: str) -> str:
@@ -366,6 +451,7 @@ def scan_and_normalize(args: argparse.Namespace) -> int:
     detailed_paths: defaultdict[str, list[str]] = defaultdict(list)
     outcomes: list[NormalizationOutcome] = []
     failure_paths: list[str] = []
+    git_attributes = get_git_file_attributes(root_path, files)
 
     for file_path in files:
         relative_path = relative_display_path(root_path, file_path)
@@ -381,8 +467,15 @@ def scan_and_normalize(args: argparse.Namespace) -> int:
             continue
 
         properties = get_editorconfig_properties(file_path)
+        file_attributes = git_attributes.get(file_path, GitFileAttributes())
         target_charset = properties.get("charset", "utf-8").lower()
         end_of_line = properties.get("end_of_line", detect_line_ending(inspection.text)).lower()
+        if file_attributes.eol in {"lf", "crlf"}:
+            end_of_line = file_attributes.eol
+        if file_attributes.working_tree_encoding:
+            mapped_charset = map_git_working_tree_encoding(file_attributes.working_tree_encoding)
+            if mapped_charset:
+                target_charset = mapped_charset
         trim_trailing_whitespace = (
             properties.get("trim_trailing_whitespace", "false").lower() == "true"
         )
