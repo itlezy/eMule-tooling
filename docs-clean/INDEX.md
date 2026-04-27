@@ -13,8 +13,8 @@ reference reading.
 ## Current Snapshot
 
 **Source of truth:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main` (`main` branch)  
-**Current non-done count:** `62`
-**Latest status refresh:** 2026-04-26
+**Current non-done count:** `61`
+**Latest status refresh:** 2026-04-27
 
 Latest review trail:
 
@@ -81,7 +81,7 @@ release branch where that comparison is meaningful.
 | [BUG-020](BUG-020.md) | Minor | **Done** | Client socket teardown ordering — cross-link not cleared before Safe_Delete |
 | [BUG-021](BUG-021.md) | Minor | **Done** | Upload queue lock inversion + socket I/O result mishandling + inflate buffer aliasing |
 | [BUG-022](BUG-022.md) | Major | **Done** | Long-path delete-to-recycle-bin still breaks in ShellDeleteFile |
-| [BUG-023](BUG-023.md) | Minor | Open | Shared-file ED2K published column shows a false `No` after publish-state reset |
+| [BUG-023](BUG-023.md) | Minor | **Done** | Shared-file ED2K published column shows a false `No` after publish-state reset |
 | [BUG-024](BUG-024.md) | Minor | **Done** | `statUTC(HANDLE)` returns corrupted `st_size` by using `nFileIndexLow` |
 | [BUG-025](BUG-025.md) | Minor | **Done** | KnownFile hashing open failures log stale or wrong error text on Win32 open failure |
 | [BUG-026](BUG-026.md) | Major | **Done** | Search tab teardown frees live result/tab payload objects before the UI detaches them |
@@ -261,13 +261,12 @@ release branch where that comparison is meaningful.
 
 ### Do First — stabilization / hardening with minimal drift
 
-1. **BUG-072** — finish safe-promotion persistence coverage for `preferencesKad.dat` and `nodes.dat`
-2. **BUG-034, BUG-035** — continue targeted runtime logging/recovery work; the broad scan is still noisy
-3. **BUG-031** — bounded retry for transient shared-file hashing open failures *(explicitly deferred / Blocked)*
+1. **BUG-034, BUG-035** — continue targeted runtime logging/recovery work; the broad scan is still noisy
+2. **BUG-031** — bounded retry for transient shared-file hashing open failures *(explicitly deferred / Blocked)*
 
 ### Do Second — narrow stability items still close to current behavior
 
-1. **BUG-006, BUG-023, BUG-034, BUG-035** — targeted correctness fixes
+1. **BUG-006, BUG-034, BUG-035** — targeted correctness fixes
 2. **BUG-008** — CaptchaGenerator rand() & 8 or fold into REF-027
 3. **CI-008** — keep expanding live and targeted regression coverage after the long-path and config-stability slices
 4. **CI-010** — continue lowering the remaining app-local warning floor now that SDK and third-party warning mass is contained *(explicitly deferred / Blocked)*
@@ -277,7 +276,6 @@ release branch where that comparison is meaningful.
 
 ### Do Later — useful, but not part of the current stabilization milestone
 
-- **BUG-023** — shared-file ED2K published-state UI false `No` after publish reset; small correctness fix, low protocol risk
 - **FEAT-017, REF-026, REF-032** — DPI/manifest/MFC-host modernization
 - **FEAT-034** — keep manual shared-files reload/hash paths responsive on large trees; watcher/live sync is separate and done in FEAT-038
 - **FEAT-043** — Known Clients list/history responsiveness for very large client histories
@@ -488,9 +486,9 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 6 bugs + 21 refactors/boost items + 26 features + 9 CI = **62 non-done issues**.*
+*Total non-done: 5 bugs + 21 refactors/boost items + 26 features + 9 CI = **61 non-done issues**.*
 
-*Status refresh through 2026-04-26: current `main` is reconciled through `dca6bba`; `FEAT-038` is documented as Done; `BUG-068`, `FEAT-043`, and `FEAT-044` were added from the eMuleAI/mod scan; `BUG-069` through `BUG-074` were added from the direct current-main bug/concurrency scan; `BUG-028` was refreshed with cross-variant notes and is now Wont-Fix by product decision to accept the retained `id3lib` fallback risk; `BUG-004`, `BUG-070`, and `BUG-072` are now Done; `BUG-002`, `BUG-013`, and `BUG-074` are Wont-Fix by product decision to keep archive preview/recovery unchanged.*
+*Status refresh through 2026-04-27: current `main` is reconciled through `10a6c20`; `FEAT-038` is documented as Done; `BUG-068`, `FEAT-043`, and `FEAT-044` were added from the eMuleAI/mod scan; `BUG-069` through `BUG-074` were added from the direct current-main bug/concurrency scan; `BUG-028` was refreshed with cross-variant notes and is now Wont-Fix by product decision to accept the retained `id3lib` fallback risk; `BUG-004`, `BUG-023`, `BUG-070`, and `BUG-072` are now Done; `BUG-002`, `BUG-013`, and `BUG-074` are Wont-Fix by product decision to keep archive preview/recovery unchanged.*
 
 ## History
 
@@ -744,3 +742,8 @@ successful `nodes.dat` promotion.
 normalization in app commit `743b914` and tests commit `d0af7be`: overlapping ranges
 are split into sorted non-overlapping segments, the lowest numeric filter level wins
 inside overlaps, and adjacent same-level segments are merged before lookup.
+
+**Updated:** 2026-04-27 — current `main` now includes `BUG-023` ED2K
+publish-state refresh handling in app commit `10a6c20`: shared files keep their
+visible published state while an ED2K republish is pending, the next server offer
+includes pending files, and the pending state clears after packet inclusion.
