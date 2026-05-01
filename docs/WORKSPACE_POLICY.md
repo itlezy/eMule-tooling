@@ -335,6 +335,10 @@ The canonical workspace currently materializes these app worktrees:
 - Do not leave edited tracked files in mixed-EOL state.
 - `repos\eMule-tooling\helpers\source-normalizer.py` is the canonical
   normalization helper for workspace-owned repos and app worktrees.
+- The normalizer is not a mandatory per-edit step for small LF-stable edits.
+  Use it when touching files with uncertain encoding or EOL history, after
+  generated or bulk edits, or when `diff --check`, hooks, or `validate` show
+  normalization drift.
 - `repos\eMule-tooling\hooks\pre-commit` is the shared workspace hook entrypoint
   for catching normalization drift before commit.
 - `repos\eMule-tooling\helpers\install-editorconfig-hook.ps1` configures a
