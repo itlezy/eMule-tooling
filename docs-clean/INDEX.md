@@ -13,7 +13,7 @@ reference reading.
 ## Current Snapshot
 
 **Source of truth:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main` (`main` branch)  
-**Current non-done count:** `59`
+**Current non-done count:** `61`
 **Latest status refresh:** 2026-05-01
 
 Latest review trail:
@@ -167,6 +167,8 @@ is meaningful.
 | [REF-032](REF-032.md) | Minor | In Progress | Use MFC-native property sheets and dynamic layout instead of CTreePropSheet / ResizableLib |
 | [REF-033](REF-033.md) | Trivial | Open | Remove remaining IE/MSHTML drag-drop, HTML Help, and legacy IE web-client baggage |
 | [REF-034](REF-034.md) | Minor | Open | Upgrade Crypto++ from 8.4 to 8.9 and refresh the local MSVC/ARM64 project fork |
+| [REF-035](REF-035.md) | Minor | Open | Adopt WIL for narrow Windows and COM RAII cleanup |
+| [REF-036](REF-036.md) | Minor | Open | Adopt GSL contracts for buffer and pointer boundary hardening |
 
 ---
 
@@ -280,6 +282,7 @@ is meaningful.
 - **CI-001 through CI-006** — broader build/tooling modernization
 - **REF-017, REF-018, REF-020, REF-021, REF-023, REF-025** — cleanup and legacy removal passes
 - **REF-027** — CaptchaGenerator rewrite
+- **REF-035, REF-036** — narrow modern-library hardening; WIL first, GSL only at tested parser/buffer boundaries
 - **REF-029, REF-030** — async socket / resolver work; explicitly future phase, not part of the current stabilization plan
 - **FEAT-014** — optional OpenAPI/external gateway follow-up after FEAT-013
 - **FEAT-018 through FEAT-021** — larger product features outside the hardening milestone
@@ -310,6 +313,9 @@ REF-025 (legacy feature removal) — coordinate with REF-003 (IRC strings)
 REF-025 (legacy removal) ──► REF-027 (CaptchaGenerator: CxImage removal; easier post-REF-025)
 REF-026 (manifest) — pair with FEAT-017 (DPI)
 REF-028 (MbedTLS 4.0) — prerequisite for TLS 1.3 support
+REF-035 (WIL RAII) — standalone leaf cleanup; coordinate with setup/build dependency pins
+REF-035 (WIL RAII) ──► REF-036 (GSL contracts) as staged modern-library hardening, not broad style churn
+REF-036 (GSL contracts) ──► CI-008 coverage before touching part-file, archive, parser, or REST boundaries
 
 [Network stack — recommended order]
 REF-029 (WSAPoll UDP backend) ──► REF-030 (async hostname resolver)
@@ -484,11 +490,12 @@ have since landed in `eMule-main`; others remain reference-only. Each individual
 *Issues are tracked here, not in the old `docs/` folder. The `docs/` folder is
 historical reference only.*
 
-*Total non-done: 3 bugs + 21 refactors/boost items + 26 features + 9 CI = **59 non-done issues**.*
+*Total non-done: 3 bugs + 23 refactors/boost items + 26 features + 9 CI = **61 non-done issues**.*
 
 *Status refresh through 2026-05-01: current `main` is reconciled through `6697302`; `FEAT-038` is documented as Done; `BUG-068`, `FEAT-043`, and `FEAT-044` were added from the eMuleAI/mod scan; `BUG-069` through `BUG-074` were added from the direct current-main bug/concurrency scan; `BUG-028` was refreshed with cross-variant notes and is now Wont-Fix by product decision to accept the retained `id3lib` fallback risk; `BUG-004`, `BUG-023`, `BUG-070`, and `BUG-072` are now Done; `BUG-002`, `BUG-006`, `BUG-008`, `BUG-013`, and `BUG-074` are Wont-Fix by product decision; `BUG-031` is Deferred.*
 *Release-readiness scan through 2026-05-01: current `main` was reviewed from `10a6c20` through `6697302`; no rollback-level regression was found in the recent broadband stabilization slices; `BUG-034` / `BUG-035` stay active with `ClientUDPSocket.cpp` unknown UDP exception diagnostics as the next high-signal target; the GitHub release update checker has one small parser hardening follow-up for overflowed version components.*
 *REST live proof on 2026-05-01: the redesigned `/api/v1` surface passed the isolated Debug x64 live smoke with one server search, one Kad search, and clean shutdown; report `repos\eMule-build-tests\reports\rest-api-smoke\20260501-154017-eMule-main-debug`.*
+*Modern-library hardening review on 2026-05-01: added `REF-035` and `REF-036` for narrow WIL RAII and GSL buffer/pointer contracts; WIL is the preferred first slice, while GSL should stay limited to tested parser, persistence, REST, or byte-buffer boundaries.*
 
 ## History
 
@@ -680,6 +687,13 @@ leftover browser-hosting markers.
 surfaced by the dependency advisory report: move from the current 8.4-based fork to a
 reviewed 8.9-based fork while preserving the narrow local `cryptlib.vcxproj` carry set
 for MSVC warnings and ARM64 support.
+
+**Updated:** 2026-05-01 — added `REF-035` and `REF-036` from the modern-library
+hardening review. `REF-035` tracks WIL for narrow Windows, WinRT, COM, and handle
+RAII in leaf cleanup sites such as toast notifications, path helpers, part-file
+allocation, and WinInet ownership. `REF-036` tracks GSL only for tested
+buffer/pointer contracts such as SafeFile/PartFile hash buffers, archive-recovery
+byte readers, and REST/test helper boundaries.
 
 **Updated:** 2026-04-19 — current `main` now includes `FEAT-013` in commits `94e0884`
 and `8d0832a`: the REST surface is delivered in-process through `WebServer.cpp` /
