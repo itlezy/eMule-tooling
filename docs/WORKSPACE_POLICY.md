@@ -77,7 +77,7 @@ repo-local docs.
   - `eMule-build`
   - `eMule-build-tests`
   - `eMule-tooling`
-  - `eMule-remote`
+  - `amutorrent`
 
 ### `stale/*`
 

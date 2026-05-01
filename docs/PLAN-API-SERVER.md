@@ -37,7 +37,7 @@
 
 Rather than extending the built-in HTML web server (see `WEB_APIs.md`), this document describes an alternative architecture: a **named pipe IPC channel** inside eMule paired with a standalone **Node.js/TypeScript sidecar process** that owns the HTTP surface.
 
-The sidecar exposes a grouped `/api/v2/...` REST API backed by the local pipe contract. Push notifications (download complete, speed stats, etc.) are delivered to HTTP clients via **Server-Sent Events (SSE)**. This document is the canonical published contract for both the in-process pipe server and the sibling `eMule-remote` sidecar.
+The retired sidecar plan exposed a grouped `/api/v2/...` REST API backed by the local pipe contract. Push notifications (download complete, speed stats, etc.) were delivered to HTTP clients via **Server-Sent Events (SSE)**. This document is retained as historical design material; it is not an active workspace topology contract.
 
 ---
 

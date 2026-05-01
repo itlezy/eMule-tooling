@@ -20,7 +20,7 @@ The shipped API is:
 This document is the canonical contract for:
 
 - `eMule-main`
-- `eMule-remote`
+- `amutorrent` integration work
 - any future local tooling that consumes the shipped REST surface
 
 ## Explicit Non-Contract Surfaces
@@ -194,31 +194,9 @@ Typical status mapping:
 - `GET /api/v1/log?limit=N` returns recent retained log entries
 - callers should bound `limit` reasonably and not assume unbounded history
 
-## Proxying Rules For `eMule-remote`
-
-`eMule-remote` is expected to proxy the shipped eMule REST surface `1:1`.
-
-That means:
-
-- same `/api/v1/...` paths
-- same query strings
-- same JSON request bodies
-- same HTTP status codes
-- same JSON success and error payloads
-
-For upstream configuration, the remote must be pointed at the eMule listener
-root, for example:
-
-- `http://127.0.0.1:4711`
-
-not:
-
-- `http://127.0.0.1:4711/api/v1`
-
-because the proxy layer appends `/api/v1/...` itself.
-
 ## Historical Reference
 
 The file `PLAN-API-SERVER.md` describes an older named-pipe plus sidecar design.
 It is retained as historical analysis only and must not be treated as the
-runtime contract for `main`.
+runtime contract for `main`. The former `eMule-remote` sidecar is retired from
+the active workspace topology.

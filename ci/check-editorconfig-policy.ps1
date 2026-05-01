@@ -127,7 +127,6 @@ $scopes = @(
     @{ Label = 'setup'; RepoRoot = $SetupRepoRoot }
     @{ Label = 'build'; RepoRoot = Resolve-WorkspacePath 'repos\eMule-build' }
     @{ Label = 'tests'; RepoRoot = Resolve-WorkspacePath 'repos\eMule-build-tests' }
-    @{ Label = 'remote'; RepoRoot = Resolve-WorkspacePath 'repos\eMule-remote' }
     @{ Label = 'app-main'; RepoRoot = Resolve-WorkspacePath 'workspaces\v0.72a\app\eMule-main' }
     @{ Label = 'app-community'; RepoRoot = Resolve-WorkspacePath 'workspaces\v0.72a\app\eMule-v0.72a-community' }
     @{ Label = 'app-broadband'; RepoRoot = Resolve-WorkspacePath 'workspaces\v0.72a\app\eMule-v0.72a-broadband' }
