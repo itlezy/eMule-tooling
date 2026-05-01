@@ -60,6 +60,21 @@ Typical status mapping:
 - `PATCH /api/v1/app/preferences`
 - `POST /api/v1/app/shutdown`
 
+`app` includes additive capability metadata for controller discovery:
+
+- `apiVersion`
+- `capabilities.transfers`
+- `capabilities.searches`
+- `capabilities.servers`
+- `capabilities.sharedFiles`
+- `capabilities.uploads`
+- `capabilities.logs`
+- `capabilities.categoriesRead`
+- `capabilities.categoryAssignment`
+- `capabilities.categoryCrud`
+- `capabilities.renameFile`
+- `capabilities.fileRatingComment`
+
 ### Status And Snapshot
 
 - `GET /api/v1/status`
@@ -85,6 +100,22 @@ Typical status mapping:
 
 Per-transfer source details are intentionally excluded from `snapshot`; callers
 should request sources lazily.
+
+### Categories
+
+- `GET /api/v1/categories`
+
+Categories are read-only in the broadband release contract. The default
+download category is exposed as id `0`, name `Default`.
+
+Category rows include:
+
+- `id`
+- `name`
+- `path`
+- `comment`
+- `color`
+- `priority`
 
 ### Transfers
 
@@ -117,7 +148,12 @@ Patch accepts one of:
 { "action": "recheck" }
 { "priority": "high" }
 { "category": 0 }
+{ "categoryName": "Default" }
 ```
+
+`categoryName` assigns the transfer to an existing configured category by name.
+Category creation, editing, deletion, and rename are intentionally not exposed
+in this release slice.
 
 Delete accepts:
 
