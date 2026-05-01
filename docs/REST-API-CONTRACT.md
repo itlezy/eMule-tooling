@@ -75,6 +75,9 @@ Typical status mapping:
 - `capabilities.renameFile`
 - `capabilities.fileRatingComment`
 
+`renameFile` means controllers may rename incomplete transfers. Completed
+transfers and shared files are not renamed by this release slice.
+
 `fileRatingComment` means controllers may update user-visible rating/comment
 metadata on completed shared files.
 
@@ -152,11 +155,16 @@ Patch accepts one of:
 { "priority": "high" }
 { "category": 0 }
 { "categoryName": "Default" }
+{ "name": "new-name.ext" }
 ```
 
 `categoryName` assigns the transfer to an existing configured category by name.
 Category creation, editing, deletion, and rename are intentionally not exposed
 in this release slice.
+
+`name` renames incomplete transfers only. Completed transfers and completing
+transfers return `409 INVALID_STATE`; shared-file filesystem rename is not part
+of this release slice.
 
 Delete accepts:
 
