@@ -1,60 +1,39 @@
-# eMule REST API Contract
+# eMule BB REST API Contract
 
-**Status:** Shipped / Canonical Contract  
-**Primary implementation:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main\srchybrid\WebServerJson.cpp`  
-**Related backlog record:** `docs-clean/FEAT-013.md`
+**Status:** Broadband release contract
+**Primary implementation:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main\srchybrid\WebServerJson.cpp`
+**Route seam:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main\srchybrid\WebServerJsonSeams.h`
 
 ## Overview
 
 `main` exposes an authenticated in-process JSON API from the existing eMule
-WebServer listener.
+WebServer listener. The broadband release contract is a redesigned
+resource-oriented `/api/v1` surface. The earlier command-style `/api/v1`
+routes were retired before public release.
 
-The shipped API is:
+The API is:
 
-- in-process inside `eMule-main`
 - rooted at `/api/v1/...`
 - authenticated with `X-API-Key`
 - JSON-only
-- limited to `GET` and `POST`
-
-This document is the canonical contract for:
-
-- `eMule-main`
-- `amutorrent` integration work
-- any future local tooling that consumes the shipped REST surface
-
-## Explicit Non-Contract Surfaces
-
-The following are **not** part of the shipped contract:
-
-- the historical named-pipe transport
-- `/api/v2/...`
-- SSE event streaming
-- bearer-login auth on the upstream eMule listener
-
-The historical sidecar plan remains in `PLAN-API-SERVER.md` for reference only.
+- served by the normal eMule WebServer HTTP or HTTPS listener
+- intended for aMuTorrent and other local controllers
 
 ## Base URL And Auth
 
-The API is served from the normal WebServer listener root:
-
 - `http://<host>:<port>/api/v1/...`
-- `https://<host>:<port>/api/v1/...` when HTTPS is enabled on the listener
+- `https://<host>:<port>/api/v1/...` when HTTPS is enabled
 
 Authentication:
 
 - header: `X-API-Key: <token>`
 
-Notes:
-
-- the configured API key is a visible operator token stored in preferences
-- requests without a configured key return `503 EMULE_UNAVAILABLE`
-- requests without a valid `X-API-Key` return `401 UNAUTHORIZED`
-- legacy HTML web UI session auth is separate and does not apply to `/api/v1`
+Requests without a configured API key return `503 EMULE_UNAVAILABLE`. Requests
+without the correct key return `401 UNAUTHORIZED`.
 
 ## Error Shape
 
-All REST failures return JSON:
+All failures return JSON:
 
 ```json
 {
@@ -65,138 +44,182 @@ All REST failures return JSON:
 
 Typical status mapping:
 
-- `400` invalid arguments, path, query, or JSON body
-- `401` missing or invalid `X-API-Key`
-- `404` object or route not found
-- `409` invalid current state where applicable
+- `400` invalid route, query, method body, or JSON
+- `401` missing or invalid API key
+- `404` route or object not found
+- `409` invalid current state
 - `500` internal operation failure
 - `503` runtime unavailable or REST not configured
 
-## Route Surface
+## Routes
 
 ### Application
 
-- `GET /api/v1/app/version`
+- `GET /api/v1/app`
 - `GET /api/v1/app/preferences`
-- `POST /api/v1/app/preferences`
+- `PATCH /api/v1/app/preferences`
 - `POST /api/v1/app/shutdown`
 
-### Stats
+### Status And Snapshot
 
-- `GET /api/v1/stats/global`
+- `GET /api/v1/status`
+- `GET /api/v1/snapshot?limit=N`
+
+`status` returns:
+
+- `stats`
+- `servers`
+- `kad`
+
+`snapshot` returns:
+
+- `app`
+- `status`
+- `transfers`
+- `sharedFiles`
+- `uploads`
+- `uploadQueue`
+- `servers`
+- `kad`
+- `logs`
+
+Per-transfer source details are intentionally excluded from `snapshot`; callers
+should request sources lazily.
 
 ### Transfers
 
-- `GET /api/v1/transfers`
+- `GET /api/v1/transfers?filter=&category=`
+- `POST /api/v1/transfers`
 - `GET /api/v1/transfers/{hash}`
+- `PATCH /api/v1/transfers/{hash}`
+- `DELETE /api/v1/transfers/{hash}`
 - `GET /api/v1/transfers/{hash}/sources`
-- `POST /api/v1/transfers/add`
-- `POST /api/v1/transfers/pause`
-- `POST /api/v1/transfers/resume`
-- `POST /api/v1/transfers/stop`
-- `POST /api/v1/transfers/delete`
-- `POST /api/v1/transfers/{hash}/recheck`
-- `POST /api/v1/transfers/{hash}/priority`
-- `POST /api/v1/transfers/{hash}/category`
+- `POST /api/v1/transfers/{hash}/sources/browse`
+
+Add accepts either:
+
+```json
+{ "link": "ed2k://..." }
+```
+
+or:
+
+```json
+{ "links": ["ed2k://..."] }
+```
+
+Patch accepts one of:
+
+```json
+{ "action": "pause" }
+{ "action": "resume" }
+{ "action": "stop" }
+{ "action": "recheck" }
+{ "priority": "high" }
+{ "category": 0 }
+```
+
+Delete accepts:
+
+```json
+{ "delete_files": true }
+```
+
+### Shared Files
+
+- `GET /api/v1/shared-files`
+- `POST /api/v1/shared-files`
+- `GET /api/v1/shared-files/{hash}`
+- `DELETE /api/v1/shared-files`
+- `DELETE /api/v1/shared-files/{hash}`
+
+Add accepts `{ "path": "C:\\share\\file.ext" }`. Delete by body accepts either
+`path` or `hash`; delete by route hash supplies `hash` from the path.
 
 ### Uploads
 
-- `GET /api/v1/uploads/list`
-- `GET /api/v1/uploads/queue`
-- `POST /api/v1/uploads/remove`
-- `POST /api/v1/uploads/release_slot`
+- `GET /api/v1/uploads`
+- `GET /api/v1/upload-queue`
+- `DELETE /api/v1/uploads/{client_id}`
+- `POST /api/v1/uploads/{client_id}/release-slot`
+
+The upload client selector may be supplied by route hash when available or by
+JSON body using `userHash` or `ip` plus `port`.
 
 ### Servers
 
-- `GET /api/v1/servers/list`
-- `GET /api/v1/servers/status`
-- `POST /api/v1/servers/connect`
-- `POST /api/v1/servers/disconnect`
-- `POST /api/v1/servers/add`
-- `POST /api/v1/servers/remove`
+- `GET /api/v1/servers`
+- `POST /api/v1/servers`
+- `PATCH /api/v1/servers/{address}:{port}`
+- `DELETE /api/v1/servers/{address}:{port}`
+
+Patch actions:
+
+```json
+{ "action": "connect" }
+{ "action": "disconnect" }
+```
+
+`disconnect` may use any syntactically valid placeholder id; the current
+implementation disconnects the active server.
 
 ### Kad
 
-- `GET /api/v1/kad/status`
-- `POST /api/v1/kad/connect`
-- `POST /api/v1/kad/disconnect`
-- `POST /api/v1/kad/recheck_firewall`
+- `GET /api/v1/kad`
+- `PATCH /api/v1/kad`
 
-### Shared
-
-- `GET /api/v1/shared/list`
-- `GET /api/v1/shared/{hash}`
-- `POST /api/v1/shared/add`
-- `POST /api/v1/shared/remove`
-
-### Search
-
-- `POST /api/v1/search/start`
-- `GET /api/v1/search/results`
-- `POST /api/v1/search/stop`
-
-### Log
-
-- `GET /api/v1/log`
-
-## Key Request And Response Notes
-
-### General
-
-- transfer and shared-file hashes are lowercase 32-character MD4 hex strings
-- query strings are significant and should be preserved exactly by proxies
-- upstream callers should treat payload field ordering as unspecified
-
-### Preferences
-
-- `POST /api/v1/app/preferences` expects:
+Patch actions:
 
 ```json
-{
-  "prefs": {
-    "...": "..."
-  }
-}
+{ "action": "connect" }
+{ "action": "disconnect" }
+{ "action": "recheck_firewall" }
 ```
 
-- unsupported preference names are rejected, not silently ignored
+### Searches
 
-### Transfers Add
+- `POST /api/v1/searches`
+- `GET /api/v1/searches/{id}`
+- `DELETE /api/v1/searches/{id}`
 
-- `POST /api/v1/transfers/add` expects a single link payload:
+Search start returns:
 
 ```json
-{
-  "link": "ed2k://..."
-}
+{ "search_id": "123" }
 ```
 
-- upstream eMule does not batch `links[]` in the shipped `/api/v1` contract
+### Logs
 
-### Search
+- `GET /api/v1/logs?limit=N`
 
-- `POST /api/v1/search/start` returns:
+Callers should bound `limit` and not assume unbounded history.
 
-```json
-{
-  "search_id": "..."
-}
-```
+## Response Notes
 
-- `GET /api/v1/search/results` expects the `search_id` query parameter
-- the response contains:
-  - `status`
-  - `results`
-- individual result entries also carry their own `searchId`
+- Collection endpoints return `{ "items": [...] }`.
+- `snapshot` embeds collection arrays directly.
+- Transfer and shared-file hashes are lowercase 32-character MD4 hex strings.
+- Field ordering is not part of the contract.
+- Mutating endpoints return either the changed object, `{ "ok": true }`, or a
+  `results` array for multi-item operations.
 
-### Log
+## Retired Before Public Release
 
-- `GET /api/v1/log?limit=N` returns recent retained log entries
-- callers should bound `limit` reasonably and not assume unbounded history
+The following command-style routes are not part of the broadband release
+contract:
 
-## Historical Reference
-
-The file `PLAN-API-SERVER.md` describes an older named-pipe plus sidecar design.
-It is retained as historical analysis only and must not be treated as the
-runtime contract for `main`. The former `eMule-remote` sidecar is retired from
-the active workspace topology.
+- `/api/v1/app/version`
+- `/api/v1/stats/global`
+- `/api/v1/transfers/add`
+- `/api/v1/transfers/pause`
+- `/api/v1/transfers/resume`
+- `/api/v1/transfers/stop`
+- `/api/v1/transfers/delete`
+- `/api/v1/uploads/list`
+- `/api/v1/uploads/queue`
+- `/api/v1/servers/list`
+- `/api/v1/servers/status`
+- `/api/v1/search/start`
+- `/api/v1/search/results`
+- `/api/v1/search/stop`
+- `/api/v1/log`
