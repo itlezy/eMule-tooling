@@ -25,14 +25,14 @@ contract.
 | REST base path is `/api/v1` | implemented | Existing REST already uses this root. |
 | Auth uses `X-API-Key` only | implemented | No REST sessions, no cookie login, and no low-rights REST mode. |
 | REST inherits WebServer bind, HTTPS, and allowed-IP exposure controls | implemented | REST remains in-process on the existing listener. |
-| JSON success envelope is `{ data, meta }` | deferred | Current implementation uses mixed raw objects and `{items}` shapes. |
-| JSON collection envelope is `{ data: { items: [...] }, meta }` | deferred | Required for aMuTorrent adapter consistency. |
-| JSON error envelope is `{ error: { code, message, details? } }` | deferred | Existing errors need typed consistency pass. |
+| JSON success envelope is `{ data, meta }` | implemented | Landed on native `main`; aMuTorrent also unwraps this shape. |
+| JSON collection envelope is `{ data: { items: [...] }, meta }` | implemented | List routes request the native item envelope and are wrapped by the v1 response envelope. |
+| JSON error envelope is `{ error: { code, message, details? } }` | implemented | Native errors now use `{ error: { code, message } }`; `details` remains optional for future richer validation. |
 | Field names are `camelCase` | deferred | Current implementation still has legacy snake_case in some request and response bodies. |
 | Mutations return the updated resource when practical | deferred | Current routes often return `{ok:true}`. |
 | Bulk endpoints use HTTP 200 with per-item results | deferred | Needed for multi-link download add and future batch controller operations. |
-| Destructive file deletion requires explicit `deleteFiles: true` | deferred | Current delete bodies need final naming and route audit. |
-| aMuTorrent consumes this OpenAPI surface statically | deferred | No dynamic capability negotiation is planned for release. |
+| Destructive file deletion requires explicit `deleteFiles: true` | implemented | Transfer deletes accept `deleteFiles`; legacy `delete_files` remains a compatibility alias. |
+| aMuTorrent consumes this OpenAPI surface statically | implemented | The integration branch unwraps native envelopes and prefers the final operation routes. |
 
 ## Application And Preferences
 
@@ -74,16 +74,16 @@ contract.
 | Resume transfer | `POST /transfers/{hash}/operations/resume` | implemented | Same route-shape alignment needed. |
 | Stop transfer | `POST /transfers/{hash}/operations/stop` | implemented | Same route-shape alignment needed. |
 | Cancel transfer | `DELETE /transfers/{hash}` | implemented | Final destructive-body behavior must use `deleteFiles`. |
-| Delete transfer local files | `DELETE /transfers/{hash}` with `deleteFiles: true` | deferred | Must be explicit and tested. |
-| Clear completed transfers | `POST /transfers/operations/clear-completed` | deferred | Legacy WebServer supports clear-completed; final REST needs a stable operation route. |
+| Delete transfer local files | `DELETE /transfers/{hash}` with `deleteFiles: true` | implemented | `deleteFiles` is the preferred spelling. |
+| Clear completed transfers | `POST /transfers/operations/clear-completed` | implemented | Uses the existing main-window clear-completed path. |
 | Rename incomplete transfer | `PATCH /transfers/{hash}` | implemented | Current main includes rename support for incomplete files only. |
 | Set transfer priority low/normal/high/auto | `PATCH /transfers/{hash}` | implemented | Final enum is `low`, `normal`, `high`, `auto`; completed/shared priority is separate. |
 | Set transfer category | `PATCH /transfers/{hash}` | implemented | Supports category id/name; final naming must be `categoryId`/`categoryName`. |
 | File recheck | `POST /transfers/{hash}/operations/recheck` | implemented | Existing route exists; final route and envelope need alignment. |
-| Preview transfer | `POST /transfers/{hash}/operations/preview` | deferred | Legacy `preview`/`getflc` action needs controller-safe route and live test. |
+| Preview transfer | `POST /transfers/{hash}/operations/preview` | implemented | Route validates preview readiness before launching the legacy preview action. |
 | Get transfer sources | `GET /transfers/{hash}/sources` | implemented | Current route exists. |
-| Get transfer part/gap/request detail | `GET /transfers/{hash}/details` | deferred | Required by aMuTorrent detail view; current adapter has placeholders. |
-| Browse source | `POST /transfers/{hash}/sources/{clientId}/operations/browse` | deferred | Legacy source browse exists; final implementation must verify that `clientId` is stable enough for this operation. |
+| Get transfer part/gap/request detail | `GET /transfers/{hash}/details` | implemented | Native route returns transfer, part, and source detail; aMuTorrent hydrates part/gap/request fields from it. |
+| Browse source | `POST /transfers/{hash}/sources/{clientId}/operations/browse` | implemented | Uses source user hash as the stable selector where available. |
 | Add/remove friend from transfer peer user hash | `POST /friends`, `DELETE /friends/{userHash}` | deferred | Friend operations are needed for old context-menu parity. |
 | Hide transfer columns or update transfer table sort | none | obsolete | Presentation state belongs to aMuTorrent or any other controller. |
 
@@ -95,11 +95,11 @@ contract.
 | Show one shared file | `GET /shared-files/{hash}` | implemented | Current route exists. |
 | Add one shared file by path | `POST /shared-files` | implemented | Current route exists; final response should return resource envelope. |
 | Unshare one file | `DELETE /shared-files/{hash}` | implemented | Existing behavior needs final `deleteFiles` naming and tests. |
-| Delete shared local file | `DELETE /shared-files/{hash}` with `deleteFiles: true` | deferred | Destructive path must be explicit and separate from transfer deletion in aMuTorrent. |
-| Set shared-file upload priority | `PATCH /shared-files/{hash}` | deferred | Legacy supports very-low/low/normal/high/release/auto. |
+| Delete shared local file | `DELETE /shared-files/{hash}` with `deleteFiles: true` | deferred | aMuTorrent now routes shared-file deletes to `/shared-files/{hash}`; native disk deletion is still intentionally not implemented. |
+| Set shared-file upload priority | `PATCH /shared-files/{hash}` | implemented | Supports `very_low`, `low`, `normal`, `high`, `very_high`, `release`, and `auto`. |
 | Update shared-file comment/rating | `PATCH /shared-files/{hash}` | implemented | Current main supports comment/rating for completed shared files. |
-| Get ED2K link | `GET /shared-files/{hash}/ed2k-link` | deferred | Metadata only; binary file streaming remains excluded. |
-| Show known file comments | `GET /shared-files/{hash}/comments` | deferred | Legacy `commentlist` should become a metadata route. |
+| Get ED2K link | `GET /shared-files/{hash}/ed2k-link` | implemented | Metadata only; binary file streaming remains excluded. |
+| Show known file comments | `GET /shared-files/{hash}/comments` | implemented | Returns the local known-file comment/rating metadata as a comments collection. |
 | Binary file download from WebServer `getfile` | none | obsolete | User explicitly excluded binary shared-file streaming. |
 | Reload shared files | `POST /shared-files/operations/reload` and `/shared-directories/operations/reload` | implemented | Existing reload route exists; final contract names operation routes. |
 | List shared directories | `GET /shared-directories` | implemented | Current REST supports configured roots. |
@@ -129,10 +129,10 @@ contract.
 | Disconnect or stop connecting | `POST /servers/operations/disconnect` | implemented | Covers both disconnect and stop-connecting legacy actions. |
 | Add server | `POST /servers` | implemented | Final create supports `address`, `port`, `name`, `priority`, `static`, and `connect`. |
 | Remove server | `DELETE /servers/{serverId}` | implemented | Existing route exists. |
-| Add server to static list | `PATCH /servers/{serverId}` with `static: true` | deferred | Legacy action exists; final REST treats static as a server property. |
-| Remove server from static list | `PATCH /servers/{serverId}` with `static: false` | deferred | Same as above. |
-| Set server priority low/normal/high | `PATCH /servers/{serverId}` | deferred | Legacy action exists; final REST treats priority as a server property. |
-| Update server.met from URL | `POST /servers/met-url-imports` | deferred | Legacy action exists and should be available to aMuTorrent. |
+| Add server to static list | `PATCH /servers/{serverId}` with `static: true` | implemented | Static membership is handled as a server property. |
+| Remove server from static list | `PATCH /servers/{serverId}` with `static: false` | implemented | Static membership is handled as a server property. |
+| Set server priority low/normal/high | `PATCH /servers/{serverId}` | implemented | Priority is handled as a server property. |
+| Update server.met from URL | `POST /servers/met-url-imports` | implemented | Marshalled through the existing UI interaction path. |
 
 ## Kad
 
@@ -142,7 +142,7 @@ contract.
 | Start Kad | `POST /kad/operations/start` | implemented | Existing command route must align to final route. |
 | Stop Kad | `POST /kad/operations/stop` | implemented | Existing command route must align to final route. |
 | Recheck Kad firewall | `POST /kad/operations/recheck-firewall` | implemented | Existing route exists. |
-| Bootstrap Kad | `POST /kad/operations/bootstrap` | deferred | Legacy `WEBGUIIA_KAD_BOOTSTRAP` exists; final API must support it. |
+| Bootstrap Kad | `POST /kad/operations/bootstrap` | implemented | Supports optional `{address, port}` and otherwise starts Kad through the legacy UI action. |
 
 ## Searches
 
@@ -151,9 +151,9 @@ contract.
 | Start search | `POST /searches` | implemented | Existing route exists through earlier shape; final contract uses resource create. |
 | Get search results | `GET /searches/{searchId}` | implemented | aMuTorrent should poll this until stable. |
 | Stop/delete one search | `DELETE /searches/{searchId}` | implemented | Existing stop route exists; final route deletes the search session. |
-| Delete all searches | `DELETE /searches` | deferred | Legacy action exists. |
-| Start search with method/type/min/max/availability/extension filters | `POST /searches` | deferred | Basic search exists; full filter parity needs verification and tests. |
-| Add selected search result to downloads | `POST /searches/{searchId}/results/{hash}/operations/download` | deferred | Required for full legacy WebServer and aMuTorrent search workflow parity. |
+| Delete all searches | `DELETE /searches` | implemented | Uses the existing delete-all-searches UI action. |
+| Start search with method/type/min/max/availability/extension filters | `POST /searches` | implemented | Method, type, size, and extension filters are parsed by the native command seam. |
+| Add selected search result to downloads | `POST /searches/{searchId}/results/{hash}/operations/download` | implemented | aMuTorrent uses this route when a native search id is available. |
 | Clear searches before new search | `POST /searches` with `clearExisting: true` or `DELETE /searches` | deferred | Contract supports both explicit clear and start-with-clear behavior. |
 | Search page sort, table layout, and refresh | none | obsolete | Presentation-only. |
 
@@ -179,11 +179,11 @@ contract.
 
 | Area | Status | Work required |
 |---|---|---|
-| Endpoint adapter route names | deferred | Update aMuTorrent to call the final resource routes, not older command-style aliases. |
-| Response envelopes | deferred | Teach aMuTorrent to unwrap `{data, meta}` and collection `{data.items}` consistently. |
-| Shared-file deletion | deferred | Ensure shared-file deletes call `/shared-files/{hash}` and never transfer delete helpers. |
-| Uploads in data pipeline | deferred | Preserve `/uploads` and `/upload-queue` rows through aMuTorrent `DataFetchService`. |
-| Transfer detail hydration | deferred | Replace placeholder part/gap/request fields with `/transfers/{hash}/details`. |
+| Endpoint adapter route names | implemented | aMuTorrent now prefers final operation/resource routes for transfers, servers, shared reload, and search-result download. |
+| Response envelopes | implemented | aMuTorrent unwraps `{data, meta}` and native `{error:{code,message}}` while keeping old mock compatibility. |
+| Shared-file deletion | implemented | Shared deletes call `/shared-files/{hash}` instead of transfer delete helpers. |
+| Uploads in data pipeline | implemented | `/uploads` rows remain preserved through the eMule BB manager fetch result. |
+| Transfer detail hydration | implemented | aMuTorrent hydrates peers plus part/gap/request detail from `/transfers/{hash}/details`. |
 | Search polling | deferred | Poll `/searches/{searchId}` until stopped/complete instead of fetching once immediately. |
 | Browser smoke | deferred | Add live aMuTorrent browser smoke against a live eMule BB instance. |
 
@@ -197,5 +197,5 @@ workspace entrypoints:
 | eMule app validation/build/tests | deferred |
 | Native REST route and contract tests | deferred |
 | Live eMule REST E2E completeness lane | deferred |
-| aMuTorrent Node eMule BB tests | deferred |
+| aMuTorrent Node eMule BB tests | implemented |
 | Live aMuTorrent browser smoke against eMule BB | deferred |

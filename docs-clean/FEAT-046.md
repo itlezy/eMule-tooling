@@ -1,7 +1,7 @@
 ---
 id: FEAT-046
 title: REST server and Kad bootstrap/import APIs
-status: Open
+status: In Progress
 priority: Major
 category: feature
 labels: [rest, servers, kad, bootstrap, live-wire]
@@ -23,7 +23,7 @@ Default live sources are the already-persisted eMule Security URLs:
 
 ## Acceptance Criteria
 
-- [ ] server import can refresh `server.met` through the same safe validation
+- [x] server import can refresh `server.met` through the same safe validation
       and promotion path used by the app
 - [ ] Kad import can refresh `nodes.dat` without weakening the existing
       bootstrap-empty guard
@@ -31,6 +31,13 @@ Default live sources are the already-persisted eMule Security URLs:
       external lists
 - [ ] live E2E records source URL, size, hash, and import outcome
 - [ ] malformed downloads preserve the previous live files
+
+## Progress
+
+- 2026-05-02: Native `main` added `POST /api/v1/servers/met-url-imports`,
+  `PATCH /api/v1/servers/{serverId}` property updates, and
+  `POST /api/v1/kad/operations/bootstrap`. Route seam and live-smoke contract
+  coverage were updated in `eMule-build-tests`.
 
 ## Relationship To Other Items
 

@@ -1,7 +1,7 @@
 ---
 id: FEAT-047
 title: REST search API completeness pass
-status: Open
+status: In Progress
 priority: Minor
 category: feature
 labels: [rest, search, amutorrent, live-wire]
@@ -17,12 +17,19 @@ controllers.
 
 ## Acceptance Criteria
 
-- [ ] aMuTorrent search views can render useful result rows without private
+- [x] aMuTorrent search views can render useful result rows without private
       adapter assumptions
-- [ ] server, global, Kad, and automatic search methods remain explicit
-- [ ] cancellation and missing-search behavior return stable typed errors
+- [x] server, global, Kad, and automatic search methods remain explicit
+- [x] cancellation and missing-search behavior return stable typed errors
 - [ ] paging or bounding behavior is documented if result sets are limited
-- [ ] live coverage includes the release search corpus
+- [x] live coverage includes the release search corpus
+
+## Progress
+
+- 2026-05-02: Native `main` added `DELETE /api/v1/searches` and
+  `POST /api/v1/searches/{searchId}/results/{hash}/operations/download`.
+  aMuTorrent now uses the native result-download route when it has a native
+  search id and keeps the ED2K-link fallback for older frames.
 
 ## Relationship To Other Items
 
