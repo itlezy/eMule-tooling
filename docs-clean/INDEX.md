@@ -18,6 +18,7 @@ reference reading.
 
 Latest review trail:
 
+- [REVIEW-2026-05-02-outbound-bind-compliance-audit](REVIEW-2026-05-02-outbound-bind-compliance-audit.md)
 - [REVIEW-2026-05-01-release-readiness-regression-scan](REVIEW-2026-05-01-release-readiness-regression-scan.md)
 - [REVIEW-2026-04-26-main-bug-concurrency-scan](REVIEW-2026-04-26-main-bug-concurrency-scan.md)
 - [REVIEW-2026-04-26-emuleai-mods-broadband-scan](REVIEW-2026-04-26-emuleai-mods-broadband-scan.md)

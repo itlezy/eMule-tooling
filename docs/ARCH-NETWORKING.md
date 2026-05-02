@@ -25,6 +25,13 @@
 
 The eMule networking stack is a mature **Windows-native asynchronous I/O architecture** centered on the current `WSAPoll` TCP backend, a dedicated upload bandwidth throttler thread, dual TCP/UDP encrypted transports, and two independent UPnP implementations. This report documents the major subsystems which remain in the current tree, identifies architectural limitations, and calls out specific issues.
 
+**Current bind audit:** the latest current-main outbound bind classification is
+tracked in
+[`../docs-clean/REVIEW-2026-05-02-outbound-bind-compliance-audit.md`](../docs-clean/REVIEW-2026-05-02-outbound-bind-compliance-audit.md).
+It records the accepted current state: core P2P traffic is bind-compliant,
+while auxiliary WinInet, SMTP, IRC, browser-handoff, and separately-bound web
+traffic are documented as non-P2P/system or user traffic.
+
 ---
 
 ## 1. Socket Class Hierarchy
