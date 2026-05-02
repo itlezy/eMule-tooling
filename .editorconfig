@@ -2,34 +2,24 @@ root = true
 
 [*]
 charset = utf-8
-end_of_line = crlf
+end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[.editorconfig]
-end_of_line = lf
-
-[.gitattributes]
-end_of_line = lf
-
-[.gitignore]
-end_of_line = lf
-
 [*.{md,yml,yaml,json}]
-end_of_line = lf
 indent_style = space
 indent_size = 2
 trim_trailing_whitespace = false
 
 [*.py]
-end_of_line = lf
 indent_style = space
 indent_size = 4
 
-[hooks/*]
-end_of_line = lf
+[*.{ps1,psm1,psd1,ps1xml}]
+indent_style = space
+indent_size = 4
 
-[*.{ps1,psd1,cmd}]
+[*.{bat,cmd}]
 end_of_line = crlf
 indent_style = space
 indent_size = 4

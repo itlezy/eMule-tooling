@@ -1,16 +1,4 @@
-* text=auto eol=crlf
+* text=auto eol=lf
 
-.editorconfig text eol=lf
-.gitattributes text eol=lf
-.gitignore text eol=lf
-hooks/* text eol=lf
-
-*.ps1 text eol=crlf
+*.bat text eol=crlf
 *.cmd text eol=crlf
-*.psd1 text eol=crlf
-
-*.md text eol=lf
-*.json text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-*.py text eol=lf

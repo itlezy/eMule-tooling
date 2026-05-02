@@ -271,6 +271,7 @@ is meaningful.
 | [CI-014](CI-014.md) | Major | Open | REST contract manifest and live completeness gate |
 | [CI-015](CI-015.md) | Major | Open | REST malformed and concurrent request matrix |
 | [CI-016](CI-016.md) | Minor | Open | REST-only main vs community regression lane |
+| [CI-017](CI-017.md) | Minor | **Done** | Normalize active workspace line-ending policy to LF by default |
 
 ---
 
@@ -319,6 +320,7 @@ is meaningful.
 - **FEAT-018 through FEAT-021** — larger product features outside the hardening milestone
 - **CI-007** — Kad fuzz tests after the broader CI/toolchain stack is ready
 - **CI-016** — broaden REST-only community parity once the v1 contract and live gates are stable
+- **CI-017** — keep workspace-owned line-ending policy consistent after the LF-default normalization pass
 
 ### Expansion Track — explicitly beyond stock
 
@@ -745,6 +747,12 @@ noise rather than source warning debt: the app project should keep app code at
 `EnableAllWarnings`, express external headers with
 `ExternalWarningLevel=TurnOffAllWarnings`, and avoid raw `/external:W*`
 switches in `AdditionalOptions`.
+
+**Updated:** 2026-05-02 — added `CI-017` for the active workspace line-ending
+normalization pass. The target policy is LF by default, including PowerShell
+and Visual Studio solution/project files; CRLF is reserved for `*.rc`, `*.rc2`,
+`*.bat`, and `*.cmd`. `amutorrent`, third-party repos, archived worktrees, and
+stale/historical branches stay out of scope.
 
 **Updated:** 2026-04-19 — current `main` now includes `FEAT-013` in commits `94e0884`
 and `8d0832a`: the REST surface is delivered in-process through `WebServer.cpp` /
