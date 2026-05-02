@@ -140,7 +140,7 @@ The last two groups are documented because they still live in the same file, but
 | INI key | Section | Mode | UI | Default | Explanation |
 | --- | --- | --- | --- | --- | --- |
 | `ShowRatesOnTitle` | `eMule` | `RW` | Yes | `true` | Show current transfer rates in the window title. |
-| `ShowExtControls` | `eMule` | `RW` | Yes | `true` | Show extended controls. You asked for this default on. |
+| `ShowExtControls` | `eMule` | Removed | No | ignored | Retired by `FEAT-051`; advanced/pro controls are now always on and old INI values are ignored. |
 | `ShowDwlPercentage` | `eMule` | `RW` | Yes | `false` | Show extra download percentage information. |
 | `IndicateRatings` | `eMule` | `RW` | Yes | `true` | Show file ratings in UI where supported. |
 | `ToolTipDelay` | `eMule` | `RW` | Yes | existing app default | Delay before tooltips appear. |

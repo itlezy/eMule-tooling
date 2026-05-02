@@ -249,6 +249,7 @@ is meaningful.
 | [FEAT-048](FEAT-048.md) | Minor | Open | REST upload queue control completeness |
 | [FEAT-049](FEAT-049.md) | Minor | Open | Curated REST preference expansion |
 | [FEAT-050](FEAT-050.md) | Minor | Open | Launch external program on completed download |
+| [FEAT-051](FEAT-051.md) | Minor | **Done** | Pro-user context menus and always-on advanced controls |
 
 ---
 
