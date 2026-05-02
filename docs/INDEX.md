@@ -80,6 +80,14 @@ active feature status.
 | [PLAN-RESTRUCTURE](PLAN-RESTRUCTURE.md) | Module restructuring guidance |
 | [REFACTOR-TASKS](REFACTOR-TASKS.md) | Historical refactor-task ledger and background |
 
+## REST API
+
+| Document | Description |
+|---|---|
+| [REST-API-CONTRACT](REST-API-CONTRACT.md) | Human-readable broadband REST contract rules and scope |
+| [REST-API-OPENAPI](REST-API-OPENAPI.yaml) | Canonical machine-readable `/api/v1` OpenAPI contract for eMule BB and aMuTorrent |
+| [REST-API-PARITY-INVENTORY](REST-API-PARITY-INVENTORY.md) | Legacy WebServer runtime-action parity checklist for the REST release |
+
 ## Notes
 
 - `docs/` owns deep background, analysis, and historical design context.

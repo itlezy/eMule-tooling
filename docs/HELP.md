@@ -6,6 +6,7 @@ This page is the online help landing page for eMule BB.
 
 - [Workspace and developer documentation](INDEX.md)
 - [REST API contract](REST-API-CONTRACT.md)
+- [REST API OpenAPI contract](REST-API-OPENAPI.yaml)
 - [Long path guide](GUIDE-LONGPATHS.md)
 - [Current active backlog](../docs-clean/INDEX.md)
 

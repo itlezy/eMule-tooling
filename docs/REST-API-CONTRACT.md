@@ -1,301 +1,68 @@
 # eMule BB REST API Contract
 
-**Status:** Broadband release contract
+**Status:** pre-release broadband contract
+**Source of truth:** [REST-API-OPENAPI.yaml](REST-API-OPENAPI.yaml)
+**Legacy parity inventory:** [REST-API-PARITY-INVENTORY.md](REST-API-PARITY-INVENTORY.md)
 **Primary implementation:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main\srchybrid\WebServerJson.cpp`
 **Route seam:** `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\eMule-main\srchybrid\WebServerJsonSeams.h`
 
 ## Overview
 
 `main` exposes an authenticated in-process JSON API from the existing eMule
-WebServer listener. The broadband release contract is a redesigned
-resource-oriented `/api/v1` surface. The earlier command-style `/api/v1`
-routes were retired before public release.
-
-The API is:
-
-- rooted at `/api/v1/...`
-- authenticated with `X-API-Key`
-- JSON-only
-- served by the normal eMule WebServer HTTP or HTTPS listener
-- intended for aMuTorrent and other local controllers
-
-## Base URL And Auth
-
-- `http://<host>:<port>/api/v1/...`
-- `https://<host>:<port>/api/v1/...` when HTTPS is enabled
-
-Authentication:
-
-- header: `X-API-Key: <token>`
-
-Requests without a configured API key return `503 EMULE_UNAVAILABLE`. Requests
-without the correct key return `401 UNAUTHORIZED`.
-
-## Error Shape
-
-All failures return JSON:
-
-```json
-{
-  "error": "ERROR_CODE",
-  "message": "human-readable description"
-}
-```
-
-Typical status mapping:
-
-- `400` invalid route, query, method body, or JSON
-- `401` missing or invalid API key
-- `404` route or object not found
-- `409` invalid current state
-- `500` internal operation failure
-- `503` runtime unavailable or REST not configured
-
-## Routes
-
-### Application
-
-- `GET /api/v1/app`
-- `GET /api/v1/app/preferences`
-- `PATCH /api/v1/app/preferences`
-- `POST /api/v1/app/shutdown`
-
-`app` includes additive capability metadata for controller discovery:
-
-- `apiVersion`
-- `capabilities.transfers`
-- `capabilities.searches`
-- `capabilities.servers`
-- `capabilities.sharedFiles`
-- `capabilities.sharedDirectories`
-- `capabilities.uploads`
-- `capabilities.logs`
-- `capabilities.categoriesRead`
-- `capabilities.categoryAssignment`
-- `capabilities.categoryCrud`
-- `capabilities.renameFile`
-- `capabilities.fileRatingComment`
-
-`renameFile` means controllers may rename incomplete transfers. Completed
-transfers and shared files are not renamed by this release slice.
-
-`fileRatingComment` means controllers may update user-visible rating/comment
-metadata on completed shared files.
-
-### Status And Snapshot
-
-- `GET /api/v1/status`
-- `GET /api/v1/snapshot?limit=N`
-
-`status` returns:
-
-- `stats`
-- `servers`
-- `kad`
-
-`snapshot` returns:
-
-- `app`
-- `status`
-- `transfers`
-- `sharedFiles`
-- `uploads`
-- `uploadQueue`
-- `servers`
-- `kad`
-- `logs`
-
-Per-transfer source details are intentionally excluded from `snapshot`; callers
-should request sources lazily.
-
-### Categories
-
-- `GET /api/v1/categories`
-- `POST /api/v1/categories`
-- `GET /api/v1/categories/{id}`
-- `PATCH /api/v1/categories/{id}`
-- `DELETE /api/v1/categories/{id}`
-
-The default download category is exposed as id `0`, name `Default`.
-
-Category rows include:
-
-- `id`
-- `name`
-- `path`
-- `comment`
-- `color`
-- `priority`
-
-Create accepts:
-
-```json
-{ "name": "Linux ISOs", "path": "C:\\incoming\\linux", "comment": "", "color": 65280, "priority": 1 }
-```
-
-Patch accepts any supported subset except `id`. The default category cannot be
-edited or deleted through the REST API.
-
-### Transfers
-
-- `GET /api/v1/transfers?filter=&category=`
-- `POST /api/v1/transfers`
-- `GET /api/v1/transfers/{hash}`
-- `PATCH /api/v1/transfers/{hash}`
-- `DELETE /api/v1/transfers/{hash}`
-- `GET /api/v1/transfers/{hash}/sources`
-- `POST /api/v1/transfers/{hash}/sources/browse`
-
-Add accepts either:
-
-```json
-{ "link": "ed2k://..." }
-```
-
-or:
-
-```json
-{ "links": ["ed2k://..."] }
-```
-
-Patch accepts one of:
-
-```json
-{ "action": "pause" }
-{ "action": "resume" }
-{ "action": "stop" }
-{ "action": "recheck" }
-{ "priority": "high" }
-{ "category": 0 }
-{ "categoryName": "Default" }
-{ "name": "new-name.ext" }
-```
-
-`categoryName` assigns the transfer to an existing configured category by name.
-
-`name` renames incomplete transfers only. Completed transfers and completing
-transfers return `409 INVALID_STATE`; shared-file filesystem rename is not part
-of this release slice.
-
-Delete accepts:
-
-```json
-{ "delete_files": true }
-```
-
-### Shared Files
-
-- `GET /api/v1/shared-files`
-- `POST /api/v1/shared-files`
-- `GET /api/v1/shared-files/{hash}`
-- `PATCH /api/v1/shared-files/{hash}`
-- `DELETE /api/v1/shared-files`
-- `DELETE /api/v1/shared-files/{hash}`
-
-Add accepts `{ "path": "C:\\share\\file.ext" }`. Delete by body accepts either
-`path` or `hash`; delete by route hash supplies `hash` from the path.
-
-Patch updates the completed shared-file comment and rating together:
-
-```json
-{ "comment": "verified release", "rating": 4 }
-```
-
-`rating` must be an integer from `0` through `5`. `comment` is required and is
-truncated to eMule's file-comment length limit. Part files cannot be updated by
-this endpoint. Shared-file rename remains unsupported in this release slice.
-
-### Shared Directories
-
-- `GET /api/v1/shared-directories`
-- `PATCH /api/v1/shared-directories`
-- `POST /api/v1/shared-directories/reload`
-
-`GET` returns configured shared roots with recursive flags. `PATCH` replaces
-the configured root set:
-
-```json
-{
-  "roots": [
-    { "path": "C:\\share", "recursive": true }
-  ]
-}
-```
-
-`reload` requests a shared-file reload using the normal application path and
-returns after the request is accepted.
-
-### Uploads
-
-- `GET /api/v1/uploads`
-- `GET /api/v1/upload-queue`
-- `DELETE /api/v1/uploads/{client_id}`
-- `POST /api/v1/uploads/{client_id}/release-slot`
-
-The upload client selector may be supplied by route hash when available or by
-JSON body using `userHash` or `ip` plus `port`.
-
-### Servers
-
-- `GET /api/v1/servers`
-- `POST /api/v1/servers`
-- `PATCH /api/v1/servers/{address}:{port}`
-- `DELETE /api/v1/servers/{address}:{port}`
-
-Patch actions:
-
-```json
-{ "action": "connect" }
-{ "action": "disconnect" }
-```
-
-`disconnect` may use any syntactically valid placeholder id; the current
-implementation disconnects the active server.
-
-### Kad
-
-- `GET /api/v1/kad`
-- `PATCH /api/v1/kad`
-
-Patch actions:
-
-```json
-{ "action": "connect" }
-{ "action": "disconnect" }
-{ "action": "recheck_firewall" }
-```
-
-### Searches
-
-- `POST /api/v1/searches`
-- `GET /api/v1/searches/{id}`
-- `DELETE /api/v1/searches/{id}`
-
-Search start returns:
-
-```json
-{ "search_id": "123" }
-```
-
-### Logs
-
-- `GET /api/v1/logs?limit=N`
-
-Callers should bound `limit` and not assume unbounded history.
-
-## Response Notes
-
-- Collection endpoints return `{ "items": [...] }`.
-- `snapshot` embeds collection arrays directly.
-- Transfer and shared-file hashes are lowercase 32-character MD4 hex strings.
-- Field ordering is not part of the contract.
-- Mutating endpoints return either the changed object, `{ "ok": true }`, or a
-  `results` array for multi-item operations.
+WebServer listener. The broadband release contract is the resource-oriented
+`/api/v1` surface described by the OpenAPI document above.
+
+The API is designed for aMuTorrent and other trusted local controllers. eMule
+BB and aMuTorrent are both pre-release, so the final contract intentionally
+prioritizes consistency and aMuTorrent completeness over preserving old
+command-style route names.
+
+## Contract Rules
+
+- root every endpoint at `/api/v1/...`
+- authenticate only with `X-API-Key`
+- serve JSON only
+- inherit the normal WebServer bind, HTTPS, and allowed-IP behavior
+- use `camelCase` field names
+- return success envelopes as `{ "data": ..., "meta": ... }`
+- return collections as `{ "data": { "items": [...] }, "meta": ... }`
+- return errors as `{ "error": { "code": "...", "message": "...", "details": {} } }`
+- return the updated resource from mutations when practical
+- require explicit booleans such as `deleteFiles: true` for destructive local
+  file deletion
+- use HTTP 200 for valid bulk requests with per-item results
+
+## Scope
+
+The release API must cover every useful runtime action from the legacy
+WebServer: transfers, shared files, shared directories, uploads, upload queue,
+servers, Kad, searches, friends, logs, categories, statistics, preferences, and
+application shutdown.
+
+The release API intentionally excludes:
+
+- HTML sessions, login/logout, templates, sort state, column hiding, and other
+  legacy WebServer presentation state
+- host operating-system shutdown and reboot
+- binary shared-file streaming
+- granular REST permissions or low-rights REST mode
+- dynamic capability negotiation between eMule BB and aMuTorrent
+
+## Implementation Status
+
+The OpenAPI contract is the target contract. The current application already
+implements a substantial resource-style REST surface, but some routes,
+envelopes, field names, and legacy-action parity items still need alignment.
+
+Use [REST-API-PARITY-INVENTORY.md](REST-API-PARITY-INVENTORY.md) as the
+implementation checklist. Any remaining `deferred` runtime action must either
+be implemented before the complete REST release or explicitly removed by a user
+decision.
 
 ## Retired Before Public Release
 
-The following command-style routes are not part of the broadband release
-contract:
+The following earlier command-style routes are not part of the final broadband
+release contract and should not be used by aMuTorrent:
 
 - `/api/v1/app/version`
 - `/api/v1/stats/global`

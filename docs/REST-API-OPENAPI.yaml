@@ -1,0 +1,1820 @@
+openapi: 3.1.0
+info:
+  title: eMule BB REST API
+  version: 1.0.0-pre
+  summary: Canonical pre-release contract for the embedded eMule BB REST API.
+  description: >
+    This is the source-of-truth contract for the redesigned `/api/v1` API.
+    The API is served by the existing eMule WebServer listener, uses
+    `X-API-Key` authentication only, and is designed for aMuTorrent and other
+    trusted local controllers. eMule BB and aMuTorrent are both pre-release, so
+    this contract may intentionally replace earlier command-style routes before
+    public release.
+servers:
+  - url: http://{host}:{port}/api/v1
+    variables:
+      host:
+        default: 127.0.0.1
+      port:
+        default: "4711"
+  - url: https://{host}:{port}/api/v1
+    variables:
+      host:
+        default: 127.0.0.1
+      port:
+        default: "4711"
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: App
+  - name: Stats
+  - name: Categories
+  - name: Transfers
+  - name: SharedFiles
+  - name: SharedDirectories
+  - name: Uploads
+  - name: Servers
+  - name: Kad
+  - name: Searches
+  - name: Friends
+  - name: Logs
+paths:
+  /app:
+    get:
+      tags: [App]
+      summary: Return application identity, runtime state, and static capabilities.
+      operationId: getApp
+      responses:
+        "200":
+          $ref: "#/components/responses/AppResponse"
+  /app/preferences:
+    get:
+      tags: [App]
+      summary: Return controller-relevant preferences.
+      operationId: getPreferences
+      responses:
+        "200":
+          $ref: "#/components/responses/PreferencesResponse"
+    patch:
+      tags: [App]
+      summary: Update controller-relevant preferences.
+      operationId: patchPreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreferencesPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/PreferencesResponse"
+  /app/shutdown:
+    post:
+      tags: [App]
+      summary: Request clean eMule process shutdown.
+      operationId: shutdownApp
+      description: >
+        This endpoint closes eMule only. Operating-system shutdown and reboot
+        actions from the legacy WebServer are intentionally not part of the
+        REST API.
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /status:
+    get:
+      tags: [Stats]
+      summary: Return current network, transfer, server, and Kad status.
+      operationId: getStatus
+      responses:
+        "200":
+          $ref: "#/components/responses/StatusResponse"
+  /snapshot:
+    get:
+      tags: [Stats]
+      summary: Return a controller dashboard snapshot.
+      operationId: getSnapshot
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          $ref: "#/components/responses/SnapshotResponse"
+  /stats:
+    get:
+      tags: [Stats]
+      summary: Return detailed cumulative and session statistics.
+      operationId: getStats
+      responses:
+        "200":
+          $ref: "#/components/responses/StatsResponse"
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List download categories.
+      operationId: listCategories
+      responses:
+        "200":
+          $ref: "#/components/responses/CategoryListResponse"
+    post:
+      tags: [Categories]
+      summary: Create a download category.
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        "201":
+          $ref: "#/components/responses/CategoryResponse"
+  /categories/{categoryId}:
+    parameters:
+      - $ref: "#/components/parameters/CategoryId"
+    get:
+      tags: [Categories]
+      summary: Return one download category.
+      operationId: getCategory
+      responses:
+        "200":
+          $ref: "#/components/responses/CategoryResponse"
+    patch:
+      tags: [Categories]
+      summary: Update one download category.
+      operationId: patchCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/CategoryResponse"
+    delete:
+      tags: [Categories]
+      summary: Delete one download category.
+      operationId: deleteCategory
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /transfers:
+    get:
+      tags: [Transfers]
+      summary: List incomplete and completed download transfers.
+      operationId: listTransfers
+      parameters:
+        - name: state
+          in: query
+          schema:
+            $ref: "#/components/schemas/TransferState"
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferListResponse"
+    post:
+      tags: [Transfers]
+      summary: Add one or more ED2K links to downloads.
+      operationId: createTransfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferCreateRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/BulkOperationResponse"
+  /transfers/operations/clear-completed:
+    post:
+      tags: [Transfers]
+      summary: Clear completed transfers from the transfer list.
+      operationId: clearCompletedTransfers
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /transfers/{hash}:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [Transfers]
+      summary: Return one transfer row.
+      operationId: getTransfer
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+    patch:
+      tags: [Transfers]
+      summary: Update mutable transfer properties.
+      operationId: patchTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+    delete:
+      tags: [Transfers]
+      summary: Cancel a transfer, optionally deleting local files.
+      operationId: deleteTransfer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteFilesRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /transfers/{hash}/details:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [Transfers]
+      summary: Return detailed part, gap, request, and source state for one transfer.
+      operationId: getTransferDetails
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferDetailsResponse"
+  /transfers/{hash}/sources:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [Transfers]
+      summary: Return known sources for one transfer.
+      operationId: listTransferSources
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferSourceListResponse"
+  /transfers/{hash}/sources/{clientId}/operations/browse:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+      - $ref: "#/components/parameters/ClientId"
+    post:
+      tags: [Transfers]
+      summary: Request source browsing for one transfer source.
+      operationId: browseTransferSource
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /transfers/{hash}/operations/pause:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Transfers]
+      summary: Pause one transfer.
+      operationId: pauseTransfer
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+  /transfers/{hash}/operations/resume:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Transfers]
+      summary: Resume one transfer.
+      operationId: resumeTransfer
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+  /transfers/{hash}/operations/stop:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Transfers]
+      summary: Stop one transfer.
+      operationId: stopTransfer
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+  /transfers/{hash}/operations/recheck:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Transfers]
+      summary: Request a file recheck.
+      operationId: recheckTransfer
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /transfers/{hash}/operations/preview:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Transfers]
+      summary: Start the configured preview action for one transfer.
+      operationId: previewTransfer
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /shared-files:
+    get:
+      tags: [SharedFiles]
+      summary: List completed shared files.
+      operationId: listSharedFiles
+      parameters:
+        - name: categoryId
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          $ref: "#/components/responses/SharedFileListResponse"
+    post:
+      tags: [SharedFiles]
+      summary: Add one local file to the known shared file set.
+      operationId: createSharedFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedFileCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/SharedFileResponse"
+  /shared-files/operations/reload:
+    post:
+      tags: [SharedFiles]
+      summary: Request a shared-file reload.
+      operationId: reloadSharedFiles
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /shared-files/{hash}:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [SharedFiles]
+      summary: Return one shared file.
+      operationId: getSharedFile
+      responses:
+        "200":
+          $ref: "#/components/responses/SharedFileResponse"
+    patch:
+      tags: [SharedFiles]
+      summary: Update shared-file metadata and upload priority.
+      operationId: patchSharedFile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedFilePatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/SharedFileResponse"
+    delete:
+      tags: [SharedFiles]
+      summary: Unshare a file, optionally deleting the local file.
+      operationId: deleteSharedFile
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteFilesRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /shared-files/{hash}/ed2k-link:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [SharedFiles]
+      summary: Return the ED2K link for one shared file.
+      operationId: getSharedFileEd2kLink
+      responses:
+        "200":
+          $ref: "#/components/responses/Ed2kLinkResponse"
+  /shared-files/{hash}/comments:
+    parameters:
+      - $ref: "#/components/parameters/FileHash"
+    get:
+      tags: [SharedFiles]
+      summary: Return known comments for one shared file.
+      operationId: listSharedFileComments
+      responses:
+        "200":
+          $ref: "#/components/responses/CommentListResponse"
+  /shared-directories:
+    get:
+      tags: [SharedDirectories]
+      summary: List configured shared directory roots.
+      operationId: listSharedDirectories
+      responses:
+        "200":
+          $ref: "#/components/responses/SharedDirectoryListResponse"
+    patch:
+      tags: [SharedDirectories]
+      summary: Replace configured shared directory roots.
+      operationId: replaceSharedDirectories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedDirectoryReplaceRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/SharedDirectoryListResponse"
+  /shared-directories/operations/reload:
+    post:
+      tags: [SharedDirectories]
+      summary: Request a shared-directory and shared-file reload.
+      operationId: reloadSharedDirectories
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /uploads:
+    get:
+      tags: [Uploads]
+      summary: List active upload slots.
+      operationId: listUploads
+      responses:
+        "200":
+          $ref: "#/components/responses/UploadListResponse"
+  /uploads/{clientId}:
+    parameters:
+      - $ref: "#/components/parameters/ClientId"
+    delete:
+      tags: [Uploads]
+      summary: Remove one uploading client.
+      operationId: deleteUpload
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /uploads/{clientId}/operations/release-slot:
+    parameters:
+      - $ref: "#/components/parameters/ClientId"
+    post:
+      tags: [Uploads]
+      summary: Give one uploading client a release slot.
+      operationId: releaseUploadSlot
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /upload-queue:
+    get:
+      tags: [Uploads]
+      summary: List waiting upload clients.
+      operationId: listUploadQueue
+      responses:
+        "200":
+          $ref: "#/components/responses/UploadQueueListResponse"
+  /servers:
+    get:
+      tags: [Servers]
+      summary: List known ED2K servers.
+      operationId: listServers
+      responses:
+        "200":
+          $ref: "#/components/responses/ServerListResponse"
+    post:
+      tags: [Servers]
+      summary: Add an ED2K server.
+      operationId: createServer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServerCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/ServerResponse"
+  /servers/operations/connect:
+    post:
+      tags: [Servers]
+      summary: Connect to the best available server.
+      operationId: connectServerAny
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /servers/operations/disconnect:
+    post:
+      tags: [Servers]
+      summary: Disconnect or stop connecting to ED2K servers.
+      operationId: disconnectServers
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /servers/met-url-imports:
+    post:
+      tags: [Servers]
+      summary: Import or update server.met from a URL.
+      operationId: createServerMetUrlImport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UrlImportRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /servers/{serverId}:
+    parameters:
+      - $ref: "#/components/parameters/ServerId"
+    get:
+      tags: [Servers]
+      summary: Return one ED2K server.
+      operationId: getServer
+      responses:
+        "200":
+          $ref: "#/components/responses/ServerResponse"
+    patch:
+      tags: [Servers]
+      summary: Update one ED2K server.
+      operationId: patchServer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServerPatch"
+      responses:
+        "200":
+          $ref: "#/components/responses/ServerResponse"
+    delete:
+      tags: [Servers]
+      summary: Remove one ED2K server.
+      operationId: deleteServer
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /servers/{serverId}/operations/connect:
+    parameters:
+      - $ref: "#/components/parameters/ServerId"
+    post:
+      tags: [Servers]
+      summary: Connect to one ED2K server.
+      operationId: connectServer
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /kad:
+    get:
+      tags: [Kad]
+      summary: Return Kad status.
+      operationId: getKad
+      responses:
+        "200":
+          $ref: "#/components/responses/KadResponse"
+  /kad/operations/start:
+    post:
+      tags: [Kad]
+      summary: Start Kad.
+      operationId: startKad
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /kad/operations/stop:
+    post:
+      tags: [Kad]
+      summary: Stop Kad.
+      operationId: stopKad
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /kad/operations/bootstrap:
+    post:
+      tags: [Kad]
+      summary: Bootstrap Kad from node address or known peers.
+      operationId: bootstrapKad
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KadBootstrapRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /kad/operations/recheck-firewall:
+    post:
+      tags: [Kad]
+      summary: Recheck Kad firewall state.
+      operationId: recheckKadFirewall
+      responses:
+        "202":
+          $ref: "#/components/responses/OkAcceptedResponse"
+  /searches:
+    post:
+      tags: [Searches]
+      summary: Start a search.
+      operationId: createSearch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/SearchResponse"
+    delete:
+      tags: [Searches]
+      summary: Delete all search sessions.
+      operationId: deleteSearches
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /searches/{searchId}:
+    parameters:
+      - $ref: "#/components/parameters/SearchId"
+    get:
+      tags: [Searches]
+      summary: Return search status and results.
+      operationId: getSearch
+      responses:
+        "200":
+          $ref: "#/components/responses/SearchResponse"
+    delete:
+      tags: [Searches]
+      summary: Stop and delete one search session.
+      operationId: deleteSearch
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /searches/{searchId}/results/{hash}/operations/download:
+    parameters:
+      - $ref: "#/components/parameters/SearchId"
+      - $ref: "#/components/parameters/FileHash"
+    post:
+      tags: [Searches]
+      summary: Add one search result to downloads.
+      operationId: downloadSearchResult
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchResultDownloadRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/TransferResponse"
+  /friends:
+    get:
+      tags: [Friends]
+      summary: List known friends.
+      operationId: listFriends
+      responses:
+        "200":
+          $ref: "#/components/responses/FriendListResponse"
+    post:
+      tags: [Friends]
+      summary: Add a friend by user hash.
+      operationId: createFriend
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FriendCreateRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/FriendResponse"
+  /friends/{userHash}:
+    parameters:
+      - $ref: "#/components/parameters/UserHash"
+    delete:
+      tags: [Friends]
+      summary: Remove a friend by user hash.
+      operationId: deleteFriend
+      responses:
+        "200":
+          $ref: "#/components/responses/OkResponse"
+  /logs:
+    get:
+      tags: [Logs]
+      summary: Return recent application log lines.
+      operationId: listLogs
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [debug, info, warning, error]
+      responses:
+        "200":
+          $ref: "#/components/responses/LogListResponse"
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  parameters:
+    CategoryId:
+      name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+    ClientId:
+      name: clientId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Stable client selector returned by upload or queue rows.
+    FileHash:
+      name: hash
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9a-fA-F]{32}$"
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+    SearchId:
+      name: searchId
+      in: path
+      required: true
+      schema:
+        type: string
+    ServerId:
+      name: serverId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: URL-encoded `address:port` composite id.
+    UserHash:
+      name: userHash
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[0-9a-fA-F]{32}$"
+  responses:
+    AppResponse:
+      description: Application envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AppEnvelope"
+    BulkOperationResponse:
+      description: Bulk operation envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BulkOperationEnvelope"
+    CategoryListResponse:
+      description: Category collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CategoryListEnvelope"
+    CategoryResponse:
+      description: Category envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CategoryEnvelope"
+    CommentListResponse:
+      description: Comment collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CommentListEnvelope"
+    Ed2kLinkResponse:
+      description: ED2K link envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Ed2kLinkEnvelope"
+    ErrorResponse:
+      description: Error envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    FriendListResponse:
+      description: Friend collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FriendListEnvelope"
+    FriendResponse:
+      description: Friend envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FriendEnvelope"
+    KadResponse:
+      description: Kad envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/KadEnvelope"
+    LogListResponse:
+      description: Log collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LogListEnvelope"
+    OkAcceptedResponse:
+      description: Accepted operation envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OkEnvelope"
+    OkResponse:
+      description: Operation envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OkEnvelope"
+    PreferencesResponse:
+      description: Preferences envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PreferencesEnvelope"
+    SearchResponse:
+      description: Search envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SearchEnvelope"
+    ServerListResponse:
+      description: Server collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServerListEnvelope"
+    ServerResponse:
+      description: Server envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ServerEnvelope"
+    SharedDirectoryListResponse:
+      description: Shared-directory collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SharedDirectoryListEnvelope"
+    SharedFileListResponse:
+      description: Shared-file collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SharedFileListEnvelope"
+    SharedFileResponse:
+      description: Shared-file envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SharedFileEnvelope"
+    SnapshotResponse:
+      description: Snapshot envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SnapshotEnvelope"
+    StatsResponse:
+      description: Stats envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StatsEnvelope"
+    StatusResponse:
+      description: Status envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/StatusEnvelope"
+    TransferDetailsResponse:
+      description: Transfer detail envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransferDetailsEnvelope"
+    TransferListResponse:
+      description: Transfer collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransferListEnvelope"
+    TransferResponse:
+      description: Transfer envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransferEnvelope"
+    TransferSourceListResponse:
+      description: Transfer-source collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TransferSourceListEnvelope"
+    UploadListResponse:
+      description: Upload collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UploadListEnvelope"
+    UploadQueueListResponse:
+      description: Upload-queue collection envelope.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UploadQueueListEnvelope"
+  schemas:
+    EnvelopeMeta:
+      type: object
+      additionalProperties: true
+      properties:
+        apiVersion:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+    Ok:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          const: true
+    OkEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          $ref: "#/components/schemas/Ok"
+        meta:
+          $ref: "#/components/schemas/EnvelopeMeta"
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+    Collection:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: {}
+    AppEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/App"
+    EnvelopeBase:
+      type: object
+      required: [data, meta]
+      properties:
+        data: {}
+        meta:
+          $ref: "#/components/schemas/EnvelopeMeta"
+    App:
+      type: object
+      required: [name, version, apiVersion, capabilities]
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        apiVersion:
+          type: string
+        elevated:
+          type: boolean
+        webServer:
+          type: object
+          properties:
+            https:
+              type: boolean
+            allowedIps:
+              type: array
+              items:
+                type: string
+        capabilities:
+          type: object
+          additionalProperties:
+            type: boolean
+    PreferencesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Preferences"
+    Preferences:
+      type: object
+      additionalProperties: true
+      properties:
+        downloadLimitKiBps:
+          type: integer
+          minimum: 0
+        uploadLimitKiBps:
+          type: integer
+          minimum: 0
+        maxSourcesPerFile:
+          type: integer
+          minimum: 0
+        maxConnections:
+          type: integer
+          minimum: 1
+        maxConnectionsPerFiveSeconds:
+          type: integer
+          minimum: 1
+        bindAddress:
+          type: string
+        keepNetworkingOfflineWhenBindingLost:
+          type: boolean
+        exitWhenBindingLost:
+          type: boolean
+        randomizeListenPortsOnStartup:
+          type: boolean
+        tcpPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        udpPort:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        gzip:
+          type: boolean
+        refreshSeconds:
+          type: integer
+          minimum: 1
+    PreferencesPatch:
+      allOf:
+        - $ref: "#/components/schemas/Preferences"
+    StatusEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Status"
+    Status:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        downloadSpeedKiBps:
+          type: number
+        uploadSpeedKiBps:
+          type: number
+        server:
+          $ref: "#/components/schemas/ServerStatus"
+        kad:
+          $ref: "#/components/schemas/Kad"
+        stats:
+          $ref: "#/components/schemas/Stats"
+    StatsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Stats"
+    Stats:
+      type: object
+      additionalProperties: true
+      properties:
+        sessionDownloadedBytes:
+          type: integer
+        sessionUploadedBytes:
+          type: integer
+        totalDownloadedBytes:
+          type: integer
+        totalUploadedBytes:
+          type: integer
+        activeDownloads:
+          type: integer
+        activeUploads:
+          type: integer
+    SnapshotEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                app:
+                  $ref: "#/components/schemas/App"
+                status:
+                  $ref: "#/components/schemas/Status"
+                transfers:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Transfer"
+                sharedFiles:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SharedFile"
+                uploads:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Upload"
+                uploadQueue:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/UploadQueueEntry"
+                servers:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Server"
+                kad:
+                  $ref: "#/components/schemas/Kad"
+                logs:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/LogEntry"
+    CategoryEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Category"
+    CategoryListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Category"
+    Category:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        name:
+          type: string
+        path:
+          type: string
+        comment:
+          type: string
+        color:
+          type: integer
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+    CategoryPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        comment:
+          type: string
+        color:
+          type: integer
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+    TransferListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Transfer"
+    TransferEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Transfer"
+    Transfer:
+      type: object
+      required: [hash, name, sizeBytes, state]
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        sizeBytes:
+          type: integer
+        completedBytes:
+          type: integer
+        state:
+          $ref: "#/components/schemas/TransferState"
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+        categoryId:
+          type: integer
+        categoryName:
+          type: string
+        progress:
+          type: number
+          minimum: 0
+          maximum: 1
+        sources:
+          type: object
+          additionalProperties: true
+        speedKiBps:
+          type: number
+        ed2kLink:
+          type: string
+    TransferState:
+      type: string
+      enum: [downloading, paused, stopped, queued, hashing, completing, completed, error]
+    TransferPriority:
+      type: string
+      enum: [veryLow, low, normal, high, release, auto]
+    TransferCreateRequest:
+      type: object
+      properties:
+        link:
+          type: string
+        links:
+          type: array
+          items:
+            type: string
+        categoryId:
+          type: integer
+          minimum: 0
+        categoryName:
+          type: string
+    TransferPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+        categoryId:
+          type: integer
+          minimum: 0
+        categoryName:
+          type: string
+    TransferDetailsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                transfer:
+                  $ref: "#/components/schemas/Transfer"
+                parts:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                gaps:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                requests:
+                  type: array
+                  items:
+                    type: object
+                    additionalProperties: true
+                sources:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/TransferSource"
+    TransferSourceListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/TransferSource"
+    TransferSource:
+      type: object
+      additionalProperties: true
+      properties:
+        clientId:
+          type: string
+        userName:
+          type: string
+        userHash:
+          type: string
+        address:
+          type: string
+        port:
+          type: integer
+        state:
+          type: string
+        requestedParts:
+          type: integer
+    DeleteFilesRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        deleteFiles:
+          type: boolean
+          default: false
+    SharedFileListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SharedFile"
+    SharedFileEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SharedFile"
+    SharedFile:
+      type: object
+      required: [hash, name, sizeBytes]
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        sizeBytes:
+          type: integer
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+        comment:
+          type: string
+        ed2kLink:
+          type: string
+        requests:
+          type: integer
+        acceptedRequests:
+          type: integer
+        transferredBytes:
+          type: integer
+    SharedFileCreateRequest:
+      type: object
+      required: [path]
+      properties:
+        path:
+          type: string
+    SharedFilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        priority:
+          $ref: "#/components/schemas/TransferPriority"
+        rating:
+          type: integer
+          minimum: 0
+          maximum: 5
+        comment:
+          type: string
+    Ed2kLinkEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [link]
+              properties:
+                link:
+                  type: string
+    CommentListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      userName:
+                        type: string
+                      rating:
+                        type: integer
+                      comment:
+                        type: string
+    SharedDirectoryListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/SharedDirectory"
+    SharedDirectory:
+      type: object
+      required: [path, recursive]
+      properties:
+        path:
+          type: string
+        recursive:
+          type: boolean
+        exists:
+          type: boolean
+        monitored:
+          type: boolean
+    SharedDirectoryReplaceRequest:
+      type: object
+      required: [roots]
+      properties:
+        roots:
+          type: array
+          items:
+            $ref: "#/components/schemas/SharedDirectory"
+    UploadListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Upload"
+    Upload:
+      type: object
+      additionalProperties: true
+      properties:
+        clientId:
+          type: string
+        userName:
+          type: string
+        userHash:
+          type: string
+        fileHash:
+          type: string
+        fileName:
+          type: string
+        speedKiBps:
+          type: number
+        uploadedBytes:
+          type: integer
+    UploadQueueListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/UploadQueueEntry"
+    UploadQueueEntry:
+      allOf:
+        - $ref: "#/components/schemas/Upload"
+        - type: object
+          properties:
+            queueRank:
+              type: integer
+    ServerListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Server"
+    ServerEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Server"
+    Server:
+      type: object
+      required: [id, address, port]
+      properties:
+        id:
+          type: string
+        address:
+          type: string
+        port:
+          type: integer
+        name:
+          type: string
+        priority:
+          type: string
+          enum: [low, normal, high]
+        static:
+          type: boolean
+        connected:
+          type: boolean
+        users:
+          type: integer
+        files:
+          type: integer
+    ServerStatus:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        connecting:
+          type: boolean
+        active:
+          $ref: "#/components/schemas/Server"
+    ServerCreateRequest:
+      type: object
+      required: [address, port]
+      properties:
+        address:
+          type: string
+        port:
+          type: integer
+        name:
+          type: string
+        priority:
+          type: string
+          enum: [low, normal, high]
+        static:
+          type: boolean
+        connect:
+          type: boolean
+    ServerPatch:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        priority:
+          type: string
+          enum: [low, normal, high]
+        static:
+          type: boolean
+    UrlImportRequest:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+          format: uri
+    KadEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Kad"
+    Kad:
+      type: object
+      additionalProperties: true
+      properties:
+        running:
+          type: boolean
+        connected:
+          type: boolean
+        firewalled:
+          type: boolean
+        nodes:
+          type: integer
+        indexedSources:
+          type: integer
+        indexedKeywords:
+          type: integer
+    KadBootstrapRequest:
+      type: object
+      properties:
+        address:
+          type: string
+        port:
+          type: integer
+    SearchEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Search"
+    Search:
+      type: object
+      required: [id, query, status, results]
+      properties:
+        id:
+          type: string
+        query:
+          type: string
+        method:
+          type: string
+          enum: [server, global, kad]
+        status:
+          type: string
+          enum: [running, stopped, complete, error]
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SearchResult"
+    SearchCreateRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+        method:
+          type: string
+          enum: [server, global, kad]
+        type:
+          type: string
+        minSizeBytes:
+          type: integer
+        maxSizeBytes:
+          type: integer
+        minAvailability:
+          type: integer
+        extension:
+          type: string
+        clearExisting:
+          type: boolean
+          default: false
+    SearchResult:
+      type: object
+      additionalProperties: true
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        sizeBytes:
+          type: integer
+        sources:
+          type: integer
+        completeSources:
+          type: integer
+        fileType:
+          type: string
+        extension:
+          type: string
+    SearchResultDownloadRequest:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          minimum: 0
+        categoryName:
+          type: string
+    FriendListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Friend"
+    FriendEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/Friend"
+    Friend:
+      type: object
+      required: [userHash]
+      properties:
+        userHash:
+          type: string
+        name:
+          type: string
+        lastSeen:
+          type: string
+          format: date-time
+    FriendCreateRequest:
+      type: object
+      required: [userHash]
+      properties:
+        userHash:
+          type: string
+        name:
+          type: string
+    LogListEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/LogEntry"
+    LogEntry:
+      type: object
+      required: [message]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          type: string
+        message:
+          type: string
+    BulkOperationEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/EnvelopeBase"
+        - type: object
+          properties:
+            data:
+              type: object
+              required: [items]
+              properties:
+                items:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/BulkOperationResult"
+    BulkOperationResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        id:
+          type: string
+        error:
+          $ref: "#/components/schemas/ErrorEnvelope"
