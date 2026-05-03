@@ -252,6 +252,7 @@ is meaningful.
 | [FEAT-051](FEAT-051.md) | Minor | **Done** | Pro-user context menus and always-on advanced controls |
 | [FEAT-052](FEAT-052.md) | Minor | **Done** | Main-shell keyboard shortcuts and mnemonic audit |
 | [FEAT-053](FEAT-053.md) | Minor | **Done** | Classic tray balloon notification mode |
+| [FEAT-054](FEAT-054.md) | Minor | **Done** | Normalize download message filename display |
 
 ---
 
