@@ -274,18 +274,18 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `PartiallyPurgeOldKnownFiles` | `eMule` | `RW` | Advanced tree | `true` | Allows more aggressive cleanup of stale known-file entries. |
 | `RearrangeKadSearchKeywords` | `eMule` | `RW` | Advanced tree | `true` | Reorder Kad search keywords before issuing the search. |
 | `MessageFromValidSourcesOnly` | `eMule` | `RW` | Advanced tree | `true` | Message acceptance gate used by `BaseClient.cpp`. |
-| `GeoLocationEnabled` | `eMule` | `RW` | Advanced tree | `true` | Enables IP geolocation display and automatic DB refresh checks. |
-| `GeoLocationCheckDays` | `eMule` | `RW` | Advanced tree | `30` days | Automatic geolocation DB refresh interval; clamped to `7..365`. |
-| `GeoLocationLastCheckTime` | `eMule` | `RW` | Geolocation updater | `0` | Last geolocation DB refresh attempt timestamp; `0` makes the enabled updater due on first run. |
+| `GeoLocationLookupEnabled` | `eMule` | `RW` | Advanced tree | `true` | Enables IP geolocation display and automatic DB refresh checks. |
+| `GeoLocationUpdatePeriodDays` | `eMule` | `RW` | Advanced tree | `30` days | Automatic geolocation DB refresh interval; clamped to `7..365`. |
+| `GeoLocationLastUpdateTime` | `eMule` | `RW` | Geolocation updater | `0` | Last geolocation DB refresh attempt timestamp; `0` makes the enabled updater due on first run. |
 | `PerfLog:Mode` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging enable/mode. Tweaks exposes this as an enable checkbox. |
 | `PerfLog:FileFormat` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging output format: CSV or MRTG. |
 | `PerfLog:File` | `PerfLog` | `RW` | Advanced tree | config-dir default | Performance logging base file path. |
 | `PerfLog:Interval` | `PerfLog` | `RW` | Advanced tree | `5` minutes | Performance logging sample interval. |
 | `MaxFileUploadSizeMB` | `WebServer` | `RW` | WebServer page | `5` | Maximum single WebServer upload size in MiB. |
 | `AllowedIPs` | `WebServer` | `RW` | WebServer page | empty | Optional semicolon-separated IPv4 allow-list for WebServer clients. |
-| `AutoIPFilterUpdate` | `eMule` | `RW` | Security page | `false` | Enables post-startup automatic `ipfilter.dat` refreshes. |
+| `IPFilterUpdateEnabled` | `eMule` | `RW` | Security page | `false` | Enables post-startup automatic `ipfilter.dat` refreshes. |
 | `IPFilterUpdatePeriodDays` | `eMule` | `RW` | Security page | `7` days | Day interval for automatic IP-filter update attempts; clamped to `1..365`. |
-| `LastIPFilterUpdate` | `eMule` | `RW` | Automatic updater | `0` | Last automatic IP-filter update attempt timestamp. |
+| `IPFilterLastUpdateTime` | `eMule` | `RW` | Automatic updater | `0` | Last automatic IP-filter update attempt timestamp. |
 | `IPFilterUpdateUrl` | `eMule` | `RW` | Security page | `http://upd.emule-security.org/ipfilter.zip` | URL used by manual and automatic IP-filter updates. |
 
 Documented-only active keys:
