@@ -220,7 +220,7 @@ The last two groups are documented because they still live in the same file, but
 | `LowRatioScoreBonus` | `UploadPolicy` | `RW` | Yes | `50` | Additive score bonus for low-ratio files. |
 | `LowIDScoreDivisor` | `UploadPolicy` | `RW` | Yes | `2` | Divisor applied to actual LowID clients in queue scoring. |
 | `SessionTransferLimitMode` | `UploadPolicy` | `RW` | Yes | percent of file | Upload session transfer-limit mode. |
-| `SessionTransferLimitValue` | `UploadPolicy` | `RW` | Yes | `55` | Upload session transfer-limit value interpreted by the selected mode. |
+| `SessionTransferLimitValue` | `UploadPolicy` | `RW` | Yes | `55` | Upload session transfer-limit value interpreted by the selected mode: percent mode accepts `1..100`, MiB mode accepts `1..4096`. |
 | `SessionTimeLimitSeconds` | `UploadPolicy` | `RW` | Yes | `3600` | Upload session time limit in seconds; `0` disables time-based rotation. |
 
 ## REST Preference Surface
@@ -292,7 +292,7 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `RearrangeKadSearchKeywords` | `eMule` | `RW` | Advanced tree | `true` | Reorder Kad search keywords before issuing the search. |
 | `MessageFromValidSourcesOnly` | `eMule` | `RW` | Advanced tree | `true` | Message acceptance gate used by `BaseClient.cpp`. |
 | `GeoLocationLookupEnabled` | `eMule` | `RW` | Advanced tree | `true` | Enables IP geolocation display and automatic DB refresh checks. |
-| `GeoLocationUpdatePeriodDays` | `eMule` | `RW` | Advanced tree | `30` days | Automatic geolocation DB refresh interval; clamped to `7..365`. |
+| `GeoLocationUpdatePeriodDays` | `eMule` | `RW` | Advanced tree | `30` days | Automatic geolocation DB refresh interval; UI accepts `0` to disable checks or `7..365`. |
 | `GeoLocationLastUpdateTime` | `eMule` | `RW` | Geolocation updater | `0` | Last geolocation DB refresh attempt timestamp; `0` makes the enabled updater due on first run. |
 | `PerfLog:Mode` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging enable/mode. Tweaks exposes this as an enable checkbox. |
 | `PerfLog:FileFormat` | `PerfLog` | `RW` | Advanced tree | `0` | Performance logging output format: CSV or MRTG. |
@@ -301,7 +301,7 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `MaxFileUploadSizeMB` | `WebServer` | `RW` | WebServer page | `5` | Maximum single WebServer upload size in MiB. |
 | `AllowedIPs` | `WebServer` | `RW` | WebServer page | empty | Optional semicolon-separated IPv4 allow-list for WebServer clients. |
 | `IPFilterUpdateEnabled` | `eMule` | `RW` | Security page | `false` | Enables post-startup automatic `ipfilter.dat` refreshes. |
-| `IPFilterUpdatePeriodDays` | `eMule` | `RW` | Security page | `7` days | Day interval for automatic IP-filter update attempts; clamped to `1..365`. |
+| `IPFilterUpdatePeriodDays` | `eMule` | `RW` | Security page | `7` days | Day interval for automatic IP-filter update attempts; INI values are clamped to `1..365`, and the Security page rejects values outside that range. |
 | `IPFilterLastUpdateTime` | `eMule` | `RW` | Automatic updater | `0` | Last automatic IP-filter update attempt timestamp. |
 | `IPFilterUpdateUrl` | `eMule` | `RW` | Security page | `http://upd.emule-security.org/ipfilter.zip` | URL used by manual and automatic IP-filter updates. |
 
@@ -499,6 +499,9 @@ The 2026-05-03 preference surface audit checked defaults, ranges, UI validation,
 
 | Item | Why it matters | Suggested follow-up |
 | --- | --- | --- |
+| INI lookup semantics | `preferences.ini` reads and writes use case-insensitive section/key matching in both the Windows profile API path and the long-path file-backed path. The `statsInterval` load / `StatsInterval` save spelling is therefore drop-in compatible. | Prefer the established written casing for new references, but do not add migration code just for casing aliases. |
+| Broadband upload policy bounds | Session-transfer limit values now use one mode-aware normalizer shared by INI load, setters, and the Tweaks page. Percent mode is `1..100`; MiB mode is `1..4096`; disabled mode ignores the value after bounding it for persistence. | Add new upload-policy keys through the same seam first, then wire UI/persistence. |
+| IP-filter update interval | INI load clamps to `1..365` for compatibility, while the Security page now rejects invalid user input instead of silently changing it. | Keep the tooltip, UI validation, `IPFilterUpdateSeams`, and docs in sync when changing the interval range. |
 | REST numeric bounds | REST now rejects values outside the same finite/UI/persistence ranges instead of silently normalizing them through setters. | Keep OpenAPI, `WebApiSurfaceSeams`, and `ApplyPreferencesJson` in lockstep when adding a REST preference. |
 | WebServer page preferences | `AllowedIPs` and `MaxFileUploadSizeMB` are written back and exposed on the WebServer page, but they are not REST preferences. | Add REST fields only if a controller workflow needs them. |
 | Documented-only active keys | Several low-level compatibility/security keys are intentionally not exposed. | Keep them documented and avoid adding UI without a specific operator workflow. |
