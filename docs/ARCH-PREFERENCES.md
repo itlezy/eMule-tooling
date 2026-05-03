@@ -215,12 +215,19 @@ The last two groups are documented because they still live in the same file, but
 
 | INI key | Section | Mode | UI | Default | Explanation |
 | --- | --- | --- | --- | --- | --- |
-| `BBMaxUpClientsAllowed` | `eMule` | `RW` | Yes | `12` | Broadband steady-state upload-slot target. This is the main broadband slot-count knob. |
-| `BBSessionMaxTrans` | `eMule` | `RW` | Yes | `SESSIONMAXTRANS` from `Opcodes.h` | Upload session transfer limit. `0` disables, `1..100` means percent of current file size, `>100` means absolute byte count. |
-| `BBSessionMaxTime` | `eMule` | `RW` | Yes | `SESSIONMAXTIME` from `Opcodes.h` | Upload session time limit in milliseconds. `0` disables. |
-| `BBBoostLowRatioFiles` | `eMule` | `RW` | Yes | `0` | Ratio threshold below which files are considered low-ratio and may get score boosting. |
-| `BBBoostLowRatioFilesBy` | `eMule` | `RW` | Yes | `0` | Additive score bonus applied when the low-ratio threshold matches. |
-| `BBDeboostLowIDs` | `eMule` | `RW` | Yes | `0` | Divisor applied to actual LowID clients in queue scoring. |
+| `MaxUploadClientsAllowed` | `UploadPolicy` | `RW` | Yes | `8` | Broadband steady-state upload-slot target. This is the main broadband slot-count knob. |
+| `SlowUploadThresholdFactor` | `UploadPolicy` | `RW` | Yes | `0.33` | Per-slot rate factor below which warmed-up upload slots can be recycled. |
+| `SlowUploadGraceSeconds` | `UploadPolicy` | `RW` | Yes | `30` | Time a warmed-up slow slot must remain below threshold before recycle. |
+| `SlowUploadWarmupSeconds` | `UploadPolicy` | `RW` | Yes | `60` | Startup grace period for new upload slots before slow-slot recycling. |
+| `ZeroUploadRateGraceSeconds` | `UploadPolicy` | `RW` | Yes | `10` | Time a warmed-up zero-rate slot can remain stalled before recycle. |
+| `SlowUploadCooldownSeconds` | `UploadPolicy` | `RW` | Yes | `120` | Cooldown during which recycled clients keep a zero queue score. |
+| `LowRatioBoostEnabled` | `UploadPolicy` | `RW` | Yes | `true` | Enables queue-score boosting for files under the low-ratio threshold. |
+| `LowRatioThreshold` | `UploadPolicy` | `RW` | Yes | `0.5` | Ratio threshold below which files can receive low-ratio boosting. |
+| `LowRatioScoreBonus` | `UploadPolicy` | `RW` | Yes | `50` | Additive score bonus for low-ratio files. |
+| `LowIDScoreDivisor` | `UploadPolicy` | `RW` | Yes | `2` | Divisor applied to actual LowID clients in queue scoring. |
+| `SessionTransferLimitMode` | `UploadPolicy` | `RW` | Yes | percent of file | Upload session transfer-limit mode. |
+| `SessionTransferLimitValue` | `UploadPolicy` | `RW` | Yes | `55` | Upload session transfer-limit value interpreted by the selected mode. |
+| `SessionTimeLimitSeconds` | `UploadPolicy` | `RW` | Yes | `3600` | Upload session time limit in seconds; `0` disables time-based rotation. |
 
 ## Hidden Runtime Preferences
 
@@ -244,6 +251,9 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `DateTimeFormat4Log` | `eMule` | `RW` | Advanced tree | `%c` | Log-line date/time display format. |
 | `DateTimeFormat4Lists` | `eMule` | `RW` | Advanced tree | `%c` | Separate date/time format string for list controls. |
 | `TxtEditor` | `eMule` | `RW` | Advanced tree | `notepad.exe` | Command used to open text output. |
+| `RunCommandOnFileCompletion` | `FileCompletion` | `RW` | Files page | `false` | Enables a configured command when a download completes. |
+| `FileCompletionProgram` | `FileCompletion` | `RW` | Files page | empty | Program path for the file-completion command. |
+| `FileCompletionArguments` | `FileCompletion` | `RW` | Files page | empty | Argument template for the file-completion command. |
 | `MaxChatHistoryLines` | `eMule` | `RW` | Advanced tree | `100` | Maximum retained chat/IRC history lines per view. Direct INI values are bounded on load. |
 | `MaxMessageSessions` | `eMule` | `RW` | Advanced tree | `50` | Maximum retained peer message sessions. Direct INI values are bounded on load. |
 | `RestoreLastMainWndDlg` | `eMule` | `RW` | Advanced tree | `false` | Restore the last active main tab on startup. |
@@ -393,12 +403,13 @@ This section explains what the more technical settings actually do in runtime te
 
 | Setting | What it actually does |
 | --- | --- |
-| `BBMaxUpClientsAllowed` | Sets the broadband branch's normal steady-state upload slot target. The queue/throttler logic tries to stabilize around this value instead of the old “many 25 KiB/s slots” model. |
-| `BBSessionMaxTrans` | Controls when a productive upload slot should be rotated out based on delivered payload. `0` disables transfer-based rotation; `1..100` interprets the number as a percent of the current upload file size; values above `100` are treated as absolute byte limits. |
-| `BBSessionMaxTime` | Time-based rotation limit for upload sessions. It complements `BBSessionMaxTrans` so healthy slots can still rotate after long service times. |
-| `BBBoostLowRatioFiles` | Threshold for deciding that a shared file is under-seeded enough to deserve queue-score preference. The actual ratio metric is file transferred bytes divided by file size. |
-| `BBBoostLowRatioFilesBy` | Additive queue-score bonus applied when the low-ratio threshold matches. This affects who gets the next productive slot, not how many slots exist. |
-| `BBDeboostLowIDs` | Queue-score divisor applied to actual LowID clients. This is deliberately harsh seeder policy: LowIDs are not banned, but they are deprioritized. |
+| `MaxUploadClientsAllowed` | Sets the broadband branch's normal steady-state upload slot target. The queue/throttler logic tries to stabilize around this value instead of the old “many 25 KiB/s slots” model. |
+| `SlowUploadThresholdFactor` | Controls how far below the calculated per-slot target a warmed-up upload slot can fall before it becomes a slow-slot recycle candidate. |
+| `SlowUploadGraceSeconds` / `SlowUploadWarmupSeconds` / `ZeroUploadRateGraceSeconds` / `SlowUploadCooldownSeconds` | Control the slow-slot recycle timing windows and the score cooldown applied after recycle. |
+| `LowRatioBoostEnabled` / `LowRatioThreshold` / `LowRatioScoreBonus` | Queue-score boost for under-seeded files. This affects who gets the next productive slot, not how many slots exist. |
+| `LowIDScoreDivisor` | Queue-score divisor applied to actual LowID clients. This is deliberately harsh seeder policy: LowIDs are not banned, but they are deprioritized. |
+| `SessionTransferLimitMode` / `SessionTransferLimitValue` | Controls when a productive upload slot should be rotated out based on delivered payload. Percent mode treats the value as a percent of the current upload file size; MiB mode treats it as an absolute MiB limit. |
+| `SessionTimeLimitSeconds` | Time-based rotation limit for upload sessions. It complements transfer-based rotation so healthy slots can still rotate after long service times. |
 
 ### Hidden Maintenance / Legacy Behavior Knobs
 

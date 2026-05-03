@@ -16,13 +16,13 @@
 ## Goal
 
 This branch keeps the broadband-oriented idea from `v0.60d-dev`: cap the normal
-number of upload slots with `BBMaxUpClientsAllowed`, but do it in a way that
+number of upload slots with `MaxUploadClientsAllowed`, but do it in a way that
 fits the `v0.72a` codebase and current broadband links.
 
 The implementation is intentionally narrow:
 
-- keep `BBMaxUpClientsAllowed` as the steady-state slot target
-- override the legacy session rotation defaults with `BBSessionTransferMode` / `BBSessionTransferValue` and `BBSessionTimeLimitSeconds`
+- keep `MaxUploadClientsAllowed` as the steady-state slot target
+- override the legacy session rotation defaults with `SessionTransferLimitMode` / `SessionTransferLimitValue` and `SessionTimeLimitSeconds`
 - base slot decisions on one finite configured upload budget
 - treat the configured broadband slot target as the normal ceiling for upload slots
 - reclaim obviously weak upload slots instead of compensating by opening many more
@@ -102,15 +102,15 @@ That behavior maps well to the goal on `v0.72a`.
 
 The slot-allocation story keeps these parts of the old broadband approach:
 
-- hidden `BBMaxUpClientsAllowed` configuration key as the steady-state slot target
-- hidden `BBSessionTransferMode`, `BBSessionTransferValue`, and `BBSessionTimeLimitSeconds` overrides for broadband session rotation
+- hidden `UploadPolicy.MaxUploadClientsAllowed` configuration key as the steady-state slot target
+- hidden `UploadPolicy.SessionTransferLimitMode`, `UploadPolicy.SessionTransferLimitValue`, and `UploadPolicy.SessionTimeLimitSeconds` overrides for broadband session rotation
 - a steady-state soft cap for upload slots
 - slow/stuck slot tracking on each uploading client
 - replacement of bad slots instead of relying on runaway slot growth
 
 Separate branch extras still present but outside this story:
 
-- hidden `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, `BBLowRatioBonus`, and `BBLowIDDivisor` queue-score controls
+- hidden `UploadPolicy.LowRatioBoostEnabled`, `UploadPolicy.LowRatioThreshold`, `UploadPolicy.LowRatioScoreBonus`, and `UploadPolicy.LowIDScoreDivisor` queue-score controls
 - `All-Time Ratio` / `Session Ratio` columns in shared, upload, and queue lists
 - `Cooldown` column in upload and queue lists
 - low-ratio preference when ordering the shared-file list published to servers,
@@ -133,7 +133,7 @@ the patch maintainable on top of `v0.72a`.
 
 ### Broadband preferences
 
-`BBMaxUpClientsAllowed=<int>`
+`[UploadPolicy] MaxUploadClientsAllowed=<int>`
 
 - stored in `preferences.ini`
 - defaults to `8`
@@ -142,7 +142,7 @@ the patch maintainable on top of `v0.72a`.
 This value is the normal broadband slot target and, on the stabilization branch,
 the effective ceiling for normal upload slots.
 
-`BBSlowThresholdFactor=<float>`
+`[UploadPolicy] SlowUploadThresholdFactor=<float>`
 
 - stored in `preferences.ini`
 - defaults to `0.33`
@@ -150,7 +150,7 @@ the effective ceiling for normal upload slots.
 - slots below `targetPerSlot * factor` are candidates for slow-slot recycle once
   the other recycle gates also hold
 
-`BBSlowGraceSeconds=<int>`
+`[UploadPolicy] SlowUploadGraceSeconds=<int>`
 
 - stored in `preferences.ini`
 - defaults to `30`
@@ -158,21 +158,21 @@ the effective ceiling for normal upload slots.
 - a warmed-up slot must remain below the slow threshold for this long before it
   is recycled
 
-`BBSlowWarmupSeconds=<int>`
+`[UploadPolicy] SlowUploadWarmupSeconds=<int>`
 
 - stored in `preferences.ini`
 - defaults to `60`
 - clamped to `0..3600`
 - fresh upload slots do not accumulate broadband recycle debt during this window
 
-`BBZeroRateGraceSeconds=<int>`
+`[UploadPolicy] ZeroUploadRateGraceSeconds=<int>`
 
 - stored in `preferences.ini`
 - defaults to `10`
 - clamped to `3..120`
 - a warmed-up slot stuck at exactly `0` upload rate for this long is recycled
 
-`BBSlowCooldownSeconds=<int>`
+`[UploadPolicy] SlowUploadCooldownSeconds=<int>`
 
 - stored in `preferences.ini`
 - defaults to `120`
@@ -180,24 +180,24 @@ the effective ceiling for normal upload slots.
 - recycled clients are requeued immediately, but their queue score stays at zero
   until this cooldown expires
 
-`BBLowRatioBoostEnabled=<bool>`
+`[UploadPolicy] LowRatioBoostEnabled=<bool>`
 
 - stored in `preferences.ini`
 - defaults to `true`
 
-`BBLowRatioThreshold=<float>`
+`[UploadPolicy] LowRatioThreshold=<float>`
 
 - stored in `preferences.ini`
 - defaults to `0.5`
 - clamped to `0.0..2.0`
 
-`BBLowRatioBonus=<int>`
+`[UploadPolicy] LowRatioScoreBonus=<int>`
 
 - stored in `preferences.ini`
 - defaults to `50`
 - clamped to `0..500`
 
-`BBLowIDDivisor=<int>`
+`[UploadPolicy] LowIDScoreDivisor=<int>`
 
 - stored in `preferences.ini`
 - defaults to `2`
@@ -205,7 +205,7 @@ the effective ceiling for normal upload slots.
 - values above `1` divide the queue score of actual LowID clients by the
   configured value
 
-`BBSessionTransferMode=<int>` + `BBSessionTransferValue=<int>`
+`[UploadPolicy] SessionTransferLimitMode=<int>` + `SessionTransferLimitValue=<int>`
 
 - stored in `preferences.ini`
 - defaults to `Percent of file size` with value `55`
@@ -217,7 +217,7 @@ the effective ceiling for normal upload slots.
   - percent mode: `1..100`
   - MiB mode: `1..4096`
 
-`BBSessionTimeLimitSeconds=<int>`
+`[UploadPolicy] SessionTimeLimitSeconds=<int>`
 
 - stored in `preferences.ini`
 - defaults to `3600`
@@ -263,13 +263,13 @@ comparisons against byte-rate counters.
 
 The per-slot target now becomes:
 
-`targetPerSlot = configuredUploadBudget / BBMaxUpClientsAllowed`
+`targetPerSlot = configuredUploadBudget / MaxUploadClientsAllowed`
 
 with a floor of `3 KiB/s`.
 
 The existing minimum-admission threshold is kept at `75%` of the target value.
 
-On a `50 Mbit/s` uplink with `BBMaxUpClientsAllowed=12`:
+On a `50 Mbit/s` uplink with `MaxUploadClientsAllowed=12`:
 
 - configured upload budget is about `6100 KiB/s`
 - target per slot is about `508 KiB/s`
@@ -281,7 +281,7 @@ On a `50 Mbit/s` uplink with `BBMaxUpClientsAllowed=12`:
 Normal behavior on the stabilization branch:
 
 - fill until the configured broadband slot target is reached
-- stop opening slots once `BBMaxUpClientsAllowed` is already occupied by normal upload slots
+- stop opening slots once `MaxUploadClientsAllowed` is already occupied by normal upload slots
 - keep `MAX_UP_CLIENTS_ALLOWED = 100` only as an absolute safety ceiling
 
 Underfill handling:
@@ -360,11 +360,11 @@ still decides who gets them.
 
 This branch keeps that policy explicit instead of burying it in slot math:
 
-- `BBLowRatioBoostEnabled`, `BBLowRatioThreshold`, and `BBLowRatioBonus` let the queue favor files
+- `LowRatioBoostEnabled`, `LowRatioThreshold`, and `LowRatioScoreBonus` let the queue favor files
   that have historically seen fewer uploaded copies
 - the ratio metric is simple and local to the current file:
   `allTimeTransferred / fileSize`
-- `BBLowIDDivisor` optionally penalizes actual LowID clients with a score
+- `LowIDScoreDivisor` optionally penalizes actual LowID clients with a score
   divisor
 
 This is intentionally harsh. The goal of this branch is not neutral fairness; it
@@ -382,9 +382,9 @@ This keeps the feature intentionally simple:
 The branch now replaces the stock `SESSIONMAXTRANS` and `SESSIONMAXTIME`
 rotation checks with the hidden broadband overrides:
 
-- `BBSessionTransferMode` + `BBSessionTransferValue` replace the stock
+- `SessionTransferLimitMode` + `SessionTransferLimitValue` replace the stock
   one-chunk transfer cap
-- `BBSessionTimeLimitSeconds` replaces the stock one-hour time cap
+- `SessionTimeLimitSeconds` replaces the stock one-hour time cap
 
 This keeps healthy upload sessions bounded without relying on the old score-based
 rotation logic, which caused extra churn on broadband-oriented low-slot setups.
@@ -403,7 +403,7 @@ using the old fixed `75 KiB/s` and `100 KiB/s` thresholds.
 
 ## Expected Outcome
 
-With `BBMaxUpClientsAllowed=12` on a `50 Mbit/s` link, the expected steady state
+With `MaxUploadClientsAllowed=12` on a `50 Mbit/s` link, the expected steady state
 is roughly:
 
 - normal operation at `12` slots
