@@ -16,10 +16,10 @@ It is based on:
 - [UI-Exposed Preferences](#ui-exposed-preferences)
   - [General](#general) — [Connection And Throughput](#connection-and-throughput) — [Server / eD2k / Kad](#server--ed2k--kad) — [Directories, Files, And Download Behavior](#directories-files-and-download-behavior) — [Display / UI / Toolbar](#display--ui--toolbar) — [Security, Privacy, And Obfuscation](#security-privacy-and-obfuscation) — [Messaging / Chat](#messaging--chat) — [Notifications](#notifications) — [UPnP](#upnp) — [Broadband Branch Controls](#broadband-branch-controls)
 - [Hidden Runtime Preferences](#hidden-runtime-preferences)
-- [Hidden Or Legacy Keys Which Look Stale](#hidden-or-legacy-keys-which-look-stale-transitional-or-import-only)
+- [Retired INI Names Ignored By Current Main](#retired-ini-names-ignored-by-current-main)
 - [UI Defaults Which Are Not First-Class CPreferences Keys](#ui-defaults-which-are-not-first-class-cpreferences-keys)
 - [Technical Notes For Non-Obvious Settings](#technical-notes-for-non-obvious-settings)
-  - [Throughput And Connection Control](#throughput-and-connection-control) — [Server / Kad Behavior](#server--kad-behavior) — [File I/O And Download Mechanics](#file-io-and-download-mechanics) — [Security / Messaging / Obfuscation](#security--messaging--obfuscation) — [UI / Rendering Internals](#ui--rendering-internals) — [Broadband Branch Controls](#broadband-branch-controls-1) — [Hidden Maintenance / Legacy Behavior Knobs](#hidden-maintenance--legacy-behavior-knobs)
+  - [Throughput And Connection Control](#throughput-and-connection-control) — [Server / Kad Behavior](#server--kad-behavior) — [File I/O And Download Mechanics](#file-io-and-download-mechanics) — [Security / Messaging / Obfuscation](#security--messaging--obfuscation) — [UI / Rendering Internals](#ui--rendering-internals) — [Broadband Branch Controls](#broadband-branch-controls-1) — [Hidden Maintenance Behavior Knobs](#hidden-maintenance-behavior-knobs)
 - [Counters, Statistics, And State Stored In The Same INI](#counters-statistics-and-state-stored-in-the-same-ini)
 - [TODO](#todo)
 - [Practical Reading Guide](#practical-reading-guide)
@@ -30,7 +30,7 @@ This document separates four different things which all live in `preferences.ini
 
 1. real user-facing preferences
 2. hidden/internal runtime preferences
-3. compatibility or import-only keys
+3. retired names current main ignores
 4. counters, statistics, and UI layout state
 
 The first two groups are the actual behavior knobs.
@@ -65,10 +65,8 @@ The last two groups are documented because they still live in the same file, but
 
 | INI key | Section | Mode | UI | Default | Explanation |
 | --- | --- | --- | --- | --- | --- |
-| `MaxUpload` | `eMule` | `RW` | Yes | `50000` | Upload speed limit in KiB/s for this branch. |
-| `MaxDownload` | `eMule` | `RW` | Yes | `200000` | Download speed limit in KiB/s for this branch. |
-| `DownloadCapacity` | `eMule` | `RW` | Yes | `200000` | Download line-capacity hint in KiB/s. Used for graphs and throughput logic. |
-| `UploadCapacityNew` | `eMule` | `RW` | Yes | `50000` | Upload line-capacity hint in KiB/s. Important for the broadband controller. |
+| `MaxUpload` | `eMule` | `RW` | Yes | `6100` | Upload speed limit in KiB/s for this branch. |
+| `MaxDownload` | `eMule` | `RW` | Yes | `12207` | Download speed limit in KiB/s for this branch. |
 | `MaxConnections` | `eMule` | `RW` | Yes | existing app default | Hard cap for total connections. |
 | `MaxHalfConnections` | `eMule` | `RW` | Yes | existing app default | Cap for half-open TCP connections. |
 | `MaxConnectionsPerFiveSeconds` | `eMule` | `RW` | Yes | existing app default | Burst limiter for outbound connection attempts. |
@@ -76,7 +74,6 @@ The last two groups are documented because they still live in the same file, but
 | `UDPPort` | `eMule` | `RW` | Yes | existing app default | Main UDP listening port. |
 | `ServerUDPPort` | `eMule` | `RW` | Yes | existing app default | UDP port used for server communication. |
 | `BindInterface` | `eMule` | `RW` | Yes | empty | Preferred network interface for P2P sockets. Empty means no interface restriction. |
-| `BindInterfaceName` | `eMule` | `RW` | Yes | empty | Stored display name for the selected P2P bind interface, mainly to keep the UI readable if the adapter is currently missing. |
 | `BindAddr` | `eMule` | `RW` | Yes | empty | Optional IPv4 address for P2P sockets. Empty means all addresses on the selected interface, or all interfaces when no interface is selected. |
 | `ConditionalTCPAccept` | `eMule` | `RW` | Yes | existing app default | Controls conditional TCP accept behavior. This is an advanced network-side knob. |
 | `ConnectionTimeout` | `eMule` | `RW` | Advanced tree | `30` seconds | Default TCP peer-connection timeout used by `EMSocket` and related connect/disconnect paths. |
@@ -121,8 +118,9 @@ The last two groups are documented because they still live in the same file, but
 | `AllocateFullFile` | `eMule` | `RW` | Yes | `false` | Preallocate the full output file size ahead of download progress. |
 | `SparsePartFiles` | `eMule` | `RW` | Yes | `false` | Use sparse part-file allocation where supported. |
 | `CommitFiles` | `eMule` | `RW` | Yes | `1` | Controls file commit behavior. Legacy low-level file I/O policy. |
-| `CheckDiskspace` | `eMule` | `RW` | Yes | `false` | Enforce minimum free-disk-space checks. |
-| `MinFreeDiskSpace` | `eMule` | `RW` | Yes | `5 * 1024 * 1024 * 1024` | Minimum free disk space threshold. Tweaks now edits this in GB. |
+| `MinFreeDiskSpaceConfig` | `eMule` | `RW` | Yes | config floor | Minimum free-space floor for the config/log volume. |
+| `MinFreeDiskSpaceTemp` | `eMule` | `RW` | Yes | temp floor | Minimum free-space floor for temp/part-file volumes. |
+| `MinFreeDiskSpaceIncoming` | `eMule` | `RW` | Yes | incoming floor | Minimum free-space floor for completed-download volumes. |
 | `AutoArchivePreviewStart` | `eMule` | `RW` | Yes | `true` | Automatically start archive preview extraction. |
 | `ExtractMetaData` | `eMule` | `RW` | Yes | `1` | Metadata extraction mode. |
 | `ResolveSharedShellLinks` | `eMule` | `RW` | Yes | `false` | Resolve shell links in shared directories. |
@@ -206,10 +204,8 @@ The last two groups are documented because they still live in the same file, but
 | INI key | Section | Mode | UI | Default | Explanation |
 | --- | --- | --- | --- | --- | --- |
 | `EnableUPnP` | `UPnP` | `RW` | Yes | `true` | Enable UPnP. You asked for this default on, including wizard flow. |
-| `CloseUPnPOnExit` | `eMule` | `RW` | Yes | `true` | Remove UPnP mappings on exit. |
-| `SkipWANIPSetup` | `eMule` | `RW` | Yes | `false` | Skip WAN IP setup path. |
-| `SkipWANPPPSetup` | `eMule` | `RW` | Yes | `false` | Skip WAN PPP setup path. |
-| `LastWorkingImplementation` | `eMule` | `RW` | No | `1` | Tracks which UPnP backend last worked. Internal, but persisted. |
+| `CloseUPnPOnExit` | `UPnP` | `RW` | Yes | `true` | Remove UPnP mappings on exit. |
+| `BackendMode` | `UPnP` | `RW` | Yes | automatic | Selects the active UPnP/NAT traversal backend mode. |
 
 ### Broadband Branch Controls
 
@@ -242,7 +238,6 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `FullVerbose` | `eMule` | `RW` | Advanced tree | `false` | Full verbose trace when verbose logging is enabled. |
 | `HighresTimer` | `eMule` | `RW` | Advanced tree | `false` | Requests a high-resolution Windows timer while eMule is running. |
 | `ICH` | `eMule` | `RW` | Advanced tree | `true` | Enables Intelligent Corruption Handling. |
-| `DontCompressAvi` | `eMule` | `RW` | Advanced tree | `false` | Skips compression for AVI upload payloads. |
 | `PreviewSmallBlocks` | `eMule` | `RW` | Advanced tree | `0` | Allows or forces preview availability before normal block-completeness checks are fully satisfied. |
 | `BeepOnError` | `eMule` | `RW` | Advanced tree | `false` | Plays an audible alert on important errors. |
 | `ShowCopyEd2kLinkCmd` | `eMule` | `RW` | Advanced tree | `false` | Shows a direct copy-ed2k-link context command. |
@@ -267,7 +262,7 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `ReBarToolbar` | `eMule` | `RW` | Advanced tree | `true` | Enable rebar-based toolbar layout. |
 | `ShowUpDownIconInTaskbar` | `eMule` | `RW` | Advanced tree | `false` | Show upload/download state in taskbar icon handling. |
 | `AlwaysShowTrayIcon` | `eMule` | `RW` | Advanced tree | `false` | Keep the eMule notification-area icon visible while the app is running. Minimize-to-tray and tray-balloon notification delivery can still force tray visibility while this is disabled. |
-| `ShowVerticalHourMarkers` | `eMule` | `RW` | Advanced tree | `true` | Draw vertical hour markers on statistics graphs. This now loads from `eMule` while falling back to the previous accidental `Statistics` placement. |
+| `ShowVerticalHourMarkers` | `eMule` | `RW` | Advanced tree | `true` | Draw vertical hour markers on statistics graphs. Current main reads and writes only this `eMule` key. |
 | `ForceSpeedsToKB` | `eMule` | `RW` | Advanced tree | `false` | Force speed-formatting helpers to prefer KB-based units. |
 | `ExtraPreviewWithMenu` | `eMule` | `RW` | Advanced tree | `false` | Changes where preview actions appear in download-list UI/menu flow. |
 | `KeepUnavailableFixedSharedDirs` | `eMule` | `RW` | Advanced tree | `false` | Keep fixed shared dirs even when currently unavailable during startup/shared-dir loading. |
@@ -301,18 +296,15 @@ Documented-only active keys:
 | `GeoLocationUpdateUrl` | `eMule` | `RW` | DB-IP template URL | Operational endpoint override; keep documented rather than casual UI. |
 | `NotifierConfiguration` | `eMule` | `RW` | notifier config path | Separate notifier configuration file path. |
 
-## Hidden Or Legacy Keys Which Look Stale, Transitional, Or Import-Only
+## Retired INI Names Ignored By Current Main
 
 | INI key | Section | Mode | Default | Explanation |
 | --- | --- | --- | --- | --- |
-| `FileBufferSizePref` | `eMule` | `R` | old compatibility import | Old file-buffer key. Current code reads it only as migration input, then uses `FileBufferSize`. |
-| `QueueSizePref` | `eMule` | `R` | old compatibility import | Old queue-size key. Current code reads it only as migration input, then uses `QueueSize`. |
-| `UploadCapacity` | `eMule` | `R` | legacy compatibility | Older upload-capacity key superseded by `UploadCapacityNew`. |
-| `DownloadCapacity` | `eMule` | `R` | legacy compatibility | Older download-capacity key now treated as a signal to reset to broadband defaults. |
-| `UploadCapacityNew` | `eMule` | `R` | legacy compatibility | Older upload-capacity key now treated as a signal to reset to broadband defaults. |
-| `ResumeNextFromSameCat` | `eMule` | retired | n/a | No active preference member in current main. |
-| `AdjustNTFSDaylightFileTime` | `eMule` | retired | n/a | No active preference member in current main. |
-| `AICHTrustEveryHash` | `eMule` | retired | n/a | Removed as stale/unfinished; save now deletes old persisted values. |
+| `DownloadCapacity`, `UploadCapacityNew`, `UploadCapacity` | `eMule` | ignored | n/a | Old capacity/import names. Current main does not read, write, migrate, or delete them. |
+| `FileBufferSizePref`, `QueueSizePref` | `eMule` | ignored | n/a | Old file-buffer and queue-size names. Current main uses `FileBufferSize` and `QueueSize` only. |
+| `MiniMule`, `AICHTrustEveryHash` | `eMule` | ignored | n/a | Retired names. Current main does not read, write, migrate, or delete them. |
+| `ResumeNextFromSameCat`, `AdjustNTFSDaylightFileTime` | `eMule` | ignored | n/a | No active preference member in current main. |
+| `SkipWANIPSetup`, `SkipWANPPPSetup`, `LastWorkingImplementation`, `DisableMiniUPNPLibImpl`, `DisableWinServImpl` | `eMule` | ignored | n/a | Retired UPnP implementation-selection names. Current main uses `[UPnP] BackendMode`. |
 
 ## UI Defaults Which Are Not First-Class `CPreferences` Keys
 
@@ -332,8 +324,6 @@ This section explains what the more technical settings actually do in runtime te
 
 | Setting | What it actually does |
 | --- | --- |
-| `DownloadCapacity` | This is not a live throttle by itself. It is the app's configured estimate of available downstream capacity. Code uses it for graph scaling, throughput heuristics, and any logic that wants a line-capacity hint instead of the current live rate. |
-| `UploadCapacityNew` | This is the configured upstream-capacity hint. On this branch it feeds the broadband upload controller together with the active upload limit when slot targeting and per-slot throughput goals are derived. |
 | `MaxUpload` | This is the actual upload limit presented to the rest of the app. The broadband controller treats it as one bound on the effective upload budget, so it directly constrains slot targeting and per-slot throughput goals. |
 | `MaxDownload` | This is the active download speed limit. Unlike capacity, this is the operative cap used when download throttling logic is active. |
 | `MaxConnections` | Hard cap on total tracked/open connections. It is a blunt resource guard, not a prioritization tool. |
@@ -364,13 +354,13 @@ This section explains what the more technical settings actually do in runtime te
 | `FileBufferSize` | Caps how much data a part file keeps buffered before flushing. Larger values reduce write frequency and can improve sequential write behavior, but increase memory use and delay flushes. |
 | `FileBufferTimeLimit` | Hidden companion to `FileBufferSize`. Even if the buffer does not fill, `PartFile.cpp` forces a flush once buffered data gets older than this threshold. |
 | `UDPReceiveBufferSize` | Controls the UDP socket receive buffer size. Larger fixed values reduce packet-drop risk during bursts at the cost of some kernel buffer memory. |
-| `BigSendBufferSize` | Controls the larger TCP send buffer target for upload sockets. Larger values can help keep fast upload slots fed without relying on tiny legacy buffers. |
+| `BigSendBufferSize` | Controls the larger TCP send buffer target for upload sockets. Larger values can help keep fast upload slots fed without relying on tiny buffers. |
 | `QueueSize` | Caps the upload waiting queue size. It does not directly control upload slots; it limits how many clients can remain queued for service. |
 | `PreviewPrio` | Biases downloads toward preview-relevant chunks first. It changes chunk-request preference, not just UI sorting. |
 | `AllocateFullFile` | Causes destination files to be pre-sized up front. This can reduce fragmentation but increases upfront disk work and space reservation. |
 | `SparsePartFiles` | Lets the filesystem avoid materializing all zero regions immediately. Useful on supported filesystems, but behavior depends on platform/filesystem support. |
-| `CommitFiles` | Controls how aggressively the app commits file data to stable storage. It is a legacy durability/performance tradeoff rather than a user-facing convenience option. |
-| `CheckDiskspace` / `MinFreeDiskSpace` | These gate download/write behavior when free space gets too low. They are operational safety checks, not UI-only warnings. |
+| `CommitFiles` | Controls how aggressively the app commits file data to stable storage. It is a durability/performance tradeoff rather than a user-facing convenience option. |
+| `MinFreeDiskSpaceConfig` / `MinFreeDiskSpaceTemp` / `MinFreeDiskSpaceIncoming` | These per-volume floors gate config, temp/part-file, and completed-download write behavior when free space gets too low. They are operational safety checks, not UI-only warnings. |
 | `PreviewCopiedArchives` | Hidden runtime switch used by archive preview/recovery paths. It determines whether copied archives are eligible for preview recovery behavior. |
 | `InspectAllFileTypes` | Hidden runtime switch for metadata inspection. When enabled, file-info probing extends beyond the usual media-centric file types. |
 | `PreviewOnIconDblClk` | Changes input behavior in the download list: double-clicking the icon zone becomes a preview action. |
@@ -384,7 +374,7 @@ This section explains what the more technical settings actually do in runtime te
 | `CryptLayerRequested` | Advertises that the client would like obfuscated/encrypted peer traffic when the other side supports it. |
 | `CryptLayerRequired` | Refuses plain connections where obfuscation is expected. This is much stronger than merely “prefer obfuscation”. |
 | `CryptLayerSupported` | Announces protocol support for obfuscation. Disabling it removes that capability entirely. |
-| `AdvancedSpamFilter` | Enables additional filtering logic for spam-like content beyond the simpler legacy path. |
+| `AdvancedSpamFilter` | Enables additional filtering logic for spam-like content beyond the simpler message checks. |
 | `MessageUseCaptchas` | Requires chat captcha checks where the message anti-spam path is active. It affects acceptance flow, not just presentation. |
 | `MessageFromValidSourcesOnly` | Hidden message gate. In `BaseClient.cpp`, it restricts which peers can send messages through that path. It is exposed in Tweaks under Security & Filtering. |
 
@@ -395,7 +385,7 @@ This section explains what the more technical settings actually do in runtime te
 | `UseSystemFontForMainControls` | Hidden rendering choice used by multiple list and window classes. It changes which font objects are applied to major controls. |
 | `ReBarToolbar` | Hidden toolbar layout selector. It changes whether the app uses the rebar-style toolbar host instead of just recoloring an existing toolbar. |
 | `ShowUpDownIconInTaskbar` | Hidden taskbar integration flag. It controls whether upload/download state feeds taskbar icon handling. |
-| `ShowVerticalHourMarkers` | Hidden graph-rendering option. It affects how the statistics graph paints time markers. Current main writes it under `eMule` and falls back to the previous accidental `Statistics` key while loading. |
+| `ShowVerticalHourMarkers` | Hidden graph-rendering option. It affects how the statistics graph paints time markers and now reads/writes only the `eMule` key. |
 | `ForceSpeedsToKB` | Hidden formatting override. It changes unit-selection logic in the formatting helpers, not the underlying rate calculations. |
 | `DateTimeFormat4Lists` | Hidden date formatting string used specifically by list controls, distinct from the main UI and log formats. |
 
@@ -411,7 +401,7 @@ This section explains what the more technical settings actually do in runtime te
 | `SessionTransferLimitMode` / `SessionTransferLimitValue` | Controls when a productive upload slot should be rotated out based on delivered payload. Percent mode treats the value as a percent of the current upload file size; MiB mode treats it as an absolute MiB limit. |
 | `SessionTimeLimitSeconds` | Time-based rotation limit for upload sessions. It complements transfer-based rotation so healthy slots can still rotate after long service times. |
 
-### Hidden Maintenance / Legacy Behavior Knobs
+### Hidden Maintenance Behavior Knobs
 
 | Setting | What it actually does |
 | --- | --- |
@@ -465,7 +455,7 @@ These are persisted, but they are not really "preferences". They are state, tele
 | `LastMainWndDlgID`, `LastLogPaneID` | Remembered last selected pages/panes. |
 | `Toolbar*`, `Skin*` | Toolbar and skin configuration state. |
 | `HyperTextFont`, `LogTextFont`, `Log*Color` | Saved fonts and colors. |
-| `StatColor*`, `statsExpandedTreeItems`, `statsConnectionsGraphRatio`, `HasCustomTaskIconColor` | Statistics window presentation state. |
+| `[Statistics] StatColor*`, `[Statistics] statsExpandedTreeItems`, `[Statistics] statsConnectionsGraphRatio`, `[Statistics] HasCustomTaskIconColor` | Statistics window presentation state. |
 
 ### Category Records
 
@@ -501,8 +491,8 @@ If you only care about real end-user settings, read:
 2. `Broadband Branch Controls`
 3. `UI Defaults Which Are Not First-Class CPreferences Keys`
 
-If you are auditing weird legacy behavior, also read:
+If you are auditing retired names or hidden behavior, also read:
 
 1. `Hidden Runtime Preferences`
-2. `Hidden Or Legacy Keys Which Look Stale, Transitional, Or Import-Only`
+2. `Retired INI Names Ignored By Current Main`
 3. `TODO`
