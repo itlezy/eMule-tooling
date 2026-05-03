@@ -197,6 +197,7 @@ The last two groups are documented because they still live in the same file, but
 | `NotifyOnLog` | `eMule` | `RW` | Yes | `false` unless enabled by user | Notify on log output. |
 | `NotifyOnImportantError` | `eMule` | `RW` | Yes | `false` unless enabled by user | Notify on important errors. |
 | `NotifierPopEveryChatMessage` | `eMule` | `RW` | Yes | `false` | Pop every chat message, not just first/important ones. |
+| `NotifierDisplayMode` | `eMule` | `RW` | Yes | `1` | Notification display mode: `0` custom popup, `1` Windows toast, `2` classic tray balloon. Windows toast falls back to tray balloon when unavailable. |
 | `NotifierUseSound` | `eMule` | `RW` | Yes | `ntfstNoSound` | Select notifier sound mode. |
 | `NotifierSoundPath` | `eMule` | `RW` | Yes | empty | Custom sound file path. |
 
@@ -255,6 +256,7 @@ These settings are active and meaningful. Most operator-safe knobs are now expos
 | `UseSystemFontForMainControls` | `eMule` | `RW` | Advanced tree | `false` | Use system fonts for major controls and list views. |
 | `ReBarToolbar` | `eMule` | `RW` | Advanced tree | `true` | Enable rebar-based toolbar layout. |
 | `ShowUpDownIconInTaskbar` | `eMule` | `RW` | Advanced tree | `false` | Show upload/download state in taskbar icon handling. |
+| `AlwaysShowTrayIcon` | `eMule` | `RW` | Advanced tree | `false` | Keep the eMule notification-area icon visible while the app is running. Minimize-to-tray and tray-balloon notification delivery can still force tray visibility while this is disabled. |
 | `ShowVerticalHourMarkers` | `eMule` | `RW` | Advanced tree | `true` | Draw vertical hour markers on statistics graphs. This now loads from `eMule` while falling back to the previous accidental `Statistics` placement. |
 | `ForceSpeedsToKB` | `eMule` | `RW` | Advanced tree | `false` | Force speed-formatting helpers to prefer KB-based units. |
 | `ExtraPreviewWithMenu` | `eMule` | `RW` | Advanced tree | `false` | Changes where preview actions appear in download-list UI/menu flow. |
