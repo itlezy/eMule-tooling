@@ -767,16 +767,16 @@ paths:
       summary: Start Kad.
       operationId: startKad
       responses:
-        "202":
-          $ref: "#/components/responses/OkAcceptedResponse"
+        "200":
+          $ref: "#/components/responses/KadResponse"
   /kad/operations/stop:
     post:
       tags: [Kad]
       summary: Stop Kad.
       operationId: stopKad
       responses:
-        "202":
-          $ref: "#/components/responses/OkAcceptedResponse"
+        "200":
+          $ref: "#/components/responses/KadResponse"
   /kad/operations/bootstrap:
     post:
       tags: [Kad]
@@ -789,16 +789,16 @@ paths:
             schema:
               $ref: "#/components/schemas/KadBootstrapRequest"
       responses:
-        "202":
-          $ref: "#/components/responses/OkAcceptedResponse"
+        "200":
+          $ref: "#/components/responses/KadResponse"
   /kad/operations/recheck-firewall:
     post:
       tags: [Kad]
       summary: Recheck Kad firewall state.
       operationId: recheckKadFirewall
       responses:
-        "202":
-          $ref: "#/components/responses/OkAcceptedResponse"
+        "200":
+          $ref: "#/components/responses/KadResponse"
   /searches:
     post:
       tags: [Searches]
@@ -1558,6 +1558,8 @@ components:
           minimum: 0
         categoryName:
           type: string
+        paused:
+          type: boolean
     TransferPatch:
       type: object
       additionalProperties: false
@@ -2000,6 +2002,10 @@ components:
           type: integer
         indexedKeywords:
           type: integer
+        operationQueued:
+          type: boolean
+        alreadyRunning:
+          type: boolean
     KadBootstrapRequest:
       type: object
       additionalProperties: false
