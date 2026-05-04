@@ -16,9 +16,10 @@ Add a browser smoke lane that runs aMuTorrent against a live eMule BB instance.
 
 ## Release 1.0 Classification
 
-**Release Gate.** eMule BB's first release positions REST/controller support as
-a product feature, so aMuTorrent needs at least one browser smoke against a live
-instance with request and console artifacts.
+**Release Gate.** Full E2E-validated integration with aMuTorrent and the Arr
+suite is part of Release 1. This item owns the aMuTorrent side of that gate:
+at least one browser smoke against a live instance with request and console
+artifacts.
 
 ## Acceptance Criteria
 
@@ -34,4 +35,5 @@ instance with request and console artifacts.
 ## Relationship To Other Items
 
 - backs `CI-011`
+- complements `ARR-001`
 - consumes the native REST contract owned by `FEAT-013` and follow-up items

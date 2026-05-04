@@ -26,7 +26,8 @@ by a later release-readiness review.
 | [CI-011](CI-011.md) | Release live E2E umbrella | Make the aggregate runner publish stable suite result artifacts and document one supported release command. |
 | [CI-014](CI-014.md) | REST manifest/live completeness gate | Make native route tests and live REST smoke consume or validate the checked-in OpenAPI contract. |
 | [CI-015](CI-015.md) | REST malformed/concurrent matrix | Turn the malformed and concurrent request cases into selectable smoke/soak budgets. |
-| [AMUT-001](AMUT-001.md) | aMuTorrent browser smoke | Run aMuTorrent against a live eMule BB instance and capture browser console plus REST request artifacts. |
+| [AMUT-001](AMUT-001.md) | aMuTorrent live E2E validation | Run aMuTorrent against a live eMule BB instance and capture browser console plus REST request artifacts. |
+| [ARR-001](ARR-001.md) | Arr live E2E validation | Validate Prowlarr Torznab, Radarr/Sonarr indexer sync/search, and qBittorrent-compatible add/mutate/delete flows against live eMule BB. |
 | [FEAT-050](FEAT-050.md) | Download completion hook | Add the disabled-by-default executable-only completion hook with native tests for token expansion, launch validation, and shutdown skip behavior. |
 
 ## Release Candidates
@@ -76,9 +77,10 @@ release gates are meaningful, not after every useful future item is complete.
    `CI-011`.
 5. Download completion hook:
    `FEAT-050`.
-6. aMuTorrent smoke:
-   `AMUT-001`, with `FEAT-045` and `AMUT-002` pulled in only if the smoke proves
-   transfer details are required for a useful release.
+6. aMuTorrent and Arr integration validation:
+   `AMUT-001`, `ARR-001`, with `FEAT-045` and `AMUT-002` pulled in only if the
+   live controller gates prove transfer details are required for a useful
+   release.
 
 ## What 1.0 Showcases
 
@@ -86,7 +88,7 @@ release gates are meaningful, not after every useful future item is complete.
   library handling
 - long-path support, shared startup cache, monitored recursive shared roots,
   and safer file persistence
-- REST automation, aMuTorrent and Arr readiness, and live E2E proof
+- REST automation, aMuTorrent, Prowlarr, Radarr, and Sonarr live E2E proof
 - disabled-by-default completion automation for local workflows
 - WebServer hardening and typed REST errors for reliable local controllers
 
@@ -100,7 +102,11 @@ Before tagging `emule-bb-v1.0.0`, run:
 - `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`
 - `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Release -Platform x64`
 - native parity tests through the supported `test` command
-- release live E2E through the supported `live-e2e` command
+- release live E2E through the supported `live-e2e` command, including:
+  - aMuTorrent browser integration
+  - Prowlarr Torznab integration
+  - Radarr and Sonarr through Prowlarr plus qBittorrent-compatible download
+    control
 
 Public-network unavailable results are acceptable only when the harness records
 the run as inconclusive with enough diagnostics to distinguish environment

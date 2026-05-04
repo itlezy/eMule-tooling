@@ -288,6 +288,7 @@ is meaningful.
 |----|----------|--------|-------|
 | [AMUT-001](AMUT-001.md) | Major | Open | aMuTorrent eMule BB browser smoke coverage |
 | [AMUT-002](AMUT-002.md) | Major | Open | aMuTorrent transfer detail hydration |
+| [ARR-001](ARR-001.md) | Major | Open | Full Arr release E2E validation |
 
 ---
 
@@ -301,7 +302,7 @@ page when deciding what must land before `emule-bb-v1.0.0`.
 1. **BUG-075, BUG-076** — stabilize REST/WebServer error and malformed-request behavior before broadening the live gate
 2. **CI-014, CI-015** — make REST contract completeness and malformed/concurrent coverage manifest-driven
 3. **BUG-077** — prove concurrent REST and legacy HTML traffic under smoke/soak budgets
-4. **CI-011, AMUT-001** — publish one release live-E2E command and prove aMuTorrent against a live eMule BB instance
+4. **CI-011, AMUT-001, ARR-001** — publish one release live-E2E command and prove aMuTorrent, Prowlarr, Radarr, and Sonarr against a live eMule BB instance
 5. **FEAT-050** — ship the disabled-by-default executable-only download completion hook
 
 ### Release Candidates
@@ -316,7 +317,7 @@ page when deciding what must land before `emule-bb-v1.0.0`.
 
 - broad networking rewrites, Boost migration, dependency upgrades, warning-floor cleanup, and large UI/product features stay outside the first-release gate
 - **BUG-034, BUG-035** remain useful runtime-hardening watchpoints, but they are not release blockers unless a later scan finds a concrete rollback-level failure
-- **CI-012, CI-013, CI-016** remain valuable E2E expansions, but the first 1.0 gate is REST completeness plus aMuTorrent smoke
+- **CI-012, CI-013, CI-016** remain valuable E2E expansions, but the first 1.0 gate is REST completeness plus full aMuTorrent and Arr validation
 - **FEAT-037** stays deferred by product decision; the existing eMule BB upload controller and queue/scoring work are enough for the first broadband-sharing story
 - **CI-007** — Kad fuzz tests after the broader CI/toolchain stack is ready
 
@@ -371,6 +372,7 @@ FEAT-013 (WebServer REST) ──► BUG-073 (WebServer session-state synchroniza
 FEAT-013 (WebServer REST) ──► BUG-075/076/077 (REST/WebServer error, malformed, and concurrency hardening)
 BUG-075/076 ──► CI-014/015 (contract manifest and malformed/concurrency gates)
 CI-011 ──► CI-012/013/014/015/016 (release live E2E coverage lanes)
+CI-011 ──► AMUT-001/ARR-001 (release controller integration gates)
 FEAT-045 ──► AMUT-002 (aMuTorrent transfer-detail hydration)
 CI-014 ──► FEAT-045/046/047/048/049 (new REST work must update the contract gate)
 FEAT-011 (CShield) ──► FEAT-012 (PR_TCPERRORFLOODER, can standalone)
@@ -534,7 +536,7 @@ historical reference only.*
 *Release-readiness scan through 2026-05-01: current `main` was reviewed from `10a6c20` through `6697302`; no rollback-level regression was found in the recent broadband stabilization slices; `BUG-034` / `BUG-035` stay active with `ClientUDPSocket.cpp` unknown UDP exception diagnostics as the next high-signal target; the GitHub release update checker has one small parser hardening follow-up for overflowed version components.*
 *REST live proof on 2026-05-01: the redesigned `/api/v1` surface passed the isolated Debug x64 live smoke with one server search, one Kad search, and clean shutdown; report `repos\eMule-build-tests\reports\rest-api-smoke\20260501-154017-eMule-main-debug`.*
 *Modern-library hardening review on 2026-05-01: added `REF-035` and `REF-036` for narrow WIL RAII and GSL buffer/pointer contracts; WIL is the preferred first slice, while GSL should stay limited to tested parser, persistence, REST, or byte-buffer boundaries.*
-*First-release backlog consolidation on 2026-05-04: added [RELEASE-1.0](RELEASE-1.0.md) as the release-gate view for `emule-bb-v1.0.0`; REST typed errors, malformed/concurrent WebServer coverage, manifest-driven REST completeness, release live E2E artifacts, aMuTorrent smoke, and the disabled-by-default completion hook are the blocking line. Transfer detail and remaining REST controller gaps are candidates, not blockers unless live integration proves they are required. PowerShare/release-oriented sharing controls stay deferred because the landed eMule BB upload controller and queue/scoring work already carry the first broadband-sharing story.*
+*First-release backlog consolidation on 2026-05-04: added [RELEASE-1.0](RELEASE-1.0.md) as the release-gate view for `emule-bb-v1.0.0`; REST typed errors, malformed/concurrent WebServer coverage, manifest-driven REST completeness, release live E2E artifacts, full aMuTorrent plus Arr validation, and the disabled-by-default completion hook are the blocking line. Transfer detail and remaining REST controller gaps are candidates, not blockers unless live integration proves they are required. PowerShare/release-oriented sharing controls stay deferred because the landed eMule BB upload controller and queue/scoring work already carry the first broadband-sharing story.*
 
 ## History
 
