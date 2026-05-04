@@ -16,6 +16,9 @@ library, or pinned dependency APIs before writing custom logic.
   `MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, ...)` decoder instead of
   carrying a hand-written UTF-8 scanner. Existing `ByteStreamToWideChar`
   fallback behavior remains responsible for non-UTF-8 legacy byte streams.
+- `GeoLocation.cpp` now uses the same strict Windows UTF-8 decoder for MMDB
+  country and city strings; malformed payload text is ignored instead of
+  guessed through an ANSI fallback.
 - `WebServerJsonSeams::UrlEncodeUtf8`, `UrlDecodeUtf8`,
   `TryParseQueryString`, and `WebServerQBitCompatSeams::TryParseFormBody`
   remain local helpers intentionally. Windows URL canonicalization helpers such
@@ -29,12 +32,8 @@ library, or pinned dependency APIs before writing custom logic.
   hostnames or addresses with ports. Windows IP parsers such as `InetPton` are
   useful only after the API deliberately narrows a route to numeric IP input.
 
-## Follow-Up Candidates
+## Resolved Cleanup
 
-- Review `GeoLocation.cpp` UTF-8 decoding. It currently calls
-  `MultiByteToWideChar(CP_UTF8, 0, ...)`; if malformed UTF-8 should be rejected
-  there, switch it to `MB_ERR_INVALID_CHARS` or a shared strict conversion
-  helper.
 - ASCII trim/lower/decimal parsing now lives in shared REST parser primitives
   consumed by both native `/api/v1` routing and compatibility command helpers.
 - Percent decoding now rejects malformed `%` escapes for REST path/query and
