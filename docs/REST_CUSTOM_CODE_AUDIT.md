@@ -37,6 +37,9 @@ library, or pinned dependency APIs before writing custom logic.
   routing: the dispatcher recognizes the raw `/api/v2` namespace first, then
   the compatibility handler runs strict shared path decoding and returns
   `400 Bad Request` for malformed path escapes.
+- qBittorrent session-cookie matching now parses exact semicolon-delimited
+  cookie pairs instead of accepting a matching `SID=...` suffix attached to a
+  different cookie name.
 - Torznab bounded integers, Torznab category IDs, and qBittorrent magnet size
   fields now reuse `WebServerJsonSeams::TryParseUnsignedDecimalValue` instead
   of carrying compatibility-local `atoi`/`strtoul`/`strtoull` conversions.
