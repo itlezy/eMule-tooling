@@ -302,19 +302,22 @@ page when deciding what must land before `emule-bb-v1.0.0`.
 2. **CI-014, CI-015** — make REST contract completeness and malformed/concurrent coverage manifest-driven
 3. **BUG-077** — prove concurrent REST and legacy HTML traffic under smoke/soak budgets
 4. **CI-011, AMUT-001** — publish one release live-E2E command and prove aMuTorrent against a live eMule BB instance
+5. **FEAT-050** — ship the disabled-by-default executable-only download completion hook
 
 ### Release Candidates
 
-1. **FEAT-045, AMUT-002** — add transfer-detail data only if aMuTorrent needs it for useful release views
-2. **FEAT-046** — finish Kad import only if live-wire bootstrap needs it
-3. **FEAT-047** — close the remaining search paging/bounds documentation gap
-4. **FEAT-048, FEAT-049** — audit upload and preference REST gaps; add only controller-required keys/operations
+1. **FEAT-032** — close NAT mapping live validation if the available network can prove it cleanly
+2. **FEAT-045, AMUT-002** — add transfer-detail data only if aMuTorrent needs it for useful release views
+3. **FEAT-046** — finish Kad import only if live-wire bootstrap needs it
+4. **FEAT-047** — close the remaining search paging/bounds documentation gap
+5. **FEAT-048, FEAT-049** — audit upload and preference REST gaps; add only controller-required keys/operations
 
 ### Deferred Beyond 1.0
 
 - broad networking rewrites, Boost migration, dependency upgrades, warning-floor cleanup, and large UI/product features stay outside the first-release gate
 - **BUG-034, BUG-035** remain useful runtime-hardening watchpoints, but they are not release blockers unless a later scan finds a concrete rollback-level failure
 - **CI-012, CI-013, CI-016** remain valuable E2E expansions, but the first 1.0 gate is REST completeness plus aMuTorrent smoke
+- **FEAT-037** stays deferred by product decision; the existing eMule BB upload controller and queue/scoring work are enough for the first broadband-sharing story
 - **CI-007** — Kad fuzz tests after the broader CI/toolchain stack is ready
 
 ### Expansion Track — explicitly beyond stock
@@ -531,7 +534,7 @@ historical reference only.*
 *Release-readiness scan through 2026-05-01: current `main` was reviewed from `10a6c20` through `6697302`; no rollback-level regression was found in the recent broadband stabilization slices; `BUG-034` / `BUG-035` stay active with `ClientUDPSocket.cpp` unknown UDP exception diagnostics as the next high-signal target; the GitHub release update checker has one small parser hardening follow-up for overflowed version components.*
 *REST live proof on 2026-05-01: the redesigned `/api/v1` surface passed the isolated Debug x64 live smoke with one server search, one Kad search, and clean shutdown; report `repos\eMule-build-tests\reports\rest-api-smoke\20260501-154017-eMule-main-debug`.*
 *Modern-library hardening review on 2026-05-01: added `REF-035` and `REF-036` for narrow WIL RAII and GSL buffer/pointer contracts; WIL is the preferred first slice, while GSL should stay limited to tested parser, persistence, REST, or byte-buffer boundaries.*
-*First-release backlog consolidation on 2026-05-04: added [RELEASE-1.0](RELEASE-1.0.md) as the release-gate view for `emule-bb-v1.0.0`; REST typed errors, malformed/concurrent WebServer coverage, manifest-driven REST completeness, release live E2E artifacts, and aMuTorrent smoke are the blocking line. Transfer detail and remaining REST controller gaps are candidates, not blockers unless live integration proves they are required.*
+*First-release backlog consolidation on 2026-05-04: added [RELEASE-1.0](RELEASE-1.0.md) as the release-gate view for `emule-bb-v1.0.0`; REST typed errors, malformed/concurrent WebServer coverage, manifest-driven REST completeness, release live E2E artifacts, aMuTorrent smoke, and the disabled-by-default completion hook are the blocking line. Transfer detail and remaining REST controller gaps are candidates, not blockers unless live integration proves they are required. PowerShare/release-oriented sharing controls stay deferred because the landed eMule BB upload controller and queue/scoring work already carry the first broadband-sharing story.*
 
 ## History
 

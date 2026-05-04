@@ -14,6 +14,13 @@ source: MorphXT FAQ; Mephisto FAQ; historical eMule feature catalogs; eMuleAI v1
 
 Add an explicit release/distribution policy layer for rare or newly published files.
 
+## Release 1.0 Classification
+
+**Deferred Beyond 1.0.** Product decision: PowerShare and adjacent
+release-oriented sharing controls are not valuable enough to delay the first
+release. eMule BB already has broadband upload-slot control and queue/scoring
+work for the 1.0 sharing story; this item stays as a later opt-in feature track.
+
 This feature groups several historically popular mod behaviors under one controlled design:
 
 - `PowerShare`

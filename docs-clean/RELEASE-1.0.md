@@ -27,6 +27,7 @@ by a later release-readiness review.
 | [CI-014](CI-014.md) | REST manifest/live completeness gate | Make native route tests and live REST smoke consume or validate the checked-in OpenAPI contract. |
 | [CI-015](CI-015.md) | REST malformed/concurrent matrix | Turn the malformed and concurrent request cases into selectable smoke/soak budgets. |
 | [AMUT-001](AMUT-001.md) | aMuTorrent browser smoke | Run aMuTorrent against a live eMule BB instance and capture browser console plus REST request artifacts. |
+| [FEAT-050](FEAT-050.md) | Download completion hook | Add the disabled-by-default executable-only completion hook with native tests for token expansion, launch validation, and shutdown skip behavior. |
 
 ## Release Candidates
 
@@ -35,6 +36,7 @@ the gate work proves that a controller cannot ship without them.
 
 | ID | Candidate | Ship decision |
 |----|-----------|---------------|
+| [FEAT-032](FEAT-032.md) | NAT mapping live validation | Finish MiniUPnP and PCP/NAT-PMP live validation if the local network can prove it cleanly; do not delay 1.0 solely for unavailable PCP/NAT-PMP conditions. |
 | [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Ship if aMuTorrent needs hydrated transfer detail for useful release views; otherwise document as 1.1 follow-up. |
 | [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Finish Kad import if live-wire bootstrap needs it; otherwise keep server import/bootstrap coverage and defer the rest. |
 | [FEAT-047](FEAT-047.md) | Search API completeness | Close the remaining paging/bounds documentation gap before release. |
@@ -51,8 +53,7 @@ These items stay tracked in the backlog, but are not first-release blockers:
 - broad socket/network rewrites: `REF-029`, `REF-030`, `FEAT-018`, `FEAT-035`,
   `FEAT-036`
 - broad product/UI features: `FEAT-017`, `FEAT-019`, `FEAT-021`, `FEAT-031`,
-  `FEAT-037`, `FEAT-039`, `FEAT-040`, `FEAT-041`, `FEAT-043`, `FEAT-044`,
-  `FEAT-050`
+  `FEAT-037`, `FEAT-039`, `FEAT-040`, `FEAT-041`, `FEAT-043`, `FEAT-044`
 - broad cleanup/modern-library work: `REF-021`, `REF-023`, `REF-025`,
   `REF-032`, `REF-033`, `REF-035`, `REF-036`, `CI-001` through `CI-007`,
   `CI-010`
@@ -73,9 +74,21 @@ release gates are meaningful, not after every useful future item is complete.
    `CI-015`, `BUG-077`.
 4. Release E2E runner and operator command:
    `CI-011`.
-5. aMuTorrent smoke:
+5. Download completion hook:
+   `FEAT-050`.
+6. aMuTorrent smoke:
    `AMUT-001`, with `FEAT-045` and `AMUT-002` pulled in only if the smoke proves
    transfer details are required for a useful release.
+
+## What 1.0 Showcases
+
+- broadband upload behavior, queue/scoring work, modern defaults, and large
+  library handling
+- long-path support, shared startup cache, monitored recursive shared roots,
+  and safer file persistence
+- REST automation, aMuTorrent and Arr readiness, and live E2E proof
+- disabled-by-default completion automation for local workflows
+- WebServer hardening and typed REST errors for reliable local controllers
 
 ## Release Candidate Validation
 

@@ -29,6 +29,13 @@ failure that does not help the operator understand what actually happened.
   `NAT-PMP`
 - exposing a new Tweaks backend-mode selector
 
+## Release 1.0 Classification
+
+**Release Candidate.** The code/build slice is already complete, so 1.0 should
+take the live NAT validation if the available network can prove it cleanly.
+Do not block `emule-bb-v1.0.0` solely because the local network cannot provide
+a PCP/NAT-PMP-capable path.
+
 ## Intended Mainline Shape
 
 - Backends:
