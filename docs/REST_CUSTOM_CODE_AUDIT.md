@@ -37,6 +37,10 @@ library, or pinned dependency APIs before writing custom logic.
   routing: the dispatcher recognizes the raw `/api/v2` namespace first, then
   the compatibility handler runs strict shared path decoding and returns
   `400 Bad Request` for malformed path escapes.
+- Torznab compatibility request classification now follows the same pattern:
+  raw `/indexer/emulebb/api` malformed-path candidates are routed to the
+  compatibility handler, which uses the shared REST path-escape validator
+  before authentication and query parsing.
 - qBittorrent session-cookie matching now parses exact semicolon-delimited
   cookie pairs instead of accepting a matching `SID=...` suffix attached to a
   different cookie name.
