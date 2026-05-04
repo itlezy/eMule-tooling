@@ -4,6 +4,11 @@ This page is the release-focused view over the active backlog. It does not
 replace `INDEX.md`; it narrows the backlog into the work that matters for
 `emule-bb-v1.0.0`.
 
+Operator docs:
+
+- [Release 1.0 checklist](RELEASE-1.0-CHECKLIST.md)
+- [Release 1.0 runbook](RELEASE-1.0-RUNBOOK.md)
+
 ## Release Identity
 
 - Product name: `eMule broadband edition`
@@ -111,3 +116,7 @@ Before tagging `emule-bb-v1.0.0`, run:
 Public-network unavailable results are acceptable only when the harness records
 the run as inconclusive with enough diagnostics to distinguish environment
 failure from product failure.
+
+Record the command, implementation commit, artifact path, and final ship
+decision for every gate in
+[RELEASE-1.0-CHECKLIST](RELEASE-1.0-CHECKLIST.md).
