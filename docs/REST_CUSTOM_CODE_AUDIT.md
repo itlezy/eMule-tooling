@@ -55,6 +55,10 @@ library, or pinned dependency APIs before writing custom logic.
 - Native REST endpoint ports, path IDs, and bounded query integers now route
   through the same strict unsigned-decimal parser before applying route-specific
   bounds. This removes remaining route-local `strtoul`/`strtoull` conversions.
+- HTTP `Content-Length` parsing now uses a shared WebSocket seam backed by the
+  strict REST unsigned-decimal parser instead of `atol`, rejecting signed,
+  partial, overflowed, and oversized request bodies before `/api/v1`, Torznab,
+  or qBittorrent compatibility dispatch.
 - REST hash validation remains local and domain-specific because the public API
   requires exactly 32 lowercase MD4 hex characters, not general binary or hash
   parsing.
