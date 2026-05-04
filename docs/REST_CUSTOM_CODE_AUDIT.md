@@ -40,6 +40,10 @@ library, or pinned dependency APIs before writing custom logic.
 - qBittorrent session-cookie matching now parses exact semicolon-delimited
   cookie pairs instead of accepting a matching `SID=...` suffix attached to a
   different cookie name.
+- qBittorrent compatibility login validation now lives in the qBit seam and
+  requires the exact configured username plus API key. This keeps credential
+  parsing local to the form decoder while avoiding another controller-only
+  auth rule.
 - Torznab bounded integers, Torznab category IDs, and qBittorrent magnet size
   fields now reuse `WebServerJsonSeams::TryParseUnsignedDecimalValue` instead
   of carrying compatibility-local `atoi`/`strtoul`/`strtoull` conversions.
