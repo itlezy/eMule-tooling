@@ -59,6 +59,10 @@ library, or pinned dependency APIs before writing custom logic.
   strict REST unsigned-decimal parser instead of `atol`, rejecting signed,
   partial, overflowed, and oversized request bodies before `/api/v1`, Torznab,
   or qBittorrent compatibility dispatch.
+- HTTP request-line parsing now lives in the same WebSocket seam and preserves
+  exact method tokens instead of classifying by string prefix. Native `/api/v1`
+  and qBittorrent compatibility already validate method tokens downstream;
+  Torznab compatibility now rejects non-GET requests before search handling.
 - REST hash validation remains local and domain-specific because the public API
   requires exactly 32 lowercase MD4 hex characters, not general binary or hash
   parsing.
