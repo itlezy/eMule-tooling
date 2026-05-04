@@ -5,6 +5,31 @@ This document is the single source of truth for the canonical eMule workspace.
 All workspace-wide directives should point here instead of restating policy in
 repo-local docs.
 
+## Session Startup Contract
+
+Every workspace session starts from this contract:
+
+- Read this policy before making workspace decisions.
+- Treat this policy as the source of truth for workspace roles, active branches,
+  worktrees, setup ownership, dependency pins, build/test entrypoints, release
+  naming, and documentation discipline.
+- Check `git status --short --branch` in each repo that will be read for
+  current-state decisions or edited.
+- Use repo-local `AGENTS.md` files only for local deltas after this policy has
+  been read.
+- Treat `docs\RESUME.md` as a short handoff note only. It is not policy, not
+  backlog authority, and not a substitute for this document.
+- Revalidate backlog and release docs against current `main`, current
+  dependency pins, and this policy before implementation.
+
+Directive precedence is:
+
+1. system and developer instructions from the active session
+2. workspace-root `AGENTS.md`
+3. this workspace policy
+4. repo-local `AGENTS.md` local deltas
+5. README, backlog, release, and handoff docs
+
 ## Mandatory Preflight
 
 - Read this policy at the start of every workspace task before running build,

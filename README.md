@@ -8,7 +8,7 @@ is:
 
 - app source: `repos\eMule`
 - build/test orchestration: `repos\eMule-build` and `repos\eMule-build-tests`
-- remote companion app: `repos\eMule-remote`
+- companion web UI: `repos\amutorrent`
 - tooling docs and helpers: this repo
 
 ## Start Here

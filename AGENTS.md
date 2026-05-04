@@ -1,19 +1,17 @@
 # Rules
-- read `EMULE_WORKSPACE_ROOT\repos\eMule-tooling\docs\WORKSPACE_POLICY.md` at the start of every workspace task
-- canonical roots are expressed through `EMULE_WORKSPACE_ROOT` or `-EmuleWorkspaceRoot`
-- the authoritative workspace policy lives in `EMULE_WORKSPACE_ROOT\repos\eMule-tooling\docs\WORKSPACE_POLICY.md`
-- the canonical tests repo is `EMULE_WORKSPACE_ROOT\repos\eMule-build-tests`
-- the canonical remote repo is `EMULE_WORKSPACE_ROOT\repos\eMule-remote`
-- the canonical app worktrees live under `EMULE_WORKSPACE_ROOT\workspaces\v0.72a\app\...`
-- routine work uses granular commits directly on each repo's `main`; create branches only when explicitly requested
-- interactive build, validation, and test commands must use `EMULE_WORKSPACE_ROOT\repos\eMule-build\workspace.ps1` or `workspace.cmd`
-- do not run ad hoc direct `MSBuild` from app worktrees, `srchybrid`, or `eMule-build-tests`
-- do not restate the full workspace contract here; that belongs in the central workspace policy document
-- when editing tracked text files, you must honor the repo-local `.editorconfig` and `.gitattributes`; normalize edited files before finishing
-- comment added code only when the purpose is not obvious
-- use Doxygen-style comments for new or clarified reusable code comments; lack of automation does not waive that requirement
-- do not recreate legacy fixed-path `eMulebb` workspace assumptions in scripts or docs
-- ensure to implement regression and parity test coverage when touching core features
-- changes to oracle or comparison workspaces are allowed only when strictly required for testing, seams, logging, tracing, or debugging
-- only at session termination or explicit handoff, save and overwrite `docs\RESUME.md` to keep track of the last and next chunk of work
-- when launching `emule.exe`, always pass `-c` to make the config root explicit
+
+- Read `EMULE_WORKSPACE_ROOT\repos\eMule-tooling\docs\WORKSPACE_POLICY.md`
+  before workspace work; it is authoritative for workspace-wide rules.
+- This file contains tooling-local deltas only. Do not duplicate branch,
+  worktree, setup, dependency, or build/test policy here.
+- This repo owns central workspace policy, active backlog docs, helper scripts,
+  shared hooks, and static policy audits.
+- Keep workspace-wide directives in `docs\WORKSPACE_POLICY.md`; repo READMEs
+  and AGENTS files should point there instead of restating it.
+- Helper scripts and docs must use `EMULE_WORKSPACE_ROOT` style paths, not old
+  fixed machine-local workspace paths.
+- Use Doxygen-style comments for new reusable code surfaces; keep trivial glue
+  comments sparse.
+- Update `docs\RESUME.md` only at session termination or explicit handoff.
+- When a tooling helper launches `emule.exe`, pass `-c` so the config root is
+  explicit.
