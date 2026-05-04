@@ -9,7 +9,7 @@
 
 Consumer repos should reference:
 
-- `itlezy/eMule-tooling/.github/workflows/reusable-baseline.yml@ci/v1`
+- `eMulebb/eMule-tooling/.github/workflows/reusable-baseline.yml@ci/v1`
 
 Do not point long-lived branches at `@main`.
 

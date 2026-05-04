@@ -104,7 +104,7 @@ ships versioned ABI guarantees.**
 ### DLL availability
 id3lib has a shared library build option, but:
 - Upstream is effectively **dead** — last real release 2003, last meaningful commit ~2016
-- The `itlezy/eMule-id3lib` fork used here has no releases and no DLL builds
+- The `eMulebb/eMule-id3lib` fork used here has no releases and no DLL builds
 - No pre-built DLLs exist from any reputable source
 
 ### What DLL linking would require
