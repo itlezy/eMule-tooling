@@ -433,6 +433,12 @@ The canonical workspace currently materializes these app worktrees:
 
 - Put changes at the earliest layer where they are true, then let later layers
   inherit them.
+- Before writing custom parsing, encoding, path, filesystem, crypto, protocol,
+  date/time, compression, or structured-data logic, look for an existing
+  standard library, platform API, project helper, or already-pinned dependency
+  that owns the behavior. Prefer the established API unless there is a clear
+  correctness, security, compatibility, or maintenance reason to implement a
+  small local helper, and document that reason in the change.
 - Prefer narrow, build-level fixes over source edits in third-party dependency
   forks when the issue is build policy, warning policy, or orchestration.
 - When several valid implementations exist, prefer the one that improves safety
