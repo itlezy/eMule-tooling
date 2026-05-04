@@ -59,6 +59,9 @@ library, or pinned dependency APIs before writing custom logic.
 
 - ASCII trim/lower/decimal parsing now lives in shared REST parser primitives
   consumed by both native `/api/v1` routing and compatibility command helpers.
+- Torznab media search parsing now reuses the native REST ASCII trim and
+  whitespace-normalization helpers instead of carrying compatibility-local
+  duplicates.
 - Percent decoding now rejects malformed `%` escapes for REST path/query and
   qBittorrent form parsing. This remains local unless a pinned URL parser with
   exact RFC3986 component semantics is introduced.
