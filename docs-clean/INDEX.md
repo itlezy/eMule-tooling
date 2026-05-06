@@ -256,7 +256,7 @@ is meaningful.
 | [FEAT-047](FEAT-047.md) | Minor | Passed | REST search API completeness pass |
 | [FEAT-048](FEAT-048.md) | Minor | Open | REST upload queue control completeness |
 | [FEAT-049](FEAT-049.md) | Minor | Open | Curated REST preference expansion |
-| [FEAT-050](FEAT-050.md) | Minor | Open | Launch external program on completed download |
+| [FEAT-050](FEAT-050.md) | Minor | **Done** | Launch external program on completed download |
 | [FEAT-051](FEAT-051.md) | Minor | **Done** | Pro-user context menus and always-on advanced controls |
 | [FEAT-052](FEAT-052.md) | Minor | **Done** | Main-shell keyboard shortcuts and mnemonic audit |
 | [FEAT-053](FEAT-053.md) | Minor | **Done** | Classic tray balloon notification mode |
