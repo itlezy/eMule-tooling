@@ -294,7 +294,7 @@ is meaningful.
 |----|----------|--------|-------|
 | [AMUT-001](AMUT-001.md) | Major | Open | aMuTorrent eMule BB browser smoke coverage |
 | [AMUT-002](AMUT-002.md) | Major | Open | aMuTorrent transfer detail hydration |
-| [ARR-001](ARR-001.md) | Major | Open | Full Arr release E2E validation |
+| [ARR-001](ARR-001.md) | Major | **Done** | Full Arr release E2E validation |
 
 ---
 
