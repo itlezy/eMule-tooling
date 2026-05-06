@@ -57,6 +57,7 @@ has completed and the artifact is recorded in
 | `BUG-077` | Passed | `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` tests | Release x64 REST live soak passed with mixed native REST, qBit, Torznab, and legacy HTML traffic: 10997 completed requests, 0 failures, 0 timeouts, 0 non-JSON native REST responses, and clean app shutdown after stress. |
 | `AMUT-001` | Passed | `affc4d6`, `11365ca` tests | aMuTorrent browser smoke now fails on browser console errors, page exceptions, failed page requests, and HTTP-200 error payloads. Release x64 `live-e2e -LiveSuite amutorrent-browser-smoke` passed in `repos\eMule-build-tests\reports\amutorrent-browser-smoke\20260506-193606-eMule-main-release`, with browser diagnostics showing 0 console errors, 0 page errors, and 0 request failures. The smoke covers configured eMule BB host/port/API key, dashboard/network status, category create/delete, ED2K add, search start/results, server action, and shared-directory reload. |
 | `FEAT-050` | Passed | `b6ce2ef`, `1db8f7c` app; `ea9f163` tests | The completion hook is disabled by default, executable-only, launched through direct `CreateProcess`, skipped on failed/duplicate/shutdown paths, and covered by native tests for token expansion, literal shell metacharacters, missing executable validation, and retained-success launch request construction. Debug x64 `build-tests` and `test` passed with `483/483` native cases and `2686/2686` assertions. |
+| `CI-011` | In Progress | `13f1487` tests | Shared-directories REST live E2E now covers an over-`MAX_PATH` Unicode root, native `/api/v1/shared-directories` mutation, `/api/v1/shared-files` listing, persistence, and relaunch reload. Focused Release x64 `live-e2e -LiveSuite shared-directories-rest` passed in `repos\eMule-build-tests\reports\shared-directories-rest\20260506-202103-eMule-main-release`; the report records a 325-character root and `unicode-U+00DF-U+6F22.txt` fixture evidence. Full Release x64 umbrella E2E remains open. |
 
 ## Gate Checklist
 
@@ -319,23 +320,28 @@ Goal: aMuTorrent runs as a UI consumer of the clean native API.
 Goal: REST and adapters preserve eMule BB long-path guarantees.
 
 - [ ] Add REST/API-level tests for:
-  - [ ] shared-directory roots
-  - [ ] shared-file add/reload/list
+  - [x] shared-directory roots
+  - [x] shared-file add/reload/list
   - [ ] category incoming paths if exposed
   - [ ] transfer file names from ED2K/magnet conversion
   - [ ] logs/error messages with Unicode text
 - [ ] Use existing `LongPathSeams` and Windows APIs instead of direct raw file
       or path calls.
 - [ ] Cover edge cases:
-  - [ ] paths over `MAX_PATH`
-  - [ ] Unicode folder/file names
+  - [x] paths over `MAX_PATH`
+  - [x] Unicode folder/file names
   - [ ] trailing dot and trailing space preservation where Windows allows it
   - [ ] reserved device names rejected
   - [ ] path traversal rejected
   - [ ] missing parent handled predictably
-  - [ ] no API output truncation
-- [ ] Add live E2E coverage using existing long-path shared roots where
+  - [x] no API output truncation
+- [x] Add live E2E coverage using existing long-path shared roots where
       possible.
+      - Evidence: `repos\eMule-build-tests\reports\shared-directories-rest\20260506-202103-eMule-main-release\result.json`
+        records `long_path_unicode.path_length` as `325`, `over_max_path` as
+        `true`, the long Unicode root in REST directory responses and
+        persisted path lists, and `unicode-U+00DF-U+6F22.txt` in shared-file
+        listings before and after relaunch.
 - [ ] Verify no REST/adapter path code uses raw `CFile`, CRT, or Win32 file
       calls where a `LongPathSeams` helper exists.
 
@@ -388,6 +394,7 @@ Goal: preserve legacy HTML while preventing it from contaminating REST behavior.
 - [x] Release x64 `live-e2e -LiveSuite amutorrent-browser-smoke`
 - [x] Release x64 `live-e2e -LiveSuite prowlarr-emulebb` and
       `live-e2e -LiveSuite radarr-sonarr-emulebb`
+- [x] Release x64 `live-e2e -LiveSuite shared-directories-rest`
 - [ ] full Release x64 `live-e2e`
 - [ ] clean worktrees in active workspace repos
 - [ ] release notes reviewed for `eMule broadband edition`
