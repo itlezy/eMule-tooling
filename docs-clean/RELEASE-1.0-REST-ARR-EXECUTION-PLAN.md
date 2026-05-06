@@ -53,7 +53,8 @@ has completed and the artifact is recorded in
 | `BUG-076` | Passed | `8d324d4`, `40bac28`, `90c6352`, `41964c8` app; `cee7499`, `214b327`, `2746ef1`, `7b002f2`, `f3d8923`, `e0f8ef6`, `aea6934` tests | Native REST target classification now keeps malformed `/api/v1%...` paths on the REST dispatcher, decoded slash/backslash path smuggling is rejected before route matching, lowercase/overlong unsupported REST method tokens preserve the target for native REST failure handling, direct malformed REST route coverage rejects invalid JSON, non-object JSON, content-type failures, malformed/duplicate queries, uppercase hashes, overlong identifiers, and unsupported native routes before command dispatch, HTTP header scanning rejects malformed, oversized, or duplicate `Content-Length` fields, incomplete header buffering is capped before body routing state exists, the socket dispatch path now shares an overflow-safe complete-request guard for declared bodies, and legacy HTML GET targets stay outside native REST and Arr/qBit compatibility dispatch. Debug x64 validation artifacts are recorded in the release checklist. |
 | `ARR-001` | In Progress | `87b6f24`, `385273c`, `324c7f7` app; `8786847`, `4e02b3d`, `0fd6e77`, `4339716`, `3c5c963`, `8a85158` tests | qBit form parsing shares native URL-encoded parser logic; strict percent-decoding parity is covered across native, Torznab, qBit form, and nested magnet parsing; qBit-compatible hash inputs normalize while native `/api/v1` hashes stay strict lowercase eD2K identifiers; native and Torznab search text normalization share the same rules; strict unsigned parsing rejects signs, whitespace, overflow, and adapter-bound violations; native and qBit category selectors share category-name trim, UTF-8/control, and length validation; magnet/eD2K conversion rejects unsafe hashes, names, sizes, and percent escapes in both directions. Full live Arr gate remains open. |
 | `CI-014` | Passed | `3bc65d6`, `3101391`, `b53627d`, `b8233b0`, `d907fc2`, `69eba5b` tests; `89810c5`, `8b548b3`, `cffd810`, `e3b5d24`, `9560435`, `fee7111`, `f2cc198` tooling | REST smoke consumes OpenAPI body metadata and OpenAPI documents explicit confirmation bodies. Native route specs now fail against OpenAPI method/path and request/query field drift; the unsupported `logs.level` query was removed from OpenAPI. Response envelopes and safe/unsafe classifications are derived from OpenAPI contract metadata and recorded in live contract summaries, and validation now fails if the human REST contract reintroduces active route tables instead of deferring to OpenAPI. Release x64 `build-tests` passed with 0 warnings, and Release x64 REST live E2E passed with 81 contract routes and 8026 stress requests with 0 failures. |
-| `CI-015` | In Progress | `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` tests | REST stress rows now enforce the native JSON-envelope path and report content-type counts, timeout count, native non-JSON response count, and cleanup shutdown duration. The stress mix now includes native REST reads/mutations/malformed requests, qBit adapter reads and missing-hash mutations, Torznab caps/search validation, and legacy HTML GETs. Release x64 REST live smoke passed with 11111 mixed stress requests, 0 failures, 0 timeouts, 0 non-JSON native REST responses, and clean app shutdown after stress. Soak validation remains open. |
+| `CI-015` | In Progress | `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` tests | REST stress rows now enforce the native JSON-envelope path and report content-type counts, timeout count, native non-JSON response count, and cleanup shutdown duration. The stress mix now includes native REST reads/mutations/malformed requests, qBit adapter reads and missing-hash mutations, Torznab caps/search validation, and legacy HTML GETs. Release x64 REST live smoke passed with 11111 mixed stress requests, and the soak budget passed with 10997 mixed stress requests; both runs had 0 failures, 0 timeouts, 0 non-JSON native REST responses, and clean app shutdown after stress. `contract-stress` remains open. |
+| `BUG-077` | Passed | `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` tests | Release x64 REST live soak passed with mixed native REST, qBit, Torznab, and legacy HTML traffic: 10997 completed requests, 0 failures, 0 timeouts, 0 non-JSON native REST responses, and clean app shutdown after stress. |
 
 ## Gate Checklist
 
@@ -162,7 +163,7 @@ legacy WebServer boundary traffic stay stable under mixed concurrent load.
 
 - [ ] Make stress budgets explicit and selectable:
   - [x] `smoke`
-  - [ ] `soak`
+  - [x] `soak`
   - [ ] `contract-stress`
 - [ ] Cover concurrent request classes:
   - [x] native REST reads
@@ -186,14 +187,14 @@ legacy WebServer boundary traffic stay stable under mixed concurrent load.
   - [x] no request exceeds configured timeout
   - [x] no REST listener disappearance
   - [x] app shuts down cleanly after stress
-  - [ ] no session or bad-login corruption symptoms under mixed traffic
+  - [x] no session or bad-login corruption symptoms under mixed traffic
 - [x] Validate release smoke with
       `live-e2e -Config Release -Platform x64 -LiveSuite rest-api
       -RestStressBudget smoke`.
-- [ ] Validate operator soak with
+- [x] Validate operator soak with
       `live-e2e -Config Release -Platform x64 -LiveSuite rest-api
       -RestStressBudget soak`.
-- [ ] Record stress reports and aggregate result JSON in the release checklist.
+- [x] Record stress reports and aggregate result JSON in the release checklist.
 
 ### 5. Native `/api/v1` Clean Contract Pass
 
