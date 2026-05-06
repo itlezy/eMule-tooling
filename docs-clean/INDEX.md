@@ -281,7 +281,7 @@ is meaningful.
 | [CI-011](CI-011.md) | Major | **Done** | Broadband release live E2E coverage umbrella |
 | [CI-012](CI-012.md) | Major | Open | Stabilize Shared Files dynamic folder lifecycle E2E |
 | [CI-013](CI-013.md) | Major | Open | Download and search UI live scenarios |
-| [CI-014](CI-014.md) | Major | Open | REST contract manifest and live completeness gate |
+| [CI-014](CI-014.md) | Major | **Done** | REST contract manifest and live completeness gate |
 | [CI-015](CI-015.md) | Major | Open | REST malformed and concurrent request matrix |
 | [CI-016](CI-016.md) | Minor | Open | REST-only main vs community regression lane |
 | [CI-017](CI-017.md) | Minor | **Done** | Normalize active workspace line-ending policy to LF by default |
