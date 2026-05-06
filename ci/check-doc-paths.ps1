@@ -104,6 +104,35 @@ function Assert-TextNotContains([string]$RepoRoot, [string]$RelativePath, [strin
     }
 }
 
+function Assert-RestApiContractDefersToOpenApi([string]$RepoRoot) {
+    $relativePath = 'docs\REST-API-CONTRACT.md'
+    $text = Get-TrackedFileText $RepoRoot $relativePath
+    if ($null -eq $text) {
+        $issues.Add(("{0}: missing required file: {1}" -f $RepoRoot, $relativePath)) | Out-Null
+        return
+    }
+
+    if (-not $text.Contains('Source of truth:** [REST-API-OPENAPI.yaml](REST-API-OPENAPI.yaml)', [System.StringComparison]::Ordinal)) {
+        $issues.Add(("{0}\{1}: REST contract doc must identify OpenAPI as the source of truth." -f $RepoRoot, $relativePath)) | Out-Null
+    }
+
+    $retiredSectionMarker = '## Retired Before Public Release'
+    $activeText = $text
+    $retiredIndex = $text.IndexOf($retiredSectionMarker, [System.StringComparison]::Ordinal)
+    if ($retiredIndex -ge 0) {
+        $activeText = $text.Substring(0, $retiredIndex)
+    }
+
+    $activeRouteTablePattern = '(?im)^\s*\|.*\b(GET|POST|PATCH|DELETE)\b\s+(/api/v1|/app|/status|/stats|/snapshot|/categories|/transfers|/shared|/uploads|/upload-queue|/servers|/kad|/searches|/friends|/logs)\b'
+    $activeRouteListPattern = '(?im)^\s*[-*]\s+`?(GET|POST|PATCH|DELETE)\s+(/api/v1|/app|/status|/stats|/snapshot|/categories|/transfers|/shared|/uploads|/upload-queue|/servers|/kad|/searches|/friends|/logs)\b'
+    foreach ($pattern in @($activeRouteTablePattern, $activeRouteListPattern)) {
+        $match = [regex]::Match($activeText, $pattern)
+        if ($match.Success) {
+            $issues.Add(("{0}\{1}: active REST route tables/lists must live in REST-API-OPENAPI.yaml, not the human contract doc: {2}" -f $RepoRoot, $relativePath, $match.Value.Trim())) | Out-Null
+        }
+    }
+}
+
 foreach ($scope in $scanScopes) {
     $repoRoot = [System.IO.Path]::GetFullPath($scope.RepoRoot)
     if (-not (Test-Path -LiteralPath $repoRoot)) {
@@ -215,6 +244,8 @@ Assert-TextNotContains (Resolve-WorkspacePath 'repos\eMule-tooling') 'README.md'
     'repos\eMule-remote',
     'remote companion app'
 ) 'active tooling README must not reference abandoned eMule-remote entrypoints'
+
+Assert-RestApiContractDefersToOpenApi (Resolve-WorkspacePath 'repos\eMule-tooling')
 
 if ($issues.Count -gt 0) {
     throw ($issues -join [Environment]::NewLine)
