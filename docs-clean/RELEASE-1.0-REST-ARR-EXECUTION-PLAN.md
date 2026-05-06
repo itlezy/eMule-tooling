@@ -52,7 +52,7 @@ has completed and the artifact is recorded in
 | `BUG-075` | Passed | `fcedfe3`, `c8e6609`, `1e2ff57`, `69d9262`, `3c63552` app; `28f17db`, `83093a6`, `c10f2a8`, `8e67131`, `b7406d9`, `957c31a`, `51f8b6b`, `a3f3d56`, `4c2240e`, `bc0ca24` tests; `95fc6e9`, `a5d3d38` tooling | Explicit destructive REST confirmations, content-type seam coverage, centralized native error envelope, method/API-key failure classification, direct route-failure seam coverage, runtime-style error envelope coverage for missing objects, invalid state, service unavailable, and internal command failure classes, adapter-specific qBit text/Torznab XML response contracts, live-smoke JSON-not-HTML native failure assertions, OpenAPI stable error-code enum coverage, and legacy non-JSON smoke guards landed. Debug x64 validation artifacts are recorded in the release checklist. |
 | `BUG-076` | Passed | `8d324d4`, `40bac28`, `90c6352`, `41964c8` app; `cee7499`, `214b327`, `2746ef1`, `7b002f2`, `f3d8923`, `e0f8ef6`, `aea6934` tests | Native REST target classification now keeps malformed `/api/v1%...` paths on the REST dispatcher, decoded slash/backslash path smuggling is rejected before route matching, lowercase/overlong unsupported REST method tokens preserve the target for native REST failure handling, direct malformed REST route coverage rejects invalid JSON, non-object JSON, content-type failures, malformed/duplicate queries, uppercase hashes, overlong identifiers, and unsupported native routes before command dispatch, HTTP header scanning rejects malformed, oversized, or duplicate `Content-Length` fields, incomplete header buffering is capped before body routing state exists, the socket dispatch path now shares an overflow-safe complete-request guard for declared bodies, and legacy HTML GET targets stay outside native REST and Arr/qBit compatibility dispatch. Debug x64 validation artifacts are recorded in the release checklist. |
 | `ARR-001` | In Progress | `87b6f24`, `385273c`, `324c7f7` app; `8786847`, `4e02b3d`, `0fd6e77`, `4339716`, `3c5c963`, `8a85158` tests | qBit form parsing shares native URL-encoded parser logic; strict percent-decoding parity is covered across native, Torznab, qBit form, and nested magnet parsing; qBit-compatible hash inputs normalize while native `/api/v1` hashes stay strict lowercase eD2K identifiers; native and Torznab search text normalization share the same rules; strict unsigned parsing rejects signs, whitespace, overflow, and adapter-bound violations; native and qBit category selectors share category-name trim, UTF-8/control, and length validation; magnet/eD2K conversion rejects unsafe hashes, names, sizes, and percent escapes in both directions. Full live Arr gate remains open. |
-| `CI-014` | In Progress | `3bc65d6`, `3101391`, `b53627d`, `b8233b0` tests; `89810c5`, `8b548b3`, `cffd810`, `e3b5d24`, `fee7111` tooling | REST smoke consumes OpenAPI body metadata and OpenAPI documents explicit confirmation bodies. Native route specs now fail against OpenAPI method/path and request/query field drift; the unsupported `logs.level` query was removed from OpenAPI. Response envelopes and safe/unsafe classifications are now derived from OpenAPI contract metadata and recorded in live contract summaries, and validation now fails if the human REST contract reintroduces active route tables instead of deferring to OpenAPI. Live evidence remains open. |
+| `CI-014` | Passed | `3bc65d6`, `3101391`, `b53627d`, `b8233b0`, `d907fc2`, `69eba5b` tests; `89810c5`, `8b548b3`, `cffd810`, `e3b5d24`, `9560435`, `fee7111`, `f2cc198` tooling | REST smoke consumes OpenAPI body metadata and OpenAPI documents explicit confirmation bodies. Native route specs now fail against OpenAPI method/path and request/query field drift; the unsupported `logs.level` query was removed from OpenAPI. Response envelopes and safe/unsafe classifications are derived from OpenAPI contract metadata and recorded in live contract summaries, and validation now fails if the human REST contract reintroduces active route tables instead of deferring to OpenAPI. Release x64 `build-tests` passed with 0 warnings, and Release x64 REST live E2E passed with 81 contract routes and 8026 stress requests with 0 failures. |
 
 ## Gate Checklist
 
@@ -139,7 +139,7 @@ coverage.
       payload.
 - [x] Extend contract validation to response envelope class and safety
       classification.
-- [ ] Make native route seam tests fail on OpenAPI drift:
+- [x] Make native route seam tests fail on OpenAPI drift:
   - [x] missing route
   - [x] extra undocumented route
   - [x] method mismatch
@@ -149,9 +149,9 @@ coverage.
       route tables from the human doc and point to OpenAPI.
 - [x] Ensure `/app/shutdown` is always excluded from live mutation loops.
 - [x] Record route coverage by family in live reports.
-- [ ] Validate with Release x64 `build-tests`.
-- [ ] Validate with `live-e2e -Config Release -Platform x64 -LiveSuite rest-api`.
-- [ ] Record REST child report and aggregate result JSON in the release
+- [x] Validate with Release x64 `build-tests`.
+- [x] Validate with `live-e2e -Config Release -Platform x64 -LiveSuite rest-api`.
+- [x] Record REST child report and aggregate result JSON in the release
       checklist.
 
 ### 4. `CI-015` and `BUG-077` Stress, Malformed, and Concurrency Matrix
