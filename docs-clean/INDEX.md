@@ -278,7 +278,7 @@ is meaningful.
 | [CI-008](CI-008.md) | Minor | In Progress | Expand regression coverage for part files, long paths, and WebServer/REST |
 | [CI-009](CI-009.md) | Minor | **Done** | Share-ignore regression coverage and Release test-build stabilization |
 | [CI-010](CI-010.md) | Minor | Blocked | Reduce remaining app-local warning debt after external noise cleanup |
-| [CI-011](CI-011.md) | Major | Open | Broadband release live E2E coverage umbrella |
+| [CI-011](CI-011.md) | Major | **Done** | Broadband release live E2E coverage umbrella |
 | [CI-012](CI-012.md) | Major | Open | Stabilize Shared Files dynamic folder lifecycle E2E |
 | [CI-013](CI-013.md) | Major | Open | Download and search UI live scenarios |
 | [CI-014](CI-014.md) | Major | Open | REST contract manifest and live completeness gate |
