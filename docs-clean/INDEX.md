@@ -253,7 +253,7 @@ is meaningful.
 | [FEAT-044](FEAT-044.md) | Minor | Open | IP filter input policy - PeerGuardian lists, whitelist, and private-IP exemption |
 | [FEAT-045](FEAT-045.md) | Major | Open | REST transfer detail endpoint for controller parity |
 | [FEAT-046](FEAT-046.md) | Major | Open | REST server and Kad bootstrap/import APIs |
-| [FEAT-047](FEAT-047.md) | Minor | Open | REST search API completeness pass |
+| [FEAT-047](FEAT-047.md) | Minor | Passed | REST search API completeness pass |
 | [FEAT-048](FEAT-048.md) | Minor | Open | REST upload queue control completeness |
 | [FEAT-049](FEAT-049.md) | Minor | Open | Curated REST preference expansion |
 | [FEAT-050](FEAT-050.md) | Minor | Open | Launch external program on completed download |
@@ -316,7 +316,7 @@ page when deciding what must land before `emule-bb-v1.0.0`.
 1. **FEAT-032** — close NAT mapping live validation if the available network can prove it cleanly
 2. **FEAT-045, AMUT-002** — add transfer-detail data only if aMuTorrent needs it for useful release views
 3. **FEAT-046** — finish Kad import only if live-wire bootstrap needs it
-4. **FEAT-047** — close the remaining search paging/bounds documentation gap
+4. **FEAT-047** — passed; search paging/bounds behavior is documented for Release 1.0
 5. **FEAT-048, FEAT-049** — audit upload and preference REST gaps; add only controller-required keys/operations
 
 ### Deferred Beyond 1.0

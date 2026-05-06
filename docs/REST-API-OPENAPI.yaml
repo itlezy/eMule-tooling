@@ -844,6 +844,13 @@ paths:
     get:
       tags: [Searches]
       summary: Return search status and results.
+      description: >
+        Returns the current native visible result snapshot for this search.
+        Release 1.0 intentionally does not accept `limit` or `offset` on this
+        route; unknown query parameters are rejected by the native route table.
+        Controllers should poll this route and treat `results` as a bounded
+        native snapshot governed by eMule's existing search-result retention
+        and visibility behavior.
       operationId: getSearch
       responses:
         "200":
@@ -2104,6 +2111,10 @@ components:
           enum: [running, stopped, complete, error]
         results:
           type: array
+          description: >
+            Current native visible result snapshot. This array is not paged in
+            Release 1.0; controllers should poll the search resource and
+            preserve eMule's stock eD2K/Kad search semantics.
           items:
             $ref: "#/components/schemas/SearchResult"
     SearchCreateRequest:

@@ -46,7 +46,7 @@ the gate work proves that a controller cannot ship without them.
 | [FEAT-032](FEAT-032.md) | NAT mapping live validation | Finish MiniUPnP and PCP/NAT-PMP live validation if the local network can prove it cleanly; do not delay 1.0 solely for unavailable PCP/NAT-PMP conditions. |
 | [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Ship if aMuTorrent needs hydrated transfer detail for useful release views; otherwise document as 1.1 follow-up. |
 | [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Finish Kad import if live-wire bootstrap needs it; otherwise keep server import/bootstrap coverage and defer the rest. |
-| [FEAT-047](FEAT-047.md) | Search API completeness | Close the remaining paging/bounds documentation gap before release. |
+| [FEAT-047](FEAT-047.md) | Search API completeness | Passed; paging/bounds semantics are documented for Release 1.0. |
 | [FEAT-048](FEAT-048.md) | Upload queue control completeness | Audit and test existing upload controls first; add only release-critical missing operations. |
 | [FEAT-049](FEAT-049.md) | Curated REST preference expansion | Add only settings directly required by aMuTorrent or release E2E automation. |
 | [AMUT-002](AMUT-002.md) | aMuTorrent transfer detail hydration | Depends on FEAT-045; degrade cleanly when the endpoint is absent. |
@@ -76,7 +76,8 @@ release gates are meaningful, not after every useful future item is complete.
 1. REST error envelope and malformed request hardening:
    `BUG-075`, `BUG-076`.
 2. Contract-driven REST completeness:
-   `CI-014`, then close the remaining `FEAT-047` documentation gap.
+   `CI-014`; keep the closed `FEAT-047` search semantics in sync with OpenAPI
+   if the search contract changes.
 3. REST robustness matrix:
    `CI-015`, `BUG-077`.
 4. Release E2E runner and operator command:

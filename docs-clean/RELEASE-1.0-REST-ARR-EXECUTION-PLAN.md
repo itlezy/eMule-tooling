@@ -216,10 +216,15 @@ it.
   - [ ] bounded unsigned integers
   - [ ] UTF-8 text without controls
   - [ ] mutually exclusive selectors rejected early
-- [ ] Close `FEAT-047` search documentation gap:
-  - [ ] document search paging/bounds behavior
-  - [ ] verify server/global/Kad/automatic live corpus coverage
-  - [ ] preserve stock eD2K/Kad search semantics
+- [x] Close `FEAT-047` search documentation gap:
+  - [x] document search paging/bounds behavior
+  - [x] verify server/global/Kad/automatic live corpus coverage
+  - [x] preserve stock eD2K/Kad search semantics
+  - Evidence: `docs\REST-API-OPENAPI.yaml` and
+    `docs\REST-API-CONTRACT.md` document that
+    `GET /api/v1/searches/{searchId}` returns the current native visible
+    result snapshot, intentionally does not expose `limit`/`offset` paging in
+    Release 1.0, and preserves stock eD2K/Kad search behavior.
 - [ ] Promote release candidates only from live evidence:
   - [ ] `FEAT-045` only if transfer details are required
   - [ ] `FEAT-046` only if bootstrap/import is required

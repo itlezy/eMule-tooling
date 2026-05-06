@@ -57,6 +57,23 @@ The release API intentionally excludes:
 - granular REST permissions or low-rights REST mode
 - dynamic capability negotiation between eMule BB and aMuTorrent
 
+## Search Semantics
+
+`POST /api/v1/searches` starts a native eMule search using the requested method:
+`automatic`, `server`, `global`, or `kad`. The route maps directly to the
+existing eD2K/Kad search modes and must not change stock search semantics for
+Release 1.0.
+
+`GET /api/v1/searches/{searchId}` returns the current native visible result
+snapshot for that search. Release 1.0 intentionally does not expose search
+result paging; the route does not accept `limit` or `offset`, and the strict
+route table rejects unknown query parameters. Controllers should poll the search
+resource and treat `results` as a bounded native snapshot governed by eMule's
+existing search-result retention and visibility behavior.
+
+`POST /api/v1/searches/{searchId}/results/{hash}/operations/download` starts a
+download from one visible search result by lowercase 32-character eD2K hash.
+
 ## Implementation Status
 
 The OpenAPI contract is the implemented target contract for the current

@@ -49,7 +49,7 @@ These items are not blockers unless a gate proves they are required.
 | [FEAT-032](FEAT-032.md) | NAT mapping live validation | Candidate | Promote only if local network proof is available and release E2E needs it |
 | [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Candidate | Promote only if aMuTorrent or Arr release views are not useful without it |
 | [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Candidate | Promote only if live-wire bootstrap cannot be made reliable without it |
-| [FEAT-047](FEAT-047.md) | Search API completeness | Candidate | Promote only for release-critical paging or bounds gaps |
+| [FEAT-047](FEAT-047.md) | Search API completeness | Passed | Search result paging/bounds semantics are documented in `docs\REST-API-OPENAPI.yaml` and `docs\REST-API-CONTRACT.md`; Release 1.0 preserves stock eD2K/Kad search behavior and exposes the current visible native result snapshot without `limit`/`offset` query parameters |
 | [FEAT-048](FEAT-048.md) | Upload queue control completeness | Candidate | Promote only for controller-required missing operations |
 | [FEAT-049](FEAT-049.md) | Curated REST preference expansion | Candidate | Promote only for aMuTorrent or release E2E required settings |
 | [AMUT-002](AMUT-002.md) | aMuTorrent transfer detail hydration | Candidate | Promote only if `FEAT-045` becomes required |

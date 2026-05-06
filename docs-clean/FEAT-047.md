@@ -1,7 +1,7 @@
 ---
 id: FEAT-047
 title: REST search API completeness pass
-status: In Progress
+status: Passed
 priority: Minor
 category: feature
 labels: [rest, search, amutorrent, live-wire]
@@ -27,11 +27,17 @@ coverage meaningful; do not change stock search semantics for this item.
       adapter assumptions
 - [x] server, global, Kad, and automatic search methods remain explicit
 - [x] cancellation and missing-search behavior return stable typed errors
-- [ ] paging or bounding behavior is documented if result sets are limited
+- [x] paging or bounding behavior is documented if result sets are limited
 - [x] live coverage includes the release search corpus
 
 ## Progress
 
+- 2026-05-06: Closed the Release 1.0 documentation gap. OpenAPI and the REST
+  contract now state that `GET /api/v1/searches/{searchId}` returns the current
+  native visible result snapshot, does not accept `limit` or `offset` in v1, and
+  preserves stock eD2K/Kad search semantics. Live REST evidence already covers
+  server/global/Kad/automatic search method handling through the release search
+  corpus.
 - 2026-05-02: Native `main` added `DELETE /api/v1/searches` and
   `POST /api/v1/searches/{searchId}/results/{hash}/operations/download`.
   aMuTorrent now uses the native result-download route when it has a native
