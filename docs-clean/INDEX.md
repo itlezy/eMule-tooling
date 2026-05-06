@@ -142,7 +142,7 @@ is meaningful.
 | [BUG-072](BUG-072.md) | Minor | **Done** | Kad preferences and routing snapshots still save in place |
 | [BUG-073](BUG-073.md) | Major | **Done** | WebServer session and bad-login state is mutated from request threads without synchronization |
 | [BUG-074](BUG-074.md) | Minor | Wont-Fix | Archive preview scanner uses volatile cancellation and synchronous UI handoff |
-| [BUG-075](BUG-075.md) | Major | Open | REST and WebServer typed error consistency |
+| [BUG-075](BUG-075.md) | Major | **Done** | REST and WebServer typed error consistency |
 | [BUG-076](BUG-076.md) | Major | Open | WebServer malformed request hardening for REST and legacy HTML |
 | [BUG-077](BUG-077.md) | Minor | Open | WebServer concurrent REST and legacy HTML soak coverage |
 
