@@ -914,11 +914,6 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Limit"
         - $ref: "#/components/parameters/Offset"
-        - name: level
-          in: query
-          schema:
-            type: string
-            enum: [debug, info, warning, error]
       responses:
         "200":
           $ref: "#/components/responses/LogListResponse"
