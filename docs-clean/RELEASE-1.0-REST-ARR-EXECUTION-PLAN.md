@@ -396,14 +396,27 @@ Windows APIs where the behavior is already owned.
 
 Goal: preserve legacy HTML while preventing it from contaminating REST behavior.
 
-- [ ] Prevent REST requests from falling into legacy login/session paths.
-- [ ] Keep shared request parsing safe for REST and legacy HTML.
-- [ ] Add legacy HTML GETs to concurrent WebServer stress.
-- [ ] Fix session or bad-login synchronization only if `BUG-073` or stress
+- [x] Prevent REST requests from falling into legacy login/session paths.
+- [x] Keep shared request parsing safe for REST and legacy HTML.
+- [x] Add legacy HTML GETs to concurrent WebServer stress.
+- [x] Fix session or bad-login synchronization only if `BUG-073` or stress
       evidence requires it.
-- [ ] Do not redesign templates.
-- [ ] Do not migrate HTML routes to REST.
-- [ ] Do not remove legacy commands for Release 1.
+- [x] Do not redesign templates.
+- [x] Do not migrate HTML routes to REST.
+- [x] Do not remove legacy commands for Release 1.
+  - Evidence: `repos\eMule-build-tests\scripts\rest-api-smoke.py` keeps
+    native REST errors on strict JSON envelopes with `require_error_response`,
+    checks legacy `/` separately with `require_legacy_non_json_response`, and
+    includes `REST_STRESS_LEGACY_OPERATIONS` only in the concurrent stress
+    operation mix.
+  - Evidence: `repos\eMule-build-tests\reports\rest-api-smoke\20260506-184530-eMule-main-release\result.json`
+    completed 10,997 soak requests with `failure_count=0`,
+    `native_rest_non_json_count=0`, and `family_counts.legacy-html=289`.
+  - Evidence: `repos\eMule-build-tests\reports\rest-api-smoke\20260506-185112-eMule-main-release\result.json`
+    completed 11,188 contract-stress requests with `failure_count=0`,
+    `native_rest_non_json_count=0`, and `family_counts.legacy-html=294`.
+  - No legacy templates, HTML routes, or legacy commands were redesigned,
+    migrated, or removed for this Release 1 boundary proof.
 
 ### 12. Final Release Evidence
 
