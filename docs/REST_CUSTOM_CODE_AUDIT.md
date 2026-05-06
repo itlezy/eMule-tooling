@@ -64,6 +64,14 @@ library, or pinned dependency APIs before writing custom logic.
   `WebServerJson::SerializeJsonUtf8`, which serializes through the pinned
   `nlohmann::json` dependency with the native REST replacement policy for
   invalid string data instead of carrying a qBit-local `dump()` wrapper.
+- REST-adjacent shared-directory and shared-file filesystem work routes through
+  `PathHelpers` and `LongPathSeams`: recursive directory collection uses
+  `PathHelpers::ForEachDirectoryEntry`, directory identity checks use
+  `LongPathSeams::TryGetResolvedDirectoryIdentity`, startup/duplicate path
+  cache reads and writes use `LongPathSeams::OpenFile`, and cache replacement
+  uses `LongPathSeams::MoveFileEx` plus `DeleteFileIfExists`. The broad app has
+  older unrelated raw file-call sites, but those are outside the REST/Arr
+  Release 1 ownership boundary.
 - HTTP `Content-Length` parsing now uses a shared WebSocket seam backed by the
   strict REST unsigned-decimal parser instead of `atol`, rejecting signed,
   partial, overflowed, and oversized request bodies before `/api/v1`, Torznab,
@@ -97,7 +105,7 @@ library, or pinned dependency APIs before writing custom logic.
 | REST/adapter file operations | Native REST shared-file and transfer delete commands plus Arr/qBit adapters | Replaced/shared | Source audit found no raw `CFile`, CRT stream, `CreateFile`, `FindFirstFile`, or attribute probes in the REST/adapter files. The only REST-side file deletion path is `ShellDeleteFile`, which delegates existence and direct deletion to `LongPathSeams`; native seam tests cover deep Unicode delete routing with and without recycle-bin mode. |
 | Hash validation | REST and qBit eD2K hash selectors | Kept with reason | The API contract is domain-specific: exactly 32 lowercase MD4 hex characters for native selectors, with qBit compatibility normalizing accepted mutation hashes before native dispatch. General Windows or crypto parsers do not own this textual contract. |
 | JSON construction | Native `/api/v1` and qBittorrent compatibility response assembly | Replaced/shared | Native REST and qBittorrent compatibility now share `WebServerJson::SerializeJsonUtf8`, backed by pinned `nlohmann::json` and the native REST invalid-string replacement policy. Native `/api/v1` success/error envelopes remain centralized in `BuildSuccessEnvelope` and `BuildErrorEnvelope`; qBit compatibility keeps its adapter-specific response shapes while reusing the serializer. |
-| File I/O | REST-adjacent path and shared-file operations | Deferred | Recent REST path work moved ownership and canonicalization checks to `PathHelpers`, but a raw file-call audit is still open for code that touches file contents or filesystem state below the REST controller boundary. |
+| File I/O | REST-adjacent path and shared-file operations | Replaced/shared | Native REST shared-directory mutation, shared-file add/list/reload, transfer delete, and static file reads delegate filesystem work to `SharedDirectoryOps`, `SharedFileList`, `ShellDeleteFile`, `PathHelpers`, or `LongPathSeams`. Source audit covered REST controllers, Arr/qBit adapters, shared-directory enumeration, shared-file startup/duplicate cache reads and writes, and static reads; no REST-owned raw file I/O remains where a LongPath/project helper owns the behavior. |
 | Concurrency and lifetime | REST command dispatch, WebServer request parsing, session/auth state | Deferred | Stress evidence covers current behavior under mixed native REST, adapters, malformed traffic, and legacy HTML GETs. A source audit of synchronization ownership is still required before marking this fully reviewed. |
 
 ## Resolved Cleanup

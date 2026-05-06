@@ -381,7 +381,7 @@ Windows APIs where the behavior is already owned.
   - [x] deferred
 - [ ] Prefer existing helpers/APIs for:
   - [x] path canonicalization
-  - [ ] file I/O
+  - [x] file I/O
   - [x] UTF-8/UTF-16 conversion
   - [x] URL/form parsing
   - [x] JSON construction
