@@ -330,7 +330,7 @@ Goal: REST and adapters preserve eMule BB long-path guarantees.
 - [ ] Cover edge cases:
   - [x] paths over `MAX_PATH`
   - [x] Unicode folder/file names
-  - [ ] trailing dot and trailing space preservation where Windows allows it
+  - [x] trailing dot and trailing space preservation where Windows allows it
   - [ ] reserved device names rejected
   - [x] path traversal rejected
   - [x] missing parent handled predictably
@@ -343,6 +343,11 @@ Goal: REST and adapters preserve eMule BB long-path guarantees.
         persisted path lists, `unicode-U+00DF-U+6F22.txt` in shared-file
         listings before and after relaunch, and the same root echoed as a
         category incoming path by `/api/v1/categories`.
+      - Evidence: `repos\eMule-build-tests\reports\shared-directories-rest\20260506-211633-eMule-main-release\result.json`
+        records exact-name shared directory `shared-rest-exact-names. \` and
+        shared file `shared-file. ` in REST responses before and after relaunch,
+        proving trailing dot/space names are preserved for existing filesystem
+        objects where Windows allows them.
       - The same report records invalid PATCH checks for blank path and
         non-boolean `recursive` fields, proves those errors do not mutate the
         shared-directory model, and records missing-parent roots as accepted
