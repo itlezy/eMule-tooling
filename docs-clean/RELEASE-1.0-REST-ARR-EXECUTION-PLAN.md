@@ -384,7 +384,7 @@ Windows APIs where the behavior is already owned.
   - [ ] file I/O
   - [x] UTF-8/UTF-16 conversion
   - [x] URL/form parsing
-  - [ ] JSON construction
+  - [x] JSON construction
   - [x] numeric parsing
   - [ ] concurrency/lifetime synchronization
 - [x] Keep local XML escaping only if no pinned XML writer is available and
