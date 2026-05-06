@@ -207,15 +207,24 @@ legacy WebServer boundary traffic stay stable under mixed concurrent load.
 Goal: native REST is internally clean and stable; aMuTorrent and adapters follow
 it.
 
-- [ ] Audit every OpenAPI route against implementation and aMuTorrent usage.
-- [ ] Break or rename pre-release routes where needed for a clean resource and
+- [x] Audit every OpenAPI route against implementation and aMuTorrent usage.
+- [x] Break or rename pre-release routes where needed for a clean resource and
       operation model.
-- [ ] Keep strict field rules:
-  - [ ] lowercase 32-character eD2K hashes
-  - [ ] explicit booleans for destructive intent
-  - [ ] bounded unsigned integers
-  - [ ] UTF-8 text without controls
-  - [ ] mutually exclusive selectors rejected early
+- [x] Keep strict field rules:
+  - [x] lowercase 32-character eD2K hashes
+  - [x] explicit booleans for destructive intent
+  - [x] bounded unsigned integers
+  - [x] UTF-8 text without controls
+  - [x] mutually exclusive selectors rejected early
+  - Evidence: `CI-014` live contract coverage exercised the OpenAPI-derived
+    route table with 81 routes; `BUG-075`, `BUG-076`, `CI-015`, and the REST
+    live smoke assert JSON-not-HTML errors, unknown field/query rejection,
+    uppercase hash rejection, explicit destructive booleans, bounded unsigned
+    query/body values, UTF-8/control validation, and mutually exclusive
+    `categoryId`/`categoryName` selectors.
+  - Evidence: `AMUT-001` passed with aMuTorrent adapting to native `/api/v1`
+    field names, and the REST contract documents retired command-style routes
+    that are not part of the Release 1.0 surface.
 - [x] Close `FEAT-047` search documentation gap:
   - [x] document search paging/bounds behavior
   - [x] verify server/global/Kad/automatic live corpus coverage
@@ -225,11 +234,16 @@ it.
     `GET /api/v1/searches/{searchId}` returns the current native visible
     result snapshot, intentionally does not expose `limit`/`offset` paging in
     Release 1.0, and preserves stock eD2K/Kad search behavior.
-- [ ] Promote release candidates only from live evidence:
-  - [ ] `FEAT-045` only if transfer details are required
-  - [ ] `FEAT-046` only if bootstrap/import is required
-  - [ ] `FEAT-048` only if upload controls are required
-  - [ ] `FEAT-049` only if preferences are required
+- [x] Promote release candidates only from live evidence:
+  - [x] `FEAT-045` only if transfer details are required
+  - [x] `FEAT-046` only if bootstrap/import is required
+  - [x] `FEAT-048` only if upload controls are required
+  - [x] `FEAT-049` only if preferences are required
+  - Evidence: aMuTorrent, Prowlarr, Radarr/Sonarr, direct REST adapter smoke,
+    and shared-directory REST E2E gates passed without proving a release
+    blocker for `FEAT-045`, `FEAT-046`, `FEAT-048`, or `FEAT-049`; those remain
+    backlog candidates unless a future live gate fails for a concrete missing
+    operation.
 
 ### 6. Shared Native REST and Arr Adapter Logic
 
@@ -245,15 +259,20 @@ logic.
   - [x] bounded unsigned parsing
   - [x] category selector validation
   - [x] magnet/eD2K conversion safety
-- [ ] Keep adapter-specific code only for:
-  - [ ] Torznab XML/feed shape
-  - [ ] qBit text responses and session-cookie compatibility
-  - [ ] Prowlarr/Radarr/Sonarr harness setup
-- [ ] Add seam tests proving identical behavior across:
+- [x] Keep adapter-specific code only for:
+  - [x] Torznab XML/feed shape
+  - [x] qBit text responses and session-cookie compatibility
+  - [x] Prowlarr/Radarr/Sonarr harness setup
+- [x] Add seam tests proving identical behavior across:
   - [x] native query strings
   - [x] Torznab query strings
   - [x] qBit form bodies
   - [x] nested qBit magnet query strings
+  - Evidence: `ARR-001` records shared parser, conversion, hash, search-text,
+    unsigned-number, category, and magnet/eD2K validation behavior across
+    native REST, Torznab, and qBittorrent compatibility. Remaining
+    adapter-owned code is limited to compatibility response shapes and live
+    harness setup.
 
 ### 7. `ARR-001` Full Arr Live E2E
 
