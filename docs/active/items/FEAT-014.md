@@ -51,7 +51,7 @@ Possible later work:
 
 ## Progress
 
-- 2026-05-02: Added `docs/REST-API-OPENAPI.yaml` as the canonical target
+- 2026-05-02: Added `docs/rest/REST-API-OPENAPI.yaml` as the canonical target
   contract for the pre-release resource-oriented `/api/v1` redesign. The item
   remains open until implementation and tests are aligned to that schema.
 
