@@ -1,8 +1,7 @@
-# eMule Broadband Edition 1.0 Release Backlog
+# eMule Broadband Edition 1.0 Release Control
 
-This page is the release-focused view over the active backlog. It does not
-replace `INDEX.md`; it narrows the backlog into the work that matters for
-`emule-bb-v1.0.0`.
+This is the active control document for `emule-bb-v1.0.0`. It owns Release 1
+gate status, candidate decisions, and final readiness rules.
 
 Current status: `release/v0.72a-broadband` is a pre-release stabilization
 branch, not ready for an official release. Do not tag or package
@@ -13,7 +12,7 @@ Operator docs:
 
 - [Release 1.0 checklist](RELEASE-1.0-CHECKLIST.md)
 - [Release 1.0 runbook](RELEASE-1.0-RUNBOOK.md)
-- [Release 1.0 REST/Arr execution plan](RELEASE-1.0-REST-ARR-EXECUTION-PLAN.md)
+- [REST/Arr deep plan](RELEASE-1.0-REST-ARR-EXECUTION-PLAN.md)
 
 ## Release Identity
 
@@ -26,87 +25,55 @@ Operator docs:
 
 ## Release Gates
 
-These items block the first public release unless they are explicitly reclassed
-by a later release-readiness review.
+These gates must remain passed, or be explicitly revalidated if their evidence
+ages out or related code changes.
 
-| ID | Gate | Next implementation slice |
-|----|------|---------------------------|
-| [BUG-075](BUG-075.md) | REST typed error consistency | Centralize route/auth/parse/validation/internal failure envelopes and lock HTTP status mapping in native tests. |
-| [BUG-076](BUG-076.md) | Malformed WebServer/REST hardening | Add malformed JSON, method, path, content-type, and body-size cases without routing REST failures through legacy HTML login/session behavior. |
-| [BUG-077](BUG-077.md) | Concurrent WebServer soak | Add short smoke and longer soak traffic that mixes REST reads, safe mutations, and legacy HTML requests. |
-| [CI-011](CI-011.md) | Release live E2E umbrella | Make the aggregate runner publish stable suite result artifacts and document one supported release command. |
-| [CI-014](CI-014.md) | REST manifest/live completeness gate | Make native route tests and live REST smoke consume or validate the checked-in OpenAPI contract. |
-| [CI-015](CI-015.md) | REST malformed/concurrent matrix | Turn the malformed and concurrent request cases into selectable smoke/soak budgets. |
-| [AMUT-001](AMUT-001.md) | aMuTorrent live E2E validation | Run aMuTorrent against a live eMule BB instance and capture browser console plus REST request artifacts. |
-| [ARR-001](ARR-001.md) | Arr live E2E validation | Validate Prowlarr Torznab, Radarr/Sonarr indexer sync/search, and qBittorrent-compatible add/mutate/delete flows against live eMule BB. |
-| [FEAT-050](FEAT-050.md) | Download completion hook | Add the disabled-by-default executable-only completion hook with native tests for token expansion, launch validation, and shutdown skip behavior. |
+| ID | Gate | Status | Evidence pointer |
+|----|------|--------|------------------|
+| [BUG-075](BUG-075.md) | REST typed error consistency | Passed | item completion evidence |
+| [BUG-076](BUG-076.md) | Malformed WebServer/REST hardening | Passed | item completion evidence |
+| [BUG-077](BUG-077.md) | Concurrent WebServer soak | Passed | item completion evidence |
+| [CI-011](CI-011.md) | Release live E2E umbrella | Done | item completion evidence and latest full `live-e2e` report |
+| [CI-014](CI-014.md) | REST manifest/live completeness gate | Passed | item completion evidence |
+| [CI-015](CI-015.md) | REST malformed/concurrent matrix | Passed | item completion evidence |
+| [AMUT-001](AMUT-001.md) | aMuTorrent live E2E validation | Passed | item completion evidence |
+| [ARR-001](ARR-001.md) | Arr live E2E validation | Passed | item completion evidence |
+| [FEAT-050](FEAT-050.md) | Download completion hook | Passed | item completion evidence |
 
-## Release Candidates
+## Candidate Decisions
 
-These are desirable for 1.0, but should stay out of the blocking gate unless
-the gate work proves that a controller cannot ship without them.
+These items are desirable but are not Release 1 blockers unless a later gate
+failure proves that they are required.
 
-| ID | Candidate | Ship decision |
-|----|-----------|---------------|
-| [FEAT-032](FEAT-032.md) | NAT mapping live validation | Deferred By Decision for 1.0; release E2E did not require NAT proof, and unavailable PCP/NAT-PMP or browse-capable public-network conditions must not delay the tag. |
-| [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Deferred By Decision for 1.0; aMuTorrent and Arr release gates passed without hydrated transfer detail, so keep this as a 1.1 controller enhancement. |
-| [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Deferred By Decision for 1.0; release live-wire gates passed with current server/search/bootstrap coverage, and Kad import remains post-1.0 work. |
-| [FEAT-047](FEAT-047.md) | Search API completeness | Passed; paging/bounds semantics are documented for Release 1.0. |
-| [FEAT-048](FEAT-048.md) | Upload queue control completeness | Deferred By Decision for 1.0; existing upload controller coverage is sufficient, and no aMuTorrent or Arr gate required additional queue mutations. |
-| [FEAT-049](FEAT-049.md) | Curated REST preference expansion | Deferred By Decision for 1.0; release E2E and preference UI gates passed with the current curated preference surface. |
-| [AMUT-002](AMUT-002.md) | aMuTorrent transfer detail hydration | Deferred By Decision for 1.0; depends on deferred `FEAT-045`, and aMuTorrent browser smoke passed with current list/snapshot data. |
+| ID | Candidate | Release 1 decision |
+|----|-----------|--------------------|
+| [FEAT-032](FEAT-032.md) | NAT mapping live validation | Deferred; Release E2E did not require NAT proof |
+| [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Deferred; aMuTorrent and Arr passed without hydrated transfer detail |
+| [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Deferred; live-wire gates passed with current server/search/bootstrap coverage |
+| [FEAT-047](FEAT-047.md) | Search API completeness | Passed; OpenAPI and REST contract document Release 1 behavior |
+| [FEAT-048](FEAT-048.md) | Upload queue control completeness | Deferred; no Release 1 gate required extra queue mutations |
+| [FEAT-049](FEAT-049.md) | Curated REST preference expansion | Deferred; current curated preference surface passed release gates |
+| [AMUT-002](AMUT-002.md) | aMuTorrent transfer detail hydration | Deferred; depends on deferred `FEAT-045` |
 
-## Explicitly Deferred From 1.0
+## Deferred Scope
 
-These items stay tracked in the backlog, but are not first-release blockers:
+The following tracks stay outside the first public release unless a later
+release-readiness review promotes a concrete blocker:
 
-- Boost migration group: `REF-008` through `REF-014`
+- Boost migration and broad CI/toolchain migration: `REF-008` through
+  `REF-014`, `CI-001` through `CI-007`, `CI-010`
 - dependency upgrades: `REF-028`, `REF-034`
-- broad socket/network rewrites: `REF-029`, `REF-030`, `FEAT-018`, `FEAT-035`,
+- broad networking work: `REF-029`, `REF-030`, `FEAT-018`, `FEAT-035`,
   `FEAT-036`
-- broad product/UI features: `FEAT-017`, `FEAT-019`, `FEAT-021`, `FEAT-031`,
-  `FEAT-037`, `FEAT-039`, `FEAT-040`, `FEAT-041`, `FEAT-043`, `FEAT-044`
-- broad cleanup/modern-library work: `REF-021`, `REF-023`, `REF-025`,
-  `REF-032`, `REF-033`, `REF-035`, `REF-036`, `CI-001` through `CI-007`,
-  `CI-010`
+- broad product/UI expansion: `FEAT-017`, `FEAT-019`, `FEAT-021`,
+  `FEAT-031`, `FEAT-037`, `FEAT-039` through `FEAT-044`
 - non-release hardening watchpoints: `BUG-031`, `BUG-034`, `BUG-035`,
-  `FEAT-001`, `FEAT-002` through `FEAT-006`, `FEAT-034`, `CI-008`, `CI-012`,
+  `FEAT-001` through `FEAT-006`, `FEAT-034`, `CI-008`, `CI-012`,
   `CI-013`, `CI-016`
 
-Deferred does not mean unimportant. It means 1.0 should ship only after the
-release gates are meaningful, not after every useful future item is complete.
+## Validation
 
-## Execution Order
-
-1. REST error envelope and malformed request hardening:
-   `BUG-075`, `BUG-076`.
-2. Contract-driven REST completeness:
-   `CI-014`; keep the closed `FEAT-047` search semantics in sync with OpenAPI
-   if the search contract changes.
-3. REST robustness matrix:
-   `CI-015`, `BUG-077`.
-4. Release E2E runner and operator command:
-   `CI-011`.
-5. Download completion hook:
-   `FEAT-050`.
-6. aMuTorrent and Arr integration validation:
-   `AMUT-001`, `ARR-001`, with `FEAT-045` and `AMUT-002` pulled in only if the
-   live controller gates prove transfer details are required for a useful
-   release.
-
-## What 1.0 Showcases
-
-- broadband upload behavior, queue/scoring work, modern defaults, and large
-  library handling
-- long-path support, shared startup cache, monitored recursive shared roots,
-  and safer file persistence
-- REST automation, aMuTorrent, Prowlarr, Radarr, and Sonarr live E2E proof
-- disabled-by-default completion automation for local workflows
-- WebServer hardening and typed REST errors for reliable local controllers
-
-## Release Candidate Validation
-
-Before tagging `emule-bb-v1.0.0`, run:
+Before tagging `emule-bb-v1.0.0`, run the supported workspace commands:
 
 - `pwsh -File repos\eMule-build\workspace.ps1 validate`
 - `pwsh -File repos\eMule-build\workspace.ps1 build-app -Config Debug -Platform x64`
@@ -114,16 +81,8 @@ Before tagging `emule-bb-v1.0.0`, run:
 - `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`
 - `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Release -Platform x64`
 - native parity tests through the supported `test` command
-- release live E2E through the supported `live-e2e` command, including:
-  - aMuTorrent browser integration
-  - Prowlarr Torznab integration
-  - Radarr and Sonarr through Prowlarr plus qBittorrent-compatible download
-    control
+- Release x64 `live-e2e`, including aMuTorrent, Prowlarr, Radarr, and Sonarr
 
 Public-network unavailable results are acceptable only when the harness records
 the run as inconclusive with enough diagnostics to distinguish environment
 failure from product failure.
-
-Record the command, implementation commit, artifact path, and final ship
-decision for every gate in
-[RELEASE-1.0-CHECKLIST](RELEASE-1.0-CHECKLIST.md).

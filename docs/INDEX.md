@@ -13,6 +13,7 @@ backlog and dated review trail. If a status claim in `docs/` conflicts with
 |---|---|
 | Workspace roles, active branches, and operating policy | [WORKSPACE_POLICY](WORKSPACE_POLICY.md) |
 | Active backlog, landed status, and revalidation notes | [../docs-clean/INDEX.md](../docs-clean/INDEX.md) |
+| Backlog history, graph, and source salvage references | [history/](history/) |
 | Historical-reference rules for the stale experimental branch | [HISTORICAL-REFERENCES](HISTORICAL-REFERENCES.md) |
 | Repo-level purpose and navigation | [../README.md](../README.md) |
 
@@ -71,6 +72,9 @@ active feature status.
 
 | Document | Description |
 |---|---|
+| [history/BACKLOG-HISTORY](history/BACKLOG-HISTORY.md) | Compact dated backlog revalidation trail |
+| [history/BACKLOG-DEPENDENCY-GRAPH](history/BACKLOG-DEPENDENCY-GRAPH.md) | Backlog sequencing and dependency hints |
+| [history/BACKLOG-SOURCE-SALVAGE](history/BACKLOG-SOURCE-SALVAGE.md) | Historical source-doc salvage map |
 | [GUIDE-LONGPATHS](GUIDE-LONGPATHS.md) | Long-path implementation guide |
 | [HISTORY-070-VS-072](HISTORY-070-VS-072.md) | 0.70b vs 0.72a comparison report |
 | [HISTORY-CHANGELOG](HISTORY-CHANGELOG.md) | Community build change review across releases |

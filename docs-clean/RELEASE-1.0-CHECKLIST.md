@@ -1,101 +1,46 @@
 # eMule Broadband Edition 1.0 Release Checklist
 
-This is the Markdown-only release control plane for `emule-bb-v1.0.0`.
-It is written for maintainers and release operators. Do not tag Release 1 until
-every release gate below has evidence.
+This is the operator checklist for `emule-bb-v1.0.0`. It does not own gate
+status; use [RELEASE-1.0](RELEASE-1.0.md) for release decisions and item docs
+for detailed completion evidence.
 
-Current status: the broadband branch is still pre-release stabilization. Gate
-rows may record candidate evidence, but they do not make the branch an official
-release until maintainers revalidate the checklist, create the package, and cut
-the annotated tag.
+Current status: the broadband branch is still pre-release stabilization. Do not
+tag or package Release 1 until this checklist is complete.
 
-## Completion Rule
+## Gate Revalidation
 
-Release 1 is complete only when:
+- [ ] [RELEASE-1.0](RELEASE-1.0.md) shows every release gate as passed or
+      explicitly accepted as inconclusive
+- [ ] every gate item has current implementation evidence and validation
+      artifacts in its item doc
+- [ ] every candidate is shipped, promoted, or explicitly deferred in
+      [RELEASE-1.0](RELEASE-1.0.md)
+- [ ] any accepted inconclusive live-network result records the external
+      condition that blocked proof
 
-- every gate is `Passed` or `Inconclusive Accepted`
-- no gate has missing implementation, command, artifact, or ship-decision cells
-- the aggregate live E2E result has no `failed` suites
-- any `Inconclusive Accepted` live-network result proves the app and harness
-  behaved correctly and records the external condition that blocked proof
-- every release candidate is either promoted to a gate, explicitly shipped, or
-  explicitly deferred
+## Required Commands
 
-Allowed gate statuses:
+- [ ] `pwsh -File repos\eMule-build\workspace.ps1 validate`
+- [ ] `pwsh -File repos\eMule-build\workspace.ps1 build-app -Config Debug -Platform x64`
+- [ ] `pwsh -File repos\eMule-build\workspace.ps1 build-app -Config Release -Platform x64`
+- [ ] `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`
+- [ ] `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Release -Platform x64`
+- [ ] supported native test command
+- [ ] full Release x64 `live-e2e`
+- [ ] `pwsh -File repos\eMule-tooling\ci\check-clean-worktree.ps1 -EmuleWorkspaceRoot .`
 
-- `Open`
-- `In Progress`
-- `Blocked`
-- `Ready For Validation`
-- `Passed`
-- `Inconclusive Accepted`
-- `Deferred By Decision`
+## Release Identity
 
-## REST/Arr Validation Focus
+- [ ] release notes use `eMule broadband edition` as the public product name
+- [ ] release notes use `eMule BB` as the compact app/mod name
+- [ ] annotated tag is `emule-bb-v1.0.0`
+- [ ] x64 asset is `eMule-broadband-1.0.0-x64.zip`
+- [ ] ARM64 asset is `eMule-broadband-1.0.0-arm64.zip`
 
-This checklist records the doc-only release status for the REST, Arr, and
-aMuTorrent gates. It does not authorize code, OpenAPI, harness, branch,
-package, or tag changes by itself.
+## Final Operator Steps
 
-The Release 1 REST/Arr acceptance focus is:
-
-- native `/api/v1` completeness, robustness, safety, and typed error handling
-- Torznab/qBittorrent Arr adapter completeness without compromising the native
-  `/api/v1` resource model
-- aMuTorrent as a UI consumer that adapts to eMule BB's clean native REST
-  design, not as the source of native API shape
-- shared parser, validation, normalization, serialization, and path-safety
-  logic between native REST and Arr compatibility layers wherever the behavior
-  is intentionally common
-- stress, E2E stress, live-wire search/download-trigger stress, malformed
-  traffic, long-path, and Unicode evidence
-- REST/Arr custom-code audit evidence showing retained local helpers have a
-  documented reason and replacement candidates use project helpers, pinned
-  dependencies, or Windows APIs
-
-## Gate Ledger
-
-| ID | Gate | Status | Implementation evidence | Validation command | Required artifact | Ship decision |
-|----|------|--------|-------------------------|--------------------|-------------------|---------------|
-| [BUG-075](BUG-075.md) | REST typed error consistency | Passed | app: `fcedfe3`, `c8e6609`, `1e2ff57`, `69d9262`, `3c63552`; tests: `28f17db`, `83093a6`, `c10f2a8`, `8e67131`, `b7406d9`, `957c31a`, `51f8b6b`, `a3f3d56`, `4c2240e`, `bc0ca24`; tooling: `95fc6e9`, `a5d3d38` | `pwsh -File repos\eMule-build\workspace.ps1 validate`; `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 test -Config Debug -Platform x64`; `python -m pytest tests\python\test_rest_api_smoke.py -q` | `workspaces\v0.72a\state\build-logs\20260506-175920`; `repos\eMule-build-tests\reports\native-coverage\20260506-175927-eMulebb-workspace-v0.72a-eMule-main-x64-Debug`; native test output passed `481/481` cases and `2679/2679` assertions; REST smoke unit output passed `25/25` tests | Evidence recorded; release not cut |
-| [BUG-076](BUG-076.md) | Malformed WebServer/REST hardening | Passed | app: `8d324d4`, `40bac28`, `90c6352`, `41964c8`; tests: `cee7499`, `214b327`, `2746ef1`, `7b002f2`, `f3d8923`, `e0f8ef6`, `aea6934` | `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 test -Config Debug -Platform x64` | `workspaces\v0.72a\state\build-logs\20260506-173324`; `repos\eMule-build-tests\reports\native-coverage\20260506-173327-eMulebb-workspace-v0.72a-eMule-main-x64-Debug`; native test output passed `481/481` cases and `2679/2679` assertions | Evidence recorded; release not cut |
-| [CI-014](CI-014.md) | REST manifest/live completeness gate | Passed | tests: `3bc65d6`, `3101391`, `b53627d`, `b8233b0`, `d907fc2`, `69eba5b`; tooling: `89810c5`, `8b548b3`, `cffd810`, `e3b5d24`, `9560435`, `fee7111`, `f2cc198` | `pwsh -File repos\eMule-build\workspace.ps1 validate`; `python -m pytest tests\python\test_rest_api_smoke.py -q`; `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Release -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api` | `workspaces\v0.72a\state\build-logs\20260506-181540`; `repos\eMule-build-tests\reports\rest-api-smoke\20260506-181933-eMule-main-release`; `repos\eMule-build-tests\reports\live-e2e-suite\20260506-181933-eMule-main-release\result.json`; REST contract covered 81 routes with `/app/shutdown` skipped as unsafe; REST stress completed 8026 requests with 0 failures | Evidence recorded; release not cut |
-| [CI-015](CI-015.md) | REST malformed/concurrent matrix | Passed | tests: `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` | `pwsh -File repos\eMule-build\workspace.ps1 validate`; `python -m pytest tests\python\test_rest_api_smoke.py -q`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api -RestCoverageBudget contract-stress` | `repos\eMule-build-tests\reports\rest-api-smoke\20260506-185112-eMule-main-release`; `repos\eMule-build-tests\reports\live-e2e-suite\20260506-185112-eMule-main-release\result.json`; contract-stress covered 81 routes and completed 11188 mixed stress requests with 0 failures, 0 timeouts, and 0 non-JSON native REST responses; app closed cleanly after stress in 5387.841 ms | Evidence recorded; release not cut |
-| [BUG-077](BUG-077.md) | Concurrent WebServer soak | Passed | tests: `f6cc0f9`, `75b4ce7`, `331f70d`, `fe6ee8c` | `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api -RestStressBudget soak` | `repos\eMule-build-tests\reports\rest-api-smoke\20260506-184530-eMule-main-release`; `repos\eMule-build-tests\reports\live-e2e-suite\20260506-184530-eMule-main-release\result.json`; mixed soak completed 10997 requests with 0 failures, 0 timeouts, and 0 non-JSON native REST responses; app closed cleanly after stress in 5418.439 ms | Evidence recorded; release not cut |
-| [CI-011](CI-011.md) | Release live E2E umbrella | Passed | app: `7754d16`, `00a7da4`, `3b315a4`, `576f9a1`; tests: `13f1487`, `1058ac2`, `2bb7fd2`, `a68ac42`, `d929611`, `e5fca8e`, `961efac`, `1f973ae` focused REST proofs, `e952b77` preference harness fix; tooling: `cb0fa27` REST helper ownership audit, `eb079f8` REST long-path-call audit, `bab2ac8` REST file I/O audit, `56bb1bb` final evidence | `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64`; focused proof: `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite shared-directories-rest`; cleanup validation: `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 test -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 build-app -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 build-app -Config Release -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Release -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api -RestStressBudget soak`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite preference-ui`; `pwsh -File repos\eMule-tooling\ci\check-clean-worktree.ps1 -EmuleWorkspaceRoot .`; `python -m pytest repos\eMule-build-tests\tests\python\test_harness_cli_common.py -q`; `pwsh -File repos\eMule-build\workspace.ps1 validate` | Full Release x64 umbrella passed in `repos\eMule-build-tests\reports\live-e2e-suite\20260506-224844-eMule-main-release\result.json`; the aggregate kept `auto-browse-live` inconclusive because no browse-capable live source was available, while release-blocking REST, aMuTorrent, Prowlarr, Radarr/Sonarr, shared-directory, preference UI, and stability suites passed; final validation passed in `workspaces\v0.72a\state\build-logs\20260506-215932`, `workspaces\v0.72a\state\build-logs\20260506-215950`, `workspaces\v0.72a\state\build-logs\20260506-220000`, `workspaces\v0.72a\state\build-logs\20260506-220009`, `repos\eMule-build-tests\reports\rest-api-smoke\20260506-220016-eMule-main-release`, and `repos\eMule-build-tests\reports\rest-api-smoke\20260506-220422-eMule-main-release`; preference UI harness refresh validated current IP filter setting names in `repos\eMule-build-tests\reports\preference-ui-e2e\20260506-224757-eMule-main-release`; tracked worktree cleanliness passed with `pwsh -File repos\eMule-tooling\ci\check-clean-worktree.ps1 -EmuleWorkspaceRoot .`; release-note product naming and ZIP asset naming were reviewed against `repos\eMule-tooling\docs\WORKSPACE_POLICY.md`, `repos\eMule-tooling\docs-clean\RELEASE-1.0.md`, and `repos\eMule-tooling\docs-clean\RELEASE-1.0-RUNBOOK.md`; focused shared-directory proof passed in `repos\eMule-build-tests\reports\shared-directories-rest\20260506-204215-eMule-main-release\result.json` with a 325-character Unicode shared root, category incoming-path echo/delete, shared-file listing, persistence, relaunch reload, malformed PATCH errors, and missing-parent root handling; exact trailing dot/space proof passed in `repos\eMule-build-tests\reports\shared-directories-rest\20260506-211633-eMule-main-release\result.json` with `shared-rest-exact-names. \` shared by REST and `shared-file. ` listed before and after relaunch; reserved device-name proof passed in `repos\eMule-build-tests\reports\rest-api-smoke\20260506-212037-eMule-main-release`, where eD2K display name `NUL .txt` was exposed by REST as safe `NUL_.txt` and then deleted; Unicode REST log proof passed in `repos\eMule-build-tests\reports\rest-api-smoke\20260506-213004-eMule-main-release`, where `/api/v1/logs` reported a matched Unicode ED2K transfer filename; adapter conversion cleanup validated in `workspaces\v0.72a\state\build-logs\20260506-203159`, `repos\eMule-build-tests\reports\native-coverage\20260506-203211-eMulebb-workspace-v0.72a-eMule-main-x64-Debug`, `workspaces\v0.72a\state\build-logs\20260506-203241`, `workspaces\v0.72a\state\build-logs\20260506-203443`, `repos\eMule-build-tests\reports\rest-api-smoke\20260506-203524-eMule-main-release`, and aggregate `repos\eMule-build-tests\reports\live-e2e-suite\20260506-203523-eMule-main-release\result.json`; shared JSON serializer cleanup validated in `workspaces\v0.72a\state\build-logs\20260506-213820`, `repos\eMule-build-tests\reports\rest-api-smoke\20260506-213848-eMule-main-release`, and `workspace.ps1 validate`; qBit session synchronization cleanup validated in `workspaces\v0.72a\state\build-logs\20260506-214758`, `repos\eMule-build-tests\reports\rest-api-smoke\20260506-214830-eMule-main-release`, and `workspace.ps1 validate`; Unicode ED2K transfer-name proof passed in `repos\eMule-build-tests\reports\rest-api-smoke\20260506-204523-eMule-main-release` and aggregate `repos\eMule-build-tests\reports\live-e2e-suite\20260506-204522-eMule-main-release\result.json`; shared-file relative traversal and non-shared long Unicode path rejection passed in `workspaces\v0.72a\state\build-logs\20260506-205305`, `workspaces\v0.72a\state\build-logs\20260506-205325`, `repos\eMule-build-tests\reports\rest-api-smoke\20260506-205356-eMule-main-release`, and aggregate `repos\eMule-build-tests\reports\live-e2e-suite\20260506-205355-eMule-main-release\result.json`; custom helper audit marked retained/replaced/deferred REST and Arr helpers in `docs\REST_CUSTOM_CODE_AUDIT.md`; REST/adapter long-path-call audit found no raw file or attribute calls in `WebServerJson`, Arr, qBit, or static-file seams and confirmed REST delete paths route through `ShellDeleteFile` to `LongPathSeams`; REST file I/O ownership audit confirmed shared-directory enumeration, shared-file cache access, transfer deletes, and static reads route through `PathHelpers`, `SharedDirectoryOps`, `SharedFileList`, `ShellDeleteFile`, or `LongPathSeams`; `workspace.ps1 validate` passed after doc updates | Evidence recorded; release not cut |
-| [AMUT-001](AMUT-001.md) | aMuTorrent live E2E validation | Passed | tests: `affc4d6`, `11365ca` | `python -m pytest tests\python\test_amutorrent_browser_smoke.py tests\python\test_live_e2e_suite.py -q`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite amutorrent-browser-smoke` | `repos\eMule-build-tests\reports\amutorrent-browser-smoke\20260506-193606-eMule-main-release\result.json`; `repos\eMule-build-tests\reports\live-e2e-suite\20260506-193606-eMule-main-release\result.json`; browser diagnostics recorded 0 console errors, 0 page errors, and 0 request failures; category create/delete, ED2K add, search, server action, and shared-directory reload flows passed | Evidence recorded; release not cut |
-| [ARR-001](ARR-001.md) | Arr live E2E validation | Passed | app: `87b6f24`, `385273c`, `324c7f7`; tests: `8786847`, `4e02b3d`, `0fd6e77`, `4339716`, `3c5c963`, `8a85158`, `59f7e6d`, `e78c369`; tooling: `303f911` | `pwsh -File repos\eMule-build\workspace.ps1 validate`; `python -m pytest tests\python\test_rest_api_smoke.py -q`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite rest-api`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite prowlarr-emulebb`; `pwsh -File repos\eMule-build\workspace.ps1 live-e2e -Config Release -Platform x64 -LiveSuite radarr-sonarr-emulebb` | Direct adapter smoke passed in `repos\eMule-build-tests\reports\rest-api-smoke\20260506-190401-eMule-main-release`; Prowlarr passed in `repos\eMule-build-tests\reports\prowlarr-emulebb-live\20260506-191105-eMule-main-release` with aggregate `repos\eMule-build-tests\reports\live-e2e-suite\20260506-191105-eMule-main-release\result.json`; Radarr/Sonarr passed in `repos\eMule-build-tests\reports\radarr-sonarr-emulebb-live\20260506-191223-eMule-main-release` with aggregate `repos\eMule-build-tests\reports\live-e2e-suite\20260506-191223-eMule-main-release\result.json` | Evidence recorded; release not cut |
-| [FEAT-050](FEAT-050.md) | Download completion hook | Passed | app: `b6ce2ef`, `1db8f7c`; tests: `ea9f163` | `pwsh -File repos\eMule-build\workspace.ps1 build-tests -Config Debug -Platform x64`; `pwsh -File repos\eMule-build\workspace.ps1 test -Config Debug -Platform x64` | `workspaces\v0.72a\state\build-logs\20260506-201517`; `repos\eMule-build-tests\reports\native-coverage\20260506-201526-eMulebb-workspace-v0.72a-eMule-main-x64-Debug`; completion-command native tests covered retained success, duplicate/failed/shutdown skips, executable-only validation, literal shell metacharacters, token expansion, and direct `CreateProcess` request building; native test output passed `483/483` cases and `2686/2686` assertions | Evidence recorded; release not cut |
-
-## Release Candidate Decisions
-
-These items are not blockers unless a gate proves they are required.
-
-| ID | Candidate | Current decision | Evidence required to promote |
-|----|-----------|------------------|------------------------------|
-| [FEAT-032](FEAT-032.md) | NAT mapping live validation | Deferred By Decision | Release E2E did not require NAT proof; unavailable PCP/NAT-PMP or browse-capable public-network conditions must not delay 1.0 |
-| [FEAT-045](FEAT-045.md) | Transfer detail endpoint | Deferred By Decision | aMuTorrent and Arr release gates passed without hydrated transfer detail; keep as a 1.1 controller enhancement |
-| [FEAT-046](FEAT-046.md) | Server/Kad bootstrap/import APIs | Deferred By Decision | Release live-wire gates passed with current server/search/bootstrap coverage; Kad import remains post-1.0 work |
-| [FEAT-047](FEAT-047.md) | Search API completeness | Passed | Search result paging/bounds semantics are documented in `docs\REST-API-OPENAPI.yaml` and `docs\REST-API-CONTRACT.md`; Release 1.0 preserves stock eD2K/Kad search behavior and exposes the current visible native result snapshot without `limit`/`offset` query parameters |
-| [FEAT-048](FEAT-048.md) | Upload queue control completeness | Deferred By Decision | Existing upload controller coverage is sufficient for 1.0; no aMuTorrent or Arr gate required additional queue mutations |
-| [FEAT-049](FEAT-049.md) | Curated REST preference expansion | Deferred By Decision | Release E2E and preference UI gates passed with the current curated preference surface |
-| [AMUT-002](AMUT-002.md) | aMuTorrent transfer detail hydration | Deferred By Decision | Depends on deferred `FEAT-045`; aMuTorrent browser smoke passed with current list/snapshot data |
-
-## Final Tag Readiness
-
-Before creating `emule-bb-v1.0.0`, record evidence for:
-
-- [x] `pwsh -File repos\eMule-build\workspace.ps1 validate`
-- [x] Debug and Release x64 app builds
-- [x] Debug and Release x64 test builds
-- [x] supported native test command
-- [x] full Release x64 `live-e2e` run
-- [x] clean worktrees in active workspace repos
-- [x] release notes reviewed for public product name `eMule broadband edition`
-- [x] release assets named `eMule-broadband-1.0.0-x64.zip` and
-  `eMule-broadband-1.0.0-arm64.zip`
-
-Evidence is recorded in the `CI-011` row above and in
-[RELEASE-1.0-REST-ARR-EXECUTION-PLAN](RELEASE-1.0-REST-ARR-EXECUTION-PLAN.md).
-Package creation and the annotated tag remain operator steps after this
-checklist is complete.
+- [ ] record final command summaries and artifact paths in the relevant gate
+      item docs
+- [ ] confirm no active workspace repo has unrelated uncommitted changes
+- [ ] create release packages
+- [ ] create the annotated tag only after package verification
