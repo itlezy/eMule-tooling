@@ -1,7 +1,7 @@
 ---
 id: FEAT-045
 title: REST transfer detail endpoint for controller parity
-status: Open
+status: In Progress
 priority: Major
 category: feature
 labels: [rest, transfers, controller, amutorrent]
@@ -29,22 +29,30 @@ Target route:
 
 Covered by the [Release 1.0 REST and Arr execution plan](../plans/RELEASE-1.0-REST-ARR-EXECUTION-PLAN.md).
 
-## Current Gap
+## Current State
 
-The REST API already exposes transfer rows and
-`GET /api/v1/transfers/{hash}/sources`. aMuTorrent still has placeholders for
-segment-oriented fields such as `partStatus`, `gapStatus`, and `reqStatus`
-because the backend does not expose an equivalent detail payload yet.
+The backend now exposes `GET /api/v1/transfers/{hash}/details` as a dedicated
+detail payload with the transfer row, per-part state, and source rows. The
+remaining gap is controller consumption and compatibility fallback in
+`AMUT-002`, not the native REST route itself.
 
 ## Acceptance Criteria
 
-- [ ] detail data is exposed through a dedicated endpoint, not by bloating
+- [x] detail data is exposed through a dedicated endpoint, not by bloating
       `snapshot`
-- [ ] missing or malformed hashes return the stable REST error envelope
-- [ ] the endpoint is covered by native route tests, live REST smoke, and the
+- [x] missing or malformed hashes return the stable REST error envelope
+- [x] the endpoint is covered by native route tests, live REST smoke, and the
       contract manifest
 - [ ] aMuTorrent consumes the endpoint when capability metadata indicates it is
       available
+
+## Progress
+
+- 2026-05-07: Revalidated the native detail route on current `main`. The
+  OpenAPI contract includes `GET /api/v1/transfers/{hash}/details`, native route
+  seams cover routing and hash validation, and the live REST smoke now verifies
+  both the missing-transfer error path and the detail payload for an added
+  paused transfer. `AMUT-002` remains open for controller-side hydration.
 
 ## Relationship To Other Items
 

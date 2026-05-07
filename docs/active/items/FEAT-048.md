@@ -27,13 +27,21 @@ Covered by the [Release 1.0 REST and Arr execution plan](../plans/RELEASE-1.0-RE
 
 ## Acceptance Criteria
 
-- [ ] existing upload list, queue list, remove, and release-slot behavior is
+- [x] existing upload list, queue list, remove, and release-slot behavior is
       live-smoked
-- [ ] client selectors are documented and tested for hash and `ip` plus `port`
+- [x] client selectors are documented and tested for hash and `ip` plus `port`
       inputs
 - [ ] unsupported queue operations return typed errors instead of silent no-op
       behavior
 - [ ] any new action preserves current upload scheduling semantics
+
+## Progress
+
+- 2026-05-07: Revalidated the existing upload surface for Release 1. Live REST
+  smoke covers upload list, upload queue list, remove, release-slot, and
+  malformed queue selectors. Native route seams now cover both lowercase
+  user-hash selectors and `ip:port` selectors for uploads and upload-queue
+  operations, including invalid port bounds.
 
 ## Relationship To Other Items
 
